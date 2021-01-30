@@ -10,8 +10,8 @@
 #define debug
 
 #define MAX_KEY_LENGTH 65
-#define M 4
-#define L 4
+#define M 100
+#define L 100
 #define MAX_RECORD_NUM (2*L-1)
 #define MIN_RECORD_NUM (L-1)
 #define MAX_KEY_NUM (2*M-1)
@@ -199,6 +199,8 @@ private:
             tree->leafPool->update(*this, offset);
             tree->leafPool->erase(rightNode.offset);
         }
+
+#ifdef debug
         
         void show() const {
             cout << "[leafNode]" << endl;
@@ -214,6 +216,8 @@ private:
             cout << endl;
             
         }
+
+#endif
     };
     
     class internalNode {
@@ -290,10 +294,11 @@ private:
                 tempNode.nodeKey[i - MIN_KEY_NUM - 1] = nodeKey[i];
                 tempNode.childNode[i - MIN_KEY_NUM - 1] = childNode[i];
             }
+            tempNode.childNode[keyNumber - MIN_KEY_NUM - 1] = childNode[keyNumber];
             tempNode.keyNumber = keyNumber - MIN_KEY_NUM - 1;
             keyNumber = MIN_KEY_NUM;
-            tree->internalPool->update(*this, offset);
             tree->internalPool->write(tempNode);
+            tree->internalPool->update(*this, offset);
             pair<int, key> temp;
             temp.first = tempNode.offset;
             temp.second = nodeKey[MIN_KEY_NUM];
@@ -365,6 +370,8 @@ private:
             tree->internalPool->update(*this, offset);
             tree->internalPool->erase(rightNode.offset);
         }
+
+#ifdef debug
         
         void show() const {
             cout << "[internalNode]" << endl;
@@ -383,6 +390,8 @@ private:
             cout << endl;
             
         }
+
+#endif
     };
 
 private:

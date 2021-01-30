@@ -73,10 +73,10 @@ public:
             offset = fout.tellp();
         }
         else {
-            fout.seekp(writePoint);
             offset = writePoint;
             fin.seekg(writePoint);
             fin.read(reinterpret_cast<char *>(&writePoint), sizeof(int));
+            fout.seekp(offset);
         }
         fout.write(reinterpret_cast<const char *>(&o), sizeof(T));
         fin.close();
@@ -105,7 +105,7 @@ public:
     void erase(int offset) {
         fout.open(filename, ios::in | ios::out | ios::binary);
         if (!fout)cerr << "[Error] File open failed in \"MemoryPool::erase\"." << endl;
-        fout.seekp(sizeof(extraMessage));
+        fout.seekp(offset);
         fout.write(reinterpret_cast<const char *>(&writePoint), sizeof(int));
         writePoint = offset;
         fout.close();
@@ -115,6 +115,7 @@ public:
         fin.open(filename, ios::in | ios::binary);
         if (!fin)cerr << "[Error] File open failed in \"MemoryPool::readExtraMessage\"." << endl;
         extraMessage temp;
+        fin.seekg(0);
         fin.read(reinterpret_cast<char *>(&temp), sizeof(extraMessage));
         fin.close();
         return temp;
@@ -129,7 +130,7 @@ public:
     }
     
     int tellWritePoint() {
-        if (writePoint > 0)return writePoint;
+        if (writePoint >= 0)return writePoint;
         else {
             fout.open(filename, ios::in | ios::out | ios::binary);
             if (!fout)cerr << "[Error] File open failed in \"MemoryPool::tellWritePoint\"." << endl;
