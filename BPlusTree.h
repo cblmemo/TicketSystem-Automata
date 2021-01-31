@@ -239,7 +239,7 @@ private:
             tree->leafPool->update(tempRightRightNode, tempRightRightNode.offset);
             
             //update fatherNode info
-            //delete fatherNode.nodeKey[index] & fatherNode.childNode[index+1]
+            //delete fatherNode.nodeKey[index] & fatherNode.childNode[index + 1]
             for (int i = index; i < fatherNode.keyNumber - 1; i++) {
                 fatherNode.nodeKey[i] = fatherNode.nodeKey[i + 1];
                 fatherNode.childNode[i + 1] = fatherNode.childNode[i + 2];
@@ -466,8 +466,8 @@ private:
                 tree->leafPool->update(tempNode, tempNode.offset);
             }
             else {
-                internalNode tempNode=tree->internalPool->read(childNode[0]);
-                tempNode.father=offset;
+                internalNode tempNode = tree->internalPool->read(childNode[0]);
+                tempNode.father = offset;
                 tree->internalPool->update(tempNode, tempNode.offset);
             }
             
@@ -496,8 +496,8 @@ private:
                 tree->leafPool->update(tempNode, tempNode.offset);
             }
             else {
-                internalNode tempNode=tree->internalPool->read(childNode[keyNumber]);
-                tempNode.father=offset;
+                internalNode tempNode = tree->internalPool->read(childNode[keyNumber]);
+                tempNode.father = offset;
                 tree->internalPool->update(tempNode, tempNode.offset);
             }
             
@@ -509,39 +509,99 @@ private:
         //keep left node and delete right node anyway
         //only right-most point can merge left
         void mergeLeft(BPlusTree *tree, internalNode &leftNode, internalNode &fatherNode) {
-            //todo update left/right brother
-            internalNode leftNode = tree->internalPool->read(leftBrother);
-            //in the following example, key 4 is const key &o
+            //update left/right brother
+            leftNode.rightBrother = rightBrother;
+            internalNode tempRightNode = tree->internalPool->read(rightBrother);
+            tempRightNode.leftBrother = leftBrother;
+            tree->internalPool->update(tempRightNode, tempRightNode.offset);
+            
+            //update fatherNode info
+            //delete last element
+            fatherNode.keyNumber--;
+            
+            //transfer data
+            //in the following example, key 4 is fatherNode.nodeKey[keyNumber - 1]
             //key:    1 2 3   4   5 6 7 8
             //child: 1 2 3 4     5 6 7 8 9
             //                \/
             //key:    1 2 3 4 5 6 7 8
             //child: 1 2 3 4 5 6 7 8 9
-            leftNode.nodeKey[leftNode.keyNumber] = o;
+            leftNode.nodeKey[leftNode.keyNumber] = fatherNode.nodeKey[keyNumber - 1];
             for (int i = 0; i < keyNumber; i++) {
                 leftNode.nodeKey[i + leftNode.keyNumber + 1] = nodeKey[i];
                 leftNode.childNode[i + leftNode.keyNumber + 1] = childNode[i];
             }
             leftNode.childNode[leftNode.keyNumber + keyNumber + 1] = childNode[keyNumber];
-            leftNode.rightBrother = rightBrother;
             leftNode.keyNumber += keyNumber + 1;
-            //todo update child node's father
+            
+            //update child node's father
+            if (childNodeIsLeaf) {
+                for (int i = 0; i <= keyNumber; i++) {
+                    leafNode tempNode = tree->leafPool->read(childNode[i]);
+                    tempNode.father = leftNode.offset;
+                    tree->leafPool->update(tempNode, tempNode.offset);
+                }
+            }
+            else {
+                for (int i = 0; i <= keyNumber; i++) {
+                    internalNode tempNode = tree->internalPool->read(childNode[i]);
+                    tempNode.father = leftNode.offset;
+                    tree->internalPool->update(tempNode, tempNode.offset);
+                }
+            }
+            
+            tree->internalPool->update(fatherNode, fatherNode.offset);
             tree->internalPool->update(leftNode, leftNode.offset);
             tree->internalPool->erase(offset);
         }
         
         void mergeRight(BPlusTree *tree, internalNode &rightNode, internalNode &fatherNode, int index) {
-            //todo update left/right brother
-            internalNode rightNode = tree->internalPool->read(rightBrother);
-            nodeKey[keyNumber] = o;
+            //update left/right brother
+            rightBrother = rightNode.rightBrother;
+            internalNode tempRightRightNode = tree->internalPool->read(rightNode.rightBrother);
+            tempRightRightNode.leftBrother = offset;
+            tree->internalPool->update(tempRightRightNode, tempRightRightNode.offset);
+            
+            //update fatherNode info
+            //delete fatherNode.nodeKey[index] & fatherNode.childNode[index + 1]
+            for (int i = index; i < fatherNode.keyNumber - 1; i++) {
+                fatherNode.nodeKey[i] = fatherNode.nodeKey[i + 1];
+                fatherNode.childNode[i + 1] = fatherNode.childNode[i + 2];
+            }
+            fatherNode.keyNumber--;
+            
+            //transfer data
+            //in the following example, key 4 is fatherNode.nodeKey[index]
+            //key:    1 2 3   4   5 6 7 8
+            //child: 1 2 3 4     5 6 7 8 9
+            //                \/
+            //key:    1 2 3 4 5 6 7 8
+            //child: 1 2 3 4 5 6 7 8 9
+            nodeKey[keyNumber] = fatherNode.nodeKey[index];
             for (int i = 0; i < rightNode.keyNumber; i++) {
                 nodeKey[i + keyNumber + 1] = rightNode.nodeKey[i];
                 childNode[i + keyNumber + 1] = rightNode.childNode[i];
             }
             childNode[keyNumber + rightNode.keyNumber + 1] = rightNode.childNode[rightNode.keyNumber];
-            rightBrother = rightNode.rightBrother;
             keyNumber += rightNode.keyNumber + 1;
-            //todo update child node's father
+            
+            //update child node's father
+            if (childNodeIsLeaf) {
+                for (int i = 0; i <= rightNode.keyNumber; i++) {
+                    leafNode tempNode = tree->leafPool->read(rightNode.childNode[i]);
+                    tempNode.father = offset;
+                    tree->leafPool->update(tempNode, tempNode.offset);
+                }
+            }
+            else {
+                for (int i = 0; i <= rightNode.keyNumber; i++) {
+                    internalNode tempNode = tree->internalPool->read(rightNode.childNode[i]);
+                    tempNode.father = offset;
+                    tree->internalPool->update(tempNode, tempNode.offset);
+                }
+            }
+            
+            tree->internalPool->update(fatherNode, fatherNode.offset);
             tree->internalPool->update(*this, offset);
             tree->internalPool->erase(rightNode.offset);
         }
@@ -575,7 +635,7 @@ private:
                     //try borrow/merge left
                     internalNode leftNode = tree->internalPool->read(leftBrother);
                     if (leftNode.keyNumber + keyNumber < MAX_KEY_NUM - 1) {
-                        mergeLeft(tree, leftNode, fatherNode, index);
+                        mergeLeft(tree, leftNode, fatherNode);
                         return true;
                     }
                     else {
@@ -602,6 +662,7 @@ private:
                     }
                 }
             }
+            else return false;
         }
 
 #ifdef debug
@@ -665,10 +726,13 @@ private:
         }
     }
     
-    //int: fatherNode offset
-    //first: now node need resize
-    //second: delete successfully
-    pair<int, pair<bool, bool>> recursionErase(int now, const key &o1, const data &o2) {
+    //FIRST:
+    //        first:   fatherNode offset
+    //        second:  nowNode offset (to find index in fatherNode)
+    //SECOND:
+    //        first:   father node need resize
+    //        second:  delete successfully
+    pair<pair<int, int>, pair<bool, bool>> recursionErase(int now, const key &o1, const data &o2) {
         internalNode nowNode = internalPool->read(now);
         bool deleted = false;
         if (nowNode.childNodeIsLeaf) {
@@ -685,8 +749,9 @@ private:
                     }
                 }
             }
-            pair<int, pair<bool, bool>> temp;
-            temp.first = targetNode.father;
+            pair<pair<int, int>, pair<bool, bool>> temp;
+            temp.first.first = targetNode.father;
+            temp.first.second = targetNode.offset;
             if (targetNode.resize(this, nowNode, index))temp.second.first = true;
             else temp.second.first = false;
             temp.second.second = deleted;
@@ -694,15 +759,17 @@ private:
         }
         else {
             int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
-            pair<int, pair<bool, bool>> temp = recursionErase(nowNode.childNode[index], o1, o2);
-            if (!temp.second.second)return temp;
+            pair<pair<int, int>, pair<bool, bool>> temp = recursionErase(nowNode.childNode[index], o1, o2);
+            if (!temp.second.first || !temp.second.second)return temp;
             else {
-                if (now != temp.first)nowNode = internalPool->read(temp.first);
-                if (temp.second.first) {
-                    internalNode sonNode = internalPool->read(nowNode.childNode[index]);
-                    if (!sonNode.resize(this, nowNode, index))temp.second.first = false;
-                    return temp;
-                }
+                if (now != temp.first.first) nowNode = internalPool->read(temp.first.first);
+                temp.first.first = nowNode.father;
+                //find index, use temp.first.second
+                index = lower_bound(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, temp.first.second) - nowNode.childNode;
+                temp.first.second = nowNode.offset;
+                internalNode sonNode = internalPool->read(nowNode.childNode[index]);
+                if (!sonNode.resize(this, nowNode, index))temp.second.first = false;
+                return temp;
             }
         }
     }
@@ -818,12 +885,19 @@ public:
             }
             else {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
-                pair<bool, bool> temp = recursionErase(rootNode.childNode[index], o1, o2);
-                if (temp.second && temp.first) {
-                    internalNode tempNode = internalPool->read(rootNode.childNode[index]);
-                    if (tempNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
+                pair<pair<int, int>, pair<bool, bool>> temp = recursionErase(rootNode.childNode[index], o1, o2);
+                if (!temp.second.second)return false;
+                else {
+                    deleted = true;
+#ifdef debug
+                    if (temp.first.first != info.root)cerr << "[error] erase!!" << endl;
+#endif
+                    if (temp.second.first) {
+                        index = lower_bound(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, temp.first.second) - rootNode.childNode;
+                        internalNode sonNode = internalPool->read(rootNode.childNode[index]);
+                        if (sonNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
+                    }
                 }
-                deleted = temp.second;
             }
             if (deleted)info.size--;
             return deleted;
