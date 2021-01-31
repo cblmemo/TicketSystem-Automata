@@ -10,8 +10,8 @@
 #define debug
 
 #define MAX_KEY_LENGTH 65
-#define M 20
-#define L 8
+#define M 100
+#define L 100
 #define MAX_RECORD_NUM (L+1)
 #define MIN_RECORD_NUM ((L+1)/2)
 #define MAX_KEY_NUM (M+1)
@@ -128,12 +128,20 @@ private:
         bool deleteElement(BPlusTree *tree, const key &o1, const data &o2) {
             int start = lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
             int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
-            for (int i = end; i < dataNumber; i++) {
-                leafData[i - end + start] = leafData[i];
-                leafKey[i - end + start] = leafKey[i];
+            bool result = false;
+            for (int i = start; i < end; i++) {
+                if (o2 == leafData[i]) {
+                    for (int j = i; j < dataNumber; j++) {
+                        leafData[i] = leafData[i + 1];
+                        leafKey[i] = leafKey[i + 1];
+                    }
+                    dataNumber--;
+                    result = true;
+                    break;
+                }
             }
-            dataNumber--;
             tree->leafPool->update(*this, offset);
+            return result;
         }
         
         pair<int, key> splitNode(BPlusTree *tree) {
@@ -141,14 +149,17 @@ private:
             tempNode.leftBrother = offset;
             tempNode.rightBrother = rightBrother;
             tempNode.father = father;
+            tempNode.offset = tree->leafPool->tellWritePoint();
+            leafNode tempRightNode = tree->leafPool->read(rightBrother);
+            tempRightNode.leftBrother = tempNode.offset;
+            tree->leafPool->update(tempRightNode, tempRightNode.offset);
+            rightBrother = tempNode.offset;
             for (int i = MIN_RECORD_NUM; i < MAX_RECORD_NUM; i++) {
                 tempNode.leafKey[i - MIN_RECORD_NUM] = leafKey[i];
                 tempNode.leafData[i - MIN_RECORD_NUM] = leafData[i];
             }
             tempNode.dataNumber = MAX_RECORD_NUM - MIN_RECORD_NUM;
             dataNumber = MIN_RECORD_NUM;
-            tempNode.offset = tree->leafPool->tellWritePoint();
-            rightBrother = tempNode.offset;
             tree->leafPool->write(tempNode);
             tree->leafPool->update(*this, offset);
             pair<int, key> temp;
@@ -225,7 +236,6 @@ private:
                 cout << "leafKey: " << leafKey[i] << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << "leafData: " << leafData[i] << endl;
             }
             cout << endl;
-            
         }
 
 #endif
@@ -273,6 +283,21 @@ private:
                 tempNode.childNode[i - MIN_KEY_NUM - 1] = childNode[i];
             }
             tempNode.childNode[keyNumber - MIN_KEY_NUM - 1] = childNode[keyNumber];
+            //update child node's father
+            if (childNodeIsLeaf) {
+                for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
+                    leafNode tempChildNode = tree->leafPool->read(childNode[i]);
+                    tempChildNode.father = tempNode.offset;
+                    tree->leafPool->update(tempChildNode, tempChildNode.offset);
+                }
+            }
+            else {
+                for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
+                    internalNode tempChildNode = tree->internalPool->read(childNode[i]);
+                    tempChildNode.father = tempNode.offset;
+                    tree->internalPool->update(tempChildNode, tempChildNode.offset);
+                }
+            }
             tempNode.keyNumber = keyNumber - MIN_KEY_NUM - 1;
             keyNumber = MIN_KEY_NUM;
             newRoot.offset = father;
@@ -292,6 +317,9 @@ private:
             tempNode.leftBrother = offset;
             tempNode.rightBrother = rightBrother;
             tempNode.offset = tree->internalPool->tellWritePoint();
+            internalNode tempRightNode = tree->internalPool->read(rightBrother);
+            tempRightNode.leftBrother = tempNode.offset;
+            tree->internalPool->update(tempRightNode, tempRightNode.offset);
             rightBrother = tempNode.offset;
             tempNode.childNodeIsLeaf = childNodeIsLeaf;
             //delete No.MIN_KEY_NUM key, and return it to upper layer
@@ -306,6 +334,21 @@ private:
                 tempNode.childNode[i - MIN_KEY_NUM - 1] = childNode[i];
             }
             tempNode.childNode[keyNumber - MIN_KEY_NUM - 1] = childNode[keyNumber];
+            //update child node's father
+            if (childNodeIsLeaf) {
+                for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
+                    leafNode tempChildNode = tree->leafPool->read(childNode[i]);
+                    tempChildNode.father = tempNode.offset;
+                    tree->leafPool->update(tempChildNode, tempChildNode.offset);
+                }
+            }
+            else {
+                for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
+                    internalNode tempChildNode = tree->internalPool->read(childNode[i]);
+                    tempChildNode.father = tempNode.offset;
+                    tree->internalPool->update(tempChildNode, tempChildNode.offset);
+                }
+            }
             tempNode.keyNumber = keyNumber - MIN_KEY_NUM - 1;
             keyNumber = MIN_KEY_NUM;
             tree->internalPool->write(tempNode);
@@ -443,31 +486,31 @@ private:
         }
     }
     
-    void recursionErase(int now) {
+    bool recursionErase(int now) {
         //todo maybe failed
     }
     
     void recursionFind(int now, const key &o, vector<data> &result) {
         internalNode nowNode = internalPool->read(now);
         if (nowNode.childNodeIsLeaf) {
-            int index = lower_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
+            int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
             int cur = nowNode.childNode[index];
             bool flag = true;
             while (cur >= 0 && flag) {
                 leafNode targetNode = leafPool->read(cur);
-                int pos = lower_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
-                for (int i = pos; i < targetNode.dataNumber; i++) {
-                    if (o < targetNode.leafKey[i]) {
+                int pos = upper_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
+                for (int i = pos - 1; i >= 0; i--) {
+                    if (o > targetNode.leafKey[i]) {
                         flag = false;
                         break;
                     }
                     result.push_back(targetNode.leafData[i]);
                 }
-                cur = targetNode.rightBrother;
+                cur = targetNode.leftBrother;
             }
         }
         else {
-            int index = lower_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
+            int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
             recursionFind(nowNode.childNode[index], o, result);
         }
     }
@@ -534,35 +577,62 @@ public:
         info.size++;
     }
     
-    void erase(const key &o1, const data &o2) {
-        //todo
+    //return whether erase is successful
+    bool erase(const key &o1, const data &o2) {
+        if (info.size == 0)return false;
+        else {
+            internalNode rootNode = internalPool->read(info.root);
+            if (rootNode.childNodeIsLeaf) {
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                leafNode targetNode = leafPool->read(rootNode.childNode[index]);
+                if (targetNode.deleteElement(this, o1, o2)) {
+                    //todo resize
+                    if (targetNode.dataNumber == MIN_RECORD_NUM) {
+                    
+                    }
+                    return true;
+                }
+                bool result = false;
+                while (targetNode.leftBrother > 0) {
+                    targetNode = leafPool->read(targetNode.leftBrother);
+                    if (targetNode.deleteElement(this, o1, o2)) {
+                        result = true;
+                        break;
+                    }
+                }
+                //todo resize
+                return result;
+            }
+            else {
+            
+            }
+        }
     }
     
     void find(const key &o, vector<data> &result) {
-        //todo find doesn't support equal key
         //change return type to data
         if (info.size == 0)return;
         else {
             internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
-                int index = lower_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 int cur = rootNode.childNode[index];
                 bool flag = true;
                 while (cur >= 0 && flag) {
                     leafNode targetNode = leafPool->read(cur);
-                    int pos = lower_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
-                    for (int i = pos; i < targetNode.dataNumber; i++) {
-                        if (o < targetNode.leafKey[i]) {
+                    int pos = upper_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
+                    for (int i = pos - 1; i >= 0; i--) {
+                        if (o > targetNode.leafKey[i]) {
                             flag = false;
                             break;
                         }
                         result.push_back(targetNode.leafData[i]);
                     }
-                    cur = targetNode.rightBrother;
+                    cur = targetNode.leftBrother;
                 }
             }
             else {
-                int index = lower_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 recursionFind(rootNode.childNode[index], o, result);
             }
         }
@@ -611,6 +681,15 @@ public:
         cout << "[show]--------------------------------------------------------------------------------" << endl;
         show(info.root, false);
         cout << "[show]--------------------------------------------------------------------------------" << endl;
+    }
+    
+    void showLeaves() const {
+        int cur = info.head;
+        while (cur >= 0) {
+            leafNode nowNode = leafPool->read(cur);
+            nowNode.show();
+            cur = nowNode.rightBrother;
+        }
     }
 
 #endif
