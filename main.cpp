@@ -28,6 +28,7 @@ int main() {
     for (const auto &i:answer) {
         vector<int> result;
         temp.find(i.first, result);
+        sort(result.begin(),result.end());
         if (i.second.size() != result.size()) {
             cerr << "wrong size!" << endl;
             cerr << "key: " << i.first << endl;

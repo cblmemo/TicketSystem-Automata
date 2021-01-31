@@ -10,12 +10,12 @@
 #define debug
 
 #define MAX_KEY_LENGTH 65
-#define M 100
-#define L 100
-#define MAX_RECORD_NUM (2*L-1)
-#define MIN_RECORD_NUM (L-1)
-#define MAX_KEY_NUM (2*M-1)
-#define MIN_KEY_NUM (M-1)
+#define M 20
+#define L 8
+#define MAX_RECORD_NUM (L+1)
+#define MIN_RECORD_NUM ((L+1)/2)
+#define MAX_KEY_NUM (M+1)
+#define MIN_KEY_NUM ((M+1)/2)
 #define MAX_CHILD_NUM (MAX_KEY_NUM+1)
 
 class BPlusTreeString {
@@ -122,6 +122,17 @@ private:
             leafKey[pos] = o1;
             leafData[pos] = o2;
             dataNumber++;
+            tree->leafPool->update(*this, offset);
+        }
+        
+        bool deleteElement(BPlusTree *tree, const key &o1, const data &o2) {
+            int start = lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+            int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+            for (int i = end; i < dataNumber; i++) {
+                leafData[i - end + start] = leafData[i];
+                leafKey[i - end + start] = leafKey[i];
+            }
+            dataNumber--;
             tree->leafPool->update(*this, offset);
         }
         
@@ -433,7 +444,7 @@ private:
     }
     
     void recursionErase(int now) {
-        //todo
+        //todo maybe failed
     }
     
     void recursionFind(int now, const key &o, vector<data> &result) {
@@ -528,6 +539,8 @@ public:
     }
     
     void find(const key &o, vector<data> &result) {
+        //todo find doesn't support equal key
+        //change return type to data
         if (info.size == 0)return;
         else {
             internalNode rootNode = internalPool->read(info.root);
