@@ -10,8 +10,8 @@
 #define debug
 
 #define MAX_KEY_LENGTH 65
-#define M 10
-#define L 10
+#define M 100
+#define L 100
 #define MAX_RECORD_NUM (L+1)
 #define MIN_RECORD_NUM ((L-1)/2)
 #define MAX_KEY_NUM (M+1)
@@ -299,7 +299,7 @@ private:
                             return false;
                         }
                         else {
-                            mergeRight(tree, leftNode, fatherNode, index);
+                            mergeRight(tree, rightNode, fatherNode, index);
                             return true;
                         }
                     }
@@ -319,7 +319,7 @@ private:
             cout << "dataNumber: " << dataNumber << endl;
             cout << "leafKey & leafData:" << endl;
             for (int i = 0; i < dataNumber; i++) {
-                cout << "leafKey: " << leafKey[i] << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << "leafData: " << leafData[i] << endl;
+                cout << "leafKey: " << leafKey[i] << "\t\t\t\t\t\t\t\t\t\t\t" << "leafData: " << leafData[i] << endl;
             }
             cout << endl;
         }
@@ -515,10 +515,6 @@ private:
             tempRightNode.leftBrother = leftBrother;
             tree->internalPool->update(tempRightNode, tempRightNode.offset);
             
-            //update fatherNode info
-            //delete last element
-            fatherNode.keyNumber--;
-            
             //transfer data
             //in the following example, key 4 is fatherNode.nodeKey[keyNumber - 1]
             //key:    1 2 3   4   5 6 7 8
@@ -533,6 +529,10 @@ private:
             }
             leftNode.childNode[leftNode.keyNumber + keyNumber + 1] = childNode[keyNumber];
             leftNode.keyNumber += keyNumber + 1;
+    
+            //update fatherNode info
+            //delete last element
+            fatherNode.keyNumber--;
             
             //update child node's father
             if (childNodeIsLeaf) {
@@ -562,14 +562,6 @@ private:
             tempRightRightNode.leftBrother = offset;
             tree->internalPool->update(tempRightRightNode, tempRightRightNode.offset);
             
-            //update fatherNode info
-            //delete fatherNode.nodeKey[index] & fatherNode.childNode[index + 1]
-            for (int i = index; i < fatherNode.keyNumber - 1; i++) {
-                fatherNode.nodeKey[i] = fatherNode.nodeKey[i + 1];
-                fatherNode.childNode[i + 1] = fatherNode.childNode[i + 2];
-            }
-            fatherNode.keyNumber--;
-            
             //transfer data
             //in the following example, key 4 is fatherNode.nodeKey[index]
             //key:    1 2 3   4   5 6 7 8
@@ -584,6 +576,14 @@ private:
             }
             childNode[keyNumber + rightNode.keyNumber + 1] = rightNode.childNode[rightNode.keyNumber];
             keyNumber += rightNode.keyNumber + 1;
+    
+            //update fatherNode info
+            //delete fatherNode.nodeKey[index] & fatherNode.childNode[index + 1]
+            for (int i = index; i < fatherNode.keyNumber - 1; i++) {
+                fatherNode.nodeKey[i] = fatherNode.nodeKey[i + 1];
+                fatherNode.childNode[i + 1] = fatherNode.childNode[i + 2];
+            }
+            fatherNode.keyNumber--;
             
             //update child node's father
             if (childNodeIsLeaf) {
@@ -677,10 +677,10 @@ private:
             cout << "keyNumber: " << keyNumber << endl;
             cout << "nodeKey & childNode:" << endl;
             for (int i = 0; i < keyNumber; i++) {
-                cout << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << "childNode: " << childNode[i] << endl;
+                cout << "\t\t\t\t\t\t\t\t\t\t\t" << "childNode: " << childNode[i] << endl;
                 cout << "nodeKey: " << nodeKey[i] << endl;
             }
-            cout << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << "childNode: " << childNode[keyNumber] << endl;
+            cout << "\t\t\t\t\t\t\t\t\t\t\t" << "childNode: " << childNode[keyNumber] << endl;
             cout << endl;
             
         }
@@ -956,7 +956,7 @@ public:
     }
 
 #ifdef debug
-public:
+private:
     void show(int offset, bool isLeaf) const {
         cout << "[pos] " << offset << endl;
         if (isLeaf) {
@@ -974,6 +974,7 @@ public:
         }
     };
     
+public:
     void show() const {
         cout << "[show]--------------------------------------------------------------------------------" << endl;
         show(info.root, false);
