@@ -10,8 +10,8 @@
 #define debug
 
 #define MAX_KEY_LENGTH 65
-#define M 100
-#define L 100
+#define M 10
+#define L 10
 #define MAX_RECORD_NUM (L+1)
 #define MIN_RECORD_NUM ((L-1)/2)
 #define MAX_KEY_NUM (M+1)
@@ -20,7 +20,7 @@
 
 class BPlusTreeString {
 public:
-    char key[MAX_KEY_LENGTH];
+    char key[MAX_KEY_LENGTH] = {0};
     
     BPlusTreeString() {
         memset(key, 0, sizeof(key));
@@ -62,13 +62,13 @@ public:
         return (*this) > o;
     }
     
-    BPlusTreeString operator=(const BPlusTreeString &o) {
+    BPlusTreeString &operator=(const BPlusTreeString &o) {
         if (this == &o)return *this;
         strcpy(key, o.key);
         return *this;
     }
     
-    BPlusTreeString operator=(const string &o) {
+    BPlusTreeString &operator=(const string &o) {
         strcpy(key, o.c_str());
         return *this;
     }
@@ -141,7 +141,7 @@ private:
                     break;
                 }
             }
-            tree->leafPool->update(*this, offset);
+            if(result)tree->leafPool->update(*this, offset);
             return result;
         }
         
@@ -336,7 +336,7 @@ private:
         bool childNodeIsLeaf = false;
         int keyNumber = 0;
         key nodeKey[MAX_KEY_NUM];
-        int childNode[MAX_CHILD_NUM];
+        int childNode[MAX_CHILD_NUM] = {0};
     
     public:
         internalNode() {
@@ -743,6 +743,7 @@ private:
             else {
                 while (targetNode.leftBrother > 0) {
                     targetNode = leafPool->read(targetNode.leftBrother);
+                    index--;
                     if (targetNode.deleteElement(this, o1, o2)) {
                         deleted = true;
                         break;
@@ -750,8 +751,8 @@ private:
                 }
             }
             pair<pair<int, int>, pair<bool, bool>> temp;
-            temp.first.first = targetNode.father;
-            temp.first.second = targetNode.offset;
+            temp.first.first = nowNode.father;
+            temp.first.second = nowNode.offset;
             if (targetNode.resize(this, nowNode, index))temp.second.first = true;
             else temp.second.first = false;
             temp.second.second = deleted;
@@ -800,7 +801,7 @@ private:
     }
 
 public:
-    BPlusTree(const string &name) {
+    explicit BPlusTree(const string &name) {
         leafPool = new MemoryPool<leafNode, basicInfo>("leaf_" + name + ".dat");
         internalPool = new MemoryPool<internalNode, basicInfo>("internal_" + name + ".dat");
         info = leafPool->readExtraMessage();
@@ -875,6 +876,7 @@ public:
                 else {
                     while (targetNode.leftBrother > 0) {
                         targetNode = leafPool->read(targetNode.leftBrother);
+                        index--;
                         if (targetNode.deleteElement(this, o1, o2)) {
                             deleted = true;
                             break;
