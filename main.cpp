@@ -13,11 +13,11 @@ void init() {
     o.close();
 }
 
-void testInsertFind() {
+void testInsertFind(int seed) {
     map<int, vector<int>> answer;
     vector<int> store;
     init();
-    srand(28193);
+    srand(seed);
     int s;
     BPlusTree<int, int> temp("test");
     for (int i = 0; i < TESTSIZE; i++) {
@@ -65,7 +65,7 @@ void testIntAll() {
     map<int, vector<int>> answer;
     vector<int> store;
     init();
-    srand(211113);
+    srand(3);
     int s;
     BPlusTree<int, int> temp("test");
     for (int i = 0; i < TESTSIZE; i++) {
@@ -84,23 +84,23 @@ void testIntAll() {
     }
     cout << endl;
 
-//    for (int i = 0; i < TESTSIZE; i++) {
-//        if (i % 2 == 1) {
-//            if (!temp.erase(store[i], i))cerr << "[error]erase failed when erasing\nkey: " << store[i] << "\tdata: " << i << endl;
-//        }
-//        if (i % (TESTSIZE / 100) == 0)cout << "[count down] Erasing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
-//    }
-//    cout << endl;
-    
-    int testNumber = 5717;
-    for (int i = 1; i < testNumber; i += 2) {
-        int t = store[i];
-        if (!temp.erase(t, i))cerr << "[error]erase failed." << endl;
-        if (i % (TESTSIZE / 100) == 1)cout << "Erasing...\t" << (i - 1) * 100 / TESTSIZE + 1 << "%" << endl;
-        //if((i - 1) * 100 / TESTSIZE>=24)cout<<i<<endl;
+    for (int i = 0; i < TESTSIZE; i++) {
+        if (i % 2 == 1) {
+            if (!temp.erase(store[i], i))cerr << "[error]erase failed when erasing\nkey: " << store[i] << "\tdata: " << i << endl;
+        }
+        if (i % (TESTSIZE / 100) == 0)cout << "[count down] Erasing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
-    int ttt = store[testNumber];
-    temp.erase(ttt, testNumber);
+    cout << endl;
+    
+//    int testNumber = 5717;
+//    for (int i = 1; i < testNumber; i += 2) {
+//        int t = store[i];
+//        if (!temp.erase(t, i))cerr << "[error]erase failed." << endl;
+//        if (i % (TESTSIZE / 100) == 1)cout << "Erasing...\t" << (i - 1) * 100 / TESTSIZE + 1 << "%" << endl;
+//        //if((i - 1) * 100 / TESTSIZE>=24)cout<<i<<endl;
+//    }
+//    int ttt = store[testNumber];
+//    temp.erase(ttt, testNumber);
     
     int cnt = 0;
     int size = answer.size();
@@ -207,7 +207,7 @@ void testBPlusTreeString() {
 
 int main() {
     //testBPlusTreeString();
-    //testInsertFind();
+    //testInsertFind(21);
     testIntAll();
     return 0;
 }

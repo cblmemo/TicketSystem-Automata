@@ -344,8 +344,8 @@ private:
             memset(childNode, -1, sizeof(childNode));
         }
         
-        void addElement(BPlusTree *tree, const pair<int, key> &o) {
-            int pos = upper_bound(nodeKey, nodeKey + keyNumber, o.second) - nodeKey;
+        void addElement(BPlusTree *tree, const pair<int, key> &o, int pos) {
+//            int pos = upper_bound(nodeKey, nodeKey + keyNumber, o.second) - nodeKey;
             for (int i = keyNumber - 1; i >= pos; i--) {
                 childNode[i + 2] = childNode[i + 1];
                 nodeKey[i + 1] = nodeKey[i];
@@ -714,23 +714,23 @@ private:
             int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
             leafNode targetNode = leafPool->read(nowNode.childNode[index]);
             targetNode.addElement(this, o1, o2);
+            pair<bool, pair<int, key>> temp;
             if (targetNode.dataNumber == MAX_RECORD_NUM) {
-                pair<bool, pair<int, key>> temp;
-                temp.first = true;
-                temp.second = targetNode.splitNode(this);
-                return temp;
+                nowNode.addElement(this, targetNode.splitNode(this), index);
+                if (nowNode.keyNumber == MAX_KEY_NUM) {
+                    temp.first = true;
+                    temp.second = nowNode.splitNode(this);
+                }
+                else temp.first = false;
             }
-            else {
-                pair<bool, pair<int, key>> temp;
-                temp.first = false;
-                return temp;
-            }
+            else temp.first = false;
+            return temp;
         }
         else {
             int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
             pair<bool, pair<int, key>> temp = recursionInsert(nowNode.childNode[index], o1, o2);
             if (temp.first) {
-                nowNode.addElement(this, temp.second);
+                nowNode.addElement(this, temp.second, index);
                 if (nowNode.keyNumber == MAX_KEY_NUM)temp.second = nowNode.splitNode(this);
                 else temp.first = false;
             }
@@ -851,16 +851,14 @@ public:
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 leafNode targetNode = leafPool->read(rootNode.childNode[index]);
                 targetNode.addElement(this, o1, o2);
-                if (targetNode.dataNumber == MAX_RECORD_NUM)rootNode.addElement(this, targetNode.splitNode(this));
+                if (targetNode.dataNumber == MAX_RECORD_NUM)rootNode.addElement(this, targetNode.splitNode(this), index);
                 if (rootNode.keyNumber == MAX_KEY_NUM)rootNode.splitRoot(this);
             }
             else {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 pair<bool, pair<int, key>> temp = recursionInsert(rootNode.childNode[index], o1, o2);
                 if (temp.first) {
-                    internalNode tempNode = internalPool->read(rootNode.childNode[index]);
-                    tempNode.addElement(this, temp.second);
-                    if (tempNode.keyNumber == MAX_KEY_NUM)rootNode.addElement(this, tempNode.splitNode(this));
+                    rootNode.addElement(this, temp.second, index);
                     if (rootNode.keyNumber == MAX_KEY_NUM)rootNode.splitRoot(this);
                 }
             }
