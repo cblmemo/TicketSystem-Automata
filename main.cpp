@@ -3,8 +3,9 @@
 #include <map>
 
 using namespace std;
+using RainyMemory::BPlusTree;
 
-#define TESTSIZE 500
+#define TESTSIZE 1000000
 
 void init() {
     fstream o;
@@ -84,7 +85,7 @@ void testIntAll() {
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Pushing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
     cout << endl;
-    
+
     for (int i = 0; i < TESTSIZE; i++) {
         if (i % 2 == 1) {
             if (!temp.erase(store[i], i))cerr << "[error]erase failed when erasing\nkey: " << store[i] << "\tdata: " << i << endl;
@@ -92,8 +93,8 @@ void testIntAll() {
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Erasing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
     cout << endl;
-
-//    int testNumber = 5717;
+    
+//    int testNumber = 30325;
 //    for (int i = 1; i < testNumber; i += 2) {
 //        int t = store[i];
 //        if (!temp.erase(t, i))cerr << "[error]erase failed." << endl;
@@ -208,9 +209,31 @@ void testBPlusTreeString() {
     //temp.showLeaves();
 }
 
+void testRepeatedInsert() {
+    init();
+    int a = 100;
+    BPlusTree<int, int> temp("test");
+    for (int i = 0; i < TESTSIZE; i++) {
+        temp.insert(a, i);
+    }
+    vector<int> tt;
+    temp.find(a, tt);
+    if(tt.size()!=TESTSIZE)cerr<<"[error] size wrong!"<<endl;
+    else {
+        sort(tt.begin(), tt.end());
+        int cnt = 0;
+        for (auto i: tt) {
+            if (i != cnt)cerr << "[error] element wrong!" << endl;
+            cnt++;
+        }
+    }
+    
+}
+
 int main() {
     //testBPlusTreeString();
     //testInsertFind(21);
     testIntAll();
+    //testRepeatedInsert();
     return 0;
 }
