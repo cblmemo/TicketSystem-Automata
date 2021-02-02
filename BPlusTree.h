@@ -86,6 +86,7 @@ public:
 
 template<class key, class data>
 class BPlusTree {
+private:
     class leafNode;
     
     class internalNode;
@@ -132,16 +133,16 @@ private:
             bool result = false;
             for (int i = start; i < end; i++) {
                 if (o2 == leafData[i]) {
-                    for (int j = i; j < dataNumber; j++) {
-                        leafData[i] = leafData[i + 1];
-                        leafKey[i] = leafKey[i + 1];
+                    for (int j = i; j < dataNumber - 1; j++) {
+                        leafData[j] = leafData[j + 1];
+                        leafKey[j] = leafKey[j + 1];
                     }
                     dataNumber--;
                     result = true;
                     break;
                 }
             }
-            if(result)tree->leafPool->update(*this, offset);
+            if (result)tree->leafPool->update(*this, offset);
             return result;
         }
         
@@ -264,25 +265,25 @@ private:
                 if (index == 0) {
                     //try borrow/merge right
                     leafNode rightNode = tree->leafPool->read(rightBrother);
-                    if (rightNode.dataNumber + dataNumber < MAX_RECORD_NUM) {
-                        mergeRight(tree, rightNode, fatherNode, index);
-                        return true;
-                    }
-                    else {
+                    if (rightNode.dataNumber > MIN_RECORD_NUM) {
                         borrowRight(tree, rightNode, fatherNode, index);
                         return false;
+                    }
+                    else {
+                        mergeRight(tree, rightNode, fatherNode, index);
+                        return true;
                     }
                 }
                 else if (index == fatherNode.keyNumber) {
                     //try borrow/merge left
                     leafNode leftNode = tree->leafPool->read(leftBrother);
-                    if (leftNode.dataNumber + dataNumber < MAX_RECORD_NUM) {
-                        mergeLeft(tree, leftNode, fatherNode);
-                        return true;
-                    }
-                    else {
+                    if (leftNode.dataNumber > MIN_RECORD_NUM) {
                         borrowLeft(tree, leftNode, fatherNode, index);
                         return false;
+                    }
+                    else {
+                        mergeLeft(tree, leftNode, fatherNode);
+                        return true;
                     }
                 }
                 else {
@@ -529,7 +530,7 @@ private:
             }
             leftNode.childNode[leftNode.keyNumber + keyNumber + 1] = childNode[keyNumber];
             leftNode.keyNumber += keyNumber + 1;
-    
+            
             //update fatherNode info
             //delete last element
             fatherNode.keyNumber--;
@@ -576,7 +577,7 @@ private:
             }
             childNode[keyNumber + rightNode.keyNumber + 1] = rightNode.childNode[rightNode.keyNumber];
             keyNumber += rightNode.keyNumber + 1;
-    
+            
             //update fatherNode info
             //delete fatherNode.nodeKey[index] & fatherNode.childNode[index + 1]
             for (int i = index; i < fatherNode.keyNumber - 1; i++) {
@@ -622,25 +623,25 @@ private:
                 if (index == 0) {
                     //try borrow/merge right
                     internalNode rightNode = tree->internalPool->read(rightBrother);
-                    if (rightNode.keyNumber + keyNumber < MAX_KEY_NUM - 1) {
-                        mergeRight(tree, rightNode, fatherNode, index);
-                        return true;
-                    }
-                    else {
+                    if (rightNode.keyNumber > MIN_KEY_NUM) {
                         borrowRight(tree, rightNode, fatherNode, index);
                         return false;
+                    }
+                    else {
+                        mergeRight(tree, rightNode, fatherNode, index);
+                        return true;
                     }
                 }
                 else if (index == fatherNode.keyNumber) {
                     //try borrow/merge left
                     internalNode leftNode = tree->internalPool->read(leftBrother);
-                    if (leftNode.keyNumber + keyNumber < MAX_KEY_NUM - 1) {
-                        mergeLeft(tree, leftNode, fatherNode);
-                        return true;
-                    }
-                    else {
+                    if (leftNode.keyNumber > MIN_KEY_NUM) {
                         borrowLeft(tree, leftNode, fatherNode, index);
                         return false;
+                    }
+                    else {
+                        mergeLeft(tree, leftNode, fatherNode);
+                        return true;
                     }
                 }
                 else {
@@ -689,8 +690,25 @@ private:
     };
 
 private:
-    //first represent child node number ++
+    void initialize(const key &o1, const data &o2) {
+        internalNode rootNode;
+        rootNode.offset = internalPool->tellWritePoint();
+        rootNode.childNodeIsLeaf = true;
+        rootNode.childNode[0] = leafPool->tellWritePoint();
+        internalPool->write(rootNode);
+        leafNode tempNode;
+        tempNode.father = rootNode.offset;
+        tempNode.offset = rootNode.childNode[0];
+        tempNode.dataNumber = 1;
+        tempNode.leafKey[0] = o1;
+        tempNode.leafData[0] = o2;
+        leafPool->write(tempNode);
+        info.head = tempNode.offset;
+        info.root = rootNode.offset;
+    }
+    
     pair<bool, pair<int, key>> recursionInsert(int now, const key &o1, const data &o2) {
+        //first represent child node number ++
         internalNode nowNode = internalPool->read(now);
         if (nowNode.childNodeIsLeaf) {
             int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
@@ -713,43 +731,40 @@ private:
             pair<bool, pair<int, key>> temp = recursionInsert(nowNode.childNode[index], o1, o2);
             if (temp.first) {
                 nowNode.addElement(this, temp.second);
-                if (nowNode.keyNumber == MAX_KEY_NUM) {
-                    temp.second = nowNode.splitNode(this);
-                    return temp;
-                }
-                else {
-                    temp.first = false;
-                    return temp;
-                }
+                if (nowNode.keyNumber == MAX_KEY_NUM)temp.second = nowNode.splitNode(this);
+                else temp.first = false;
             }
-            else return temp;
+            return temp;
         }
     }
     
-    //FIRST:
-    //        first:   fatherNode offset
-    //        second:  nowNode offset (to find index in fatherNode)
-    //SECOND:
-    //        first:   father node need resize
-    //        second:  delete successfully
     pair<pair<int, int>, pair<bool, bool>> recursionErase(int now, const key &o1, const data &o2) {
+        //FIRST:
+        //        first:   fatherNode offset
+        //        second:  nowNode offset (to find index in fatherNode)
+        //SECOND:
+        //        first:   son node need resize
+        //        second:  delete successfully
         internalNode nowNode = internalPool->read(now);
         bool deleted = false;
         if (nowNode.childNodeIsLeaf) {
             int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
             leafNode targetNode = leafPool->read(nowNode.childNode[index]);
             bool flag = targetNode.deleteElement(this, o1, o2);
+            bool changeIndexFlag = false;
             if (flag)deleted = true;
             else {
                 while (targetNode.leftBrother > 0) {
+                    changeIndexFlag = true;
                     targetNode = leafPool->read(targetNode.leftBrother);
-                    index--;
                     if (targetNode.deleteElement(this, o1, o2)) {
                         deleted = true;
                         break;
                     }
                 }
             }
+            if (now != targetNode.father)nowNode = internalPool->read(targetNode.father);
+            if (changeIndexFlag)index = lower_bound(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, targetNode.offset) - nowNode.childNode;
             pair<pair<int, int>, pair<bool, bool>> temp;
             temp.first.first = nowNode.father;
             temp.first.second = nowNode.offset;
@@ -763,12 +778,12 @@ private:
             pair<pair<int, int>, pair<bool, bool>> temp = recursionErase(nowNode.childNode[index], o1, o2);
             if (!temp.second.first || !temp.second.second)return temp;
             else {
-                if (now != temp.first.first) nowNode = internalPool->read(temp.first.first);
+                if (nowNode.offset != temp.first.first) nowNode = internalPool->read(temp.first.first);
                 temp.first.first = nowNode.father;
+                internalNode sonNode = internalPool->read(temp.first.second);
                 //find index, use temp.first.second
                 index = lower_bound(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, temp.first.second) - nowNode.childNode;
                 temp.first.second = nowNode.offset;
-                internalNode sonNode = internalPool->read(nowNode.childNode[index]);
                 if (!sonNode.resize(this, nowNode, index))temp.second.first = false;
                 return temp;
             }
@@ -822,31 +837,22 @@ public:
         return info.size == 0;
     }
     
+    void clear() {
+        leafPool->clear();
+        internalPool->clear();
+        info = leafPool->readExtraMessage();
+    }
+    
     void insert(const key &o1, const data &o2) {
-        if (info.size == 0) {
-            internalNode rootNode;
-            rootNode.offset = internalPool->tellWritePoint();
-            rootNode.childNodeIsLeaf = true;
-            rootNode.childNode[0] = leafPool->tellWritePoint();
-            internalPool->write(rootNode);
-            leafNode tempNode;
-            tempNode.father = rootNode.offset;
-            tempNode.offset = rootNode.childNode[0];
-            tempNode.dataNumber = 1;
-            tempNode.leafKey[0] = o1;
-            tempNode.leafData[0] = o2;
-            leafPool->write(tempNode);
-            info.head = tempNode.offset;
-            info.root = rootNode.offset;
-        }
+        if (info.root == -1) initialize(o1, o2);
         else {
             internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 leafNode targetNode = leafPool->read(rootNode.childNode[index]);
                 targetNode.addElement(this, o1, o2);
-                if (targetNode.dataNumber == MAX_RECORD_NUM) rootNode.addElement(this, targetNode.splitNode(this));
-                if (rootNode.keyNumber == MAX_KEY_NUM) rootNode.splitRoot(this);
+                if (targetNode.dataNumber == MAX_RECORD_NUM)rootNode.addElement(this, targetNode.splitNode(this));
+                if (rootNode.keyNumber == MAX_KEY_NUM)rootNode.splitRoot(this);
             }
             else {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
@@ -862,8 +868,8 @@ public:
         info.size++;
     }
     
-    //return whether erase is successful
     bool erase(const key &o1, const data &o2) {
+        //return whether erase is successful
         if (info.size == 0)return false;
         else {
             internalNode rootNode = internalPool->read(info.root);
@@ -872,18 +878,20 @@ public:
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 leafNode targetNode = leafPool->read(rootNode.childNode[index]);
                 bool flag = targetNode.deleteElement(this, o1, o2);
+                bool changeIndexFlag = false;
                 if (flag)deleted = true;
                 else {
                     while (targetNode.leftBrother > 0) {
+                        changeIndexFlag = true;
                         targetNode = leafPool->read(targetNode.leftBrother);
-                        index--;
                         if (targetNode.deleteElement(this, o1, o2)) {
                             deleted = true;
                             break;
                         }
                     }
                 }
-                if (targetNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
+                if (changeIndexFlag)index = lower_bound(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, targetNode.offset) - rootNode.childNode;
+                targetNode.resize(this, rootNode, index);
             }
             else {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
@@ -891,12 +899,9 @@ public:
                 if (!temp.second.second)return false;
                 else {
                     deleted = true;
-#ifdef debug
-                    if (temp.first.first != info.root)cerr << "[error] erase!!" << endl;
-#endif
                     if (temp.second.first) {
+                        internalNode sonNode = internalPool->read(temp.first.second);
                         index = lower_bound(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, temp.first.second) - rootNode.childNode;
-                        internalNode sonNode = internalPool->read(rootNode.childNode[index]);
                         if (sonNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
                     }
                 }
@@ -935,18 +940,14 @@ public:
         }
     }
     
-    data operator[](int index) const {
-        int cnt = 0;
-        int cur = info.head;
-        while (cur >= 0) {
-            leafNode nowNode = leafPool->read(cur);
-            cnt += nowNode.dataNumber;
-            if (nowNode.dataNumber > index) return nowNode.leafData[index - (cnt - nowNode.dataNumber)];
-            cur = nowNode.rightBrother;
-        }
+    vector<data> operator[](const key &o) {
+        vector<data> result;
+        find(o, result);
+        return result;
     }
     
     void traversal(vector<data> &result) {
+        if (info.head == -1)return;
         int cur = info.head;
         while (cur >= 0) {
             leafNode nowNode = leafPool->read(cur);
@@ -973,7 +974,7 @@ private:
             }
         }
     };
-    
+
 public:
     void show() const {
         cout << "[show]--------------------------------------------------------------------------------" << endl;

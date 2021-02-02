@@ -37,8 +37,8 @@ public:
         if (!fin) {
             fin.clear();
             fin.close();
-            fin.open(filename, ios::out);
-            fin.close();
+            fout.open(filename, ios::out);
+            fout.close();
             writePoint = -1;
             extraMessage temp;
             fout.open(filename, ios::in | ios::out | ios::binary);
@@ -58,6 +58,19 @@ public:
     ~MemoryPool() {
         fout.open(filename, ios::in | ios::out | ios::binary);
         if (!fout)cerr << "[Error] File open failed in \"~MemoryPool::MemoryPool()\"." << endl;
+        fout.seekp(sizeof(extraMessage));
+        fout.write(reinterpret_cast<const char *>(&writePoint), sizeof(int));
+        fout.close();
+    }
+    
+    void clear() {
+        fout.open(filename, ios::out);
+        fout.close();
+        writePoint = -1;
+        extraMessage temp;
+        fout.open(filename, ios::in | ios::out | ios::binary);
+        fout.seekp(0);
+        fout.write(reinterpret_cast<const char *>(&temp), sizeof(extraMessage));
         fout.seekp(sizeof(extraMessage));
         fout.write(reinterpret_cast<const char *>(&writePoint), sizeof(int));
         fout.close();

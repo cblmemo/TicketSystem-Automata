@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#define TESTSIZE 1000000
+#define TESTSIZE 10000
 
 void init() {
     fstream o;
@@ -13,7 +13,7 @@ void init() {
     o.close();
 }
 
-void testInsertFind(){
+void testInsertFind() {
     map<int, vector<int>> answer;
     vector<int> store;
     init();
@@ -65,7 +65,7 @@ void testIntAll() {
     map<int, vector<int>> answer;
     vector<int> store;
     init();
-    srand(233);
+    srand(211113);
     int s;
     BPlusTree<int, int> temp("test");
     for (int i = 0; i < TESTSIZE; i++) {
@@ -74,6 +74,7 @@ void testIntAll() {
         temp.insert(s, i);
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Inserting...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
+    cout << endl;
     
     for (int i = 0; i < TESTSIZE; i++) {
         if (i % 2 == 0) {
@@ -81,21 +82,25 @@ void testIntAll() {
         }
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Pushing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
-    
+    cout << endl;
+
 //    for (int i = 0; i < TESTSIZE; i++) {
 //        if (i % 2 == 1) {
 //            if (!temp.erase(store[i], i))cerr << "[error]erase failed when erasing\nkey: " << store[i] << "\tdata: " << i << endl;
 //        }
 //        if (i % (TESTSIZE / 100) == 0)cout << "[count down] Erasing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
 //    }
+//    cout << endl;
     
-    for (int i = 1; i < 23; i += 2) {
+    int testNumber = 5717;
+    for (int i = 1; i < testNumber; i += 2) {
         int t = store[i];
         if (!temp.erase(t, i))cerr << "[error]erase failed." << endl;
         if (i % (TESTSIZE / 100) == 1)cout << "Erasing...\t" << (i - 1) * 100 / TESTSIZE + 1 << "%" << endl;
         //if((i - 1) * 100 / TESTSIZE>=24)cout<<i<<endl;
     }
-    temp.erase(store[23], 23);
+    int ttt = store[testNumber];
+    temp.erase(ttt, testNumber);
     
     int cnt = 0;
     int size = answer.size();
@@ -127,7 +132,14 @@ void testIntAll() {
         if (cnt % (size / 100) == 0)cout << "[count down] Checking...\t" << cnt * 100 / size + 1 << "%" << endl;
         cnt++;
     }
-    //temp.showLeaves();
+    cout << endl;
+    temp.showLeaves();
+    
+    temp.size();
+    temp.empty();
+    temp.clear();
+    vector<int> tt;
+    temp.traversal(tt);
 }
 
 void testBPlusTreeString() {
@@ -195,7 +207,7 @@ void testBPlusTreeString() {
 
 int main() {
     //testBPlusTreeString();
-    testInsertFind();
-    //testIntAll();
+    //testInsertFind();
+    testIntAll();
     return 0;
 }
