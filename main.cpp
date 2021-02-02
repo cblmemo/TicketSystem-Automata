@@ -1,9 +1,10 @@
 #include "BPlusTree.h"
+#include "BPlusTreeString.h"
 #include <map>
 
 using namespace std;
 
-#define TESTSIZE 10000
+#define TESTSIZE 500
 
 void init() {
     fstream o;
@@ -65,7 +66,7 @@ void testIntAll() {
     map<int, vector<int>> answer;
     vector<int> store;
     init();
-    srand(3);
+    srand(30);
     int s;
     BPlusTree<int, int> temp("test");
     for (int i = 0; i < TESTSIZE; i++) {
@@ -83,7 +84,7 @@ void testIntAll() {
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Pushing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
     cout << endl;
-
+    
     for (int i = 0; i < TESTSIZE; i++) {
         if (i % 2 == 1) {
             if (!temp.erase(store[i], i))cerr << "[error]erase failed when erasing\nkey: " << store[i] << "\tdata: " << i << endl;
@@ -91,7 +92,7 @@ void testIntAll() {
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Erasing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
     cout << endl;
-    
+
 //    int testNumber = 5717;
 //    for (int i = 1; i < testNumber; i += 2) {
 //        int t = store[i];
@@ -133,13 +134,15 @@ void testIntAll() {
         cnt++;
     }
     cout << endl;
-    temp.showLeaves();
+    //temp.showLeaves();
     
     temp.size();
     temp.empty();
     temp.clear();
     vector<int> tt;
     temp.traversal(tt);
+    for (auto i:tt)cerr << "[error] clear failed." << endl;
+    temp.showLeaves();
 }
 
 void testBPlusTreeString() {

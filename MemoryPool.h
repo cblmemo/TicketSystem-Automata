@@ -13,16 +13,11 @@
 #include <algorithm>
 
 using std::string;
-using std::pair;
 using std::fstream;
 using std::ios;
 using std::cerr;
 using std::cout;
 using std::endl;
-using std::ostream;
-using std::vector;
-using std::upper_bound;
-using std::lower_bound;
 
 template<class T, class extraMessage>
 class MemoryPool {
@@ -32,7 +27,7 @@ private:
     fstream fin, fout;
 
 public:
-    MemoryPool(const string &_filename) : filename(_filename) {
+    explicit MemoryPool(const string &_filename) : filename(_filename) {
         fin.open(filename, ios::in);
         if (!fin) {
             fin.clear();
@@ -80,7 +75,7 @@ public:
         fin.open(filename, ios::in | ios::binary);
         fout.open(filename, ios::in | ios::out | ios::binary);
         if ((!fin) | (!fout))cerr << "[Error] File open failed in \"MemoryPool::write\"." << endl;
-        int offset = -1;
+        int offset;
         if (writePoint < 0) {
             fout.seekp(0, ios::end);
             offset = fout.tellp();

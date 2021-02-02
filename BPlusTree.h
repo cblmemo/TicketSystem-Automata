@@ -7,82 +7,20 @@
 
 #include "MemoryPool.h"
 
+using std::pair;
+using std::vector;
+using std::upper_bound;
+using std::lower_bound;
+
 #define debug
 
-#define MAX_KEY_LENGTH 65
-#define M 100
-#define L 100
+#define M 8
+#define L 8
 #define MAX_RECORD_NUM (L+1)
 #define MIN_RECORD_NUM ((L-1)/2)
 #define MAX_KEY_NUM (M+1)
 #define MIN_KEY_NUM ((M-1)/2)
 #define MAX_CHILD_NUM (MAX_KEY_NUM+1)
-
-class BPlusTreeString {
-public:
-    char key[MAX_KEY_LENGTH] = {0};
-    
-    BPlusTreeString() {
-        memset(key, 0, sizeof(key));
-        key[0] = '\0';
-    }
-    
-    BPlusTreeString(const BPlusTreeString &o) {
-        strcpy(key, o.key);
-    }
-    
-    explicit BPlusTreeString(const string &o) {
-        strcpy(key, o.c_str());
-    }
-    
-    bool operator<(const BPlusTreeString &o) const {
-        return strcmp(key, o.key) < 0;
-    }
-    
-    bool operator==(const BPlusTreeString &o) const {
-        return strcmp(key, o.key) == 0;
-    }
-    
-    bool operator!=(const BPlusTreeString &o) const {
-        return !((*this) == o);
-    }
-    
-    bool operator>(const BPlusTreeString &o) const {
-        if ((*this) == o)return false;
-        return !((*this) < o);
-    }
-    
-    bool operator<=(const BPlusTreeString &o) const {
-        if ((*this) == o)return true;
-        return (*this) < o;
-    }
-    
-    bool operator>=(const BPlusTreeString &o) const {
-        if ((*this) == o)return true;
-        return (*this) > o;
-    }
-    
-    BPlusTreeString &operator=(const BPlusTreeString &o) {
-        if (this == &o)return *this;
-        strcpy(key, o.key);
-        return *this;
-    }
-    
-    BPlusTreeString &operator=(const string &o) {
-        strcpy(key, o.c_str());
-        return *this;
-    }
-    
-    explicit operator string() {
-        string temp = key;
-        return temp;
-    }
-    
-    friend ostream &operator<<(ostream &os, const BPlusTreeString &o) {
-        os << o.key;
-        return os;
-    }
-};
 
 template<class key, class data>
 class BPlusTree {
@@ -991,6 +929,5 @@ public:
 
 #endif
 };
-
 
 #endif //UNTITLED_BPLUSTREE_H
