@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/1/28.
 //
 
-#ifndef UNTITLED_BPLUSTREE_H
-#define UNTITLED_BPLUSTREE_H
+#ifndef RAINYMEMORY_BPLUSTREE_H
+#define RAINYMEMORY_BPLUSTREE_H
 
 #include "MemoryPool.h"
 
@@ -930,4 +930,4 @@ public:
 #endif
 };
 
-#endif //UNTITLED_BPLUSTREE_H
+#endif //RAINYMEMORY_BPLUSTREE_H

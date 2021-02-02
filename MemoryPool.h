@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/1/28.
 //
 
-#ifndef UNTITLED_MEMORYPOOL_H
-#define UNTITLED_MEMORYPOOL_H
+#ifndef RAINYMEMORY_MEMORYPOOL_H
+#define RAINYMEMORY_MEMORYPOOL_H
 
 #include <iostream>
 #include <string>
@@ -150,4 +150,4 @@ public:
     }
 };
 
-#endif //UNTITLED_MEMORYPOOL_H
+#endif //RAINYMEMORY_MEMORYPOOL_H
