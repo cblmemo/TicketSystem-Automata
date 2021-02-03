@@ -240,7 +240,7 @@ namespace RainyMemory {
                             return true;
                         }
                     }
-                    else {
+                    else if (leftBrother >= 0 && leftBrother >= 0) {
                         //try borrow/merge left/right
                         leafNode leftNode = tree->leafPool->read(leftBrother);
                         if (leftNode.dataNumber > MIN_RECORD_NUM) {
@@ -259,6 +259,7 @@ namespace RainyMemory {
                             }
                         }
                     }
+                    else return false;
                 }
                 else return false;
             }
@@ -599,7 +600,7 @@ namespace RainyMemory {
                             return true;
                         }
                     }
-                    else {
+                    else if (leftBrother >= 0 && leftBrother >= 0) {
                         internalNode leftNode = tree->internalPool->read(leftBrother);
                         if (leftNode.keyNumber > MIN_KEY_NUM) {
                             borrowLeft(tree, leftNode, fatherNode, index);
@@ -617,6 +618,7 @@ namespace RainyMemory {
                             }
                         }
                     }
+                    else return false;
                 }
                 else return false;
             }

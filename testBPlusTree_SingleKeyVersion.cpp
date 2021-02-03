@@ -19,7 +19,7 @@ void init() {
 
 void commandLine() {
 //    init();
-    BPlusTree<int, int> bpt("test");
+    BPlusTree<int, int, 5, 5> bpt("test");
     string cmd;
     while (getline(cin, cmd)) {
         if (cmd == "exit")break;

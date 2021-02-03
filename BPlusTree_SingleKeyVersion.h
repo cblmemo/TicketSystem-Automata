@@ -57,7 +57,6 @@ namespace RainyMemory {
         class leafNode {
         public:
             int offset = -1;
-            int father = -1;
             int leftBrother = -1;
             int rightBrother = -1;
             int dataNumber = 0;
@@ -98,7 +97,6 @@ namespace RainyMemory {
                 leafNode tempNode;
                 tempNode.leftBrother = offset;
                 tempNode.rightBrother = rightBrother;
-                tempNode.father = father;
                 tempNode.offset = tree->leafPool->tellWritePoint();
                 if (rightBrother >= 0) {
                     leafNode tempRightNode = tree->leafPool->read(rightBrother);
@@ -240,7 +238,7 @@ namespace RainyMemory {
                             return true;
                         }
                     }
-                    else {
+                    else if (leftBrother >= 0 && rightBrother >= 0) {
                         //try borrow/merge left/right
                         leafNode leftNode = tree->leafPool->read(leftBrother);
                         if (leftNode.dataNumber > MIN_RECORD_NUM) {
@@ -259,6 +257,7 @@ namespace RainyMemory {
                             }
                         }
                     }
+                    else return false;
                 }
                 else return false;
             }
@@ -268,7 +267,6 @@ namespace RainyMemory {
             void show() const {
                 cout << "[leafNode]" << endl;
                 cout << "offset: " << offset << endl;
-                cout << "father: " << father << endl;
                 cout << "leftBrother: " << leftBrother << endl;
                 cout << "rightBrother: " << rightBrother << endl;
                 cout << "dataNumber: " << dataNumber << endl;
@@ -285,7 +283,6 @@ namespace RainyMemory {
         class internalNode {
         public:
             int offset = -1;
-            int father = -1;
             int leftBrother = -1;
             int rightBrother = -1;
             bool childNodeIsLeaf = false;
@@ -308,8 +305,7 @@ namespace RainyMemory {
             void splitRoot(BPlusTree *tree) {
                 //oldRoot(*this) -> oldRoot + tempNode
                 internalNode newRoot, tempNode;
-                tempNode.father = tree->internalPool->write(newRoot);
-                father = tempNode.father;
+                newRoot.offset = tree->internalPool->write(newRoot);
                 rightBrother = tree->internalPool->tellWritePoint();
                 tempNode.offset = rightBrother;
                 tempNode.leftBrother = offset;
@@ -319,24 +315,8 @@ namespace RainyMemory {
                     tempNode.childNode[i - MIN_KEY_NUM - 1] = childNode[i];
                 }
                 tempNode.childNode[keyNumber - MIN_KEY_NUM - 1] = childNode[keyNumber];
-                //update child node's father
-                if (childNodeIsLeaf) {
-                    for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
-                        leafNode tempChildNode = tree->leafPool->read(childNode[i]);
-                        tempChildNode.father = tempNode.offset;
-                        tree->leafPool->update(tempChildNode, tempChildNode.offset);
-                    }
-                }
-                else {
-                    for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
-                        internalNode tempChildNode = tree->internalPool->read(childNode[i]);
-                        tempChildNode.father = tempNode.offset;
-                        tree->internalPool->update(tempChildNode, tempChildNode.offset);
-                    }
-                }
                 tempNode.keyNumber = keyNumber - MIN_KEY_NUM - 1;
                 keyNumber = MIN_KEY_NUM;
-                newRoot.offset = father;
                 newRoot.keyNumber = 1;
                 newRoot.nodeKey[0] = nodeKey[MIN_KEY_NUM];
                 newRoot.childNode[0] = offset;
@@ -349,7 +329,6 @@ namespace RainyMemory {
             
             pair<int, key> splitNode(BPlusTree *tree) {
                 internalNode tempNode;
-                tempNode.father = father;
                 tempNode.leftBrother = offset;
                 tempNode.rightBrother = rightBrother;
                 tempNode.offset = tree->internalPool->tellWritePoint();
@@ -373,21 +352,6 @@ namespace RainyMemory {
                 }
                 tempNode.childNode[keyNumber - MIN_KEY_NUM - 1] = childNode[keyNumber];
                 
-                //update child node's father
-                if (childNodeIsLeaf) {
-                    for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
-                        leafNode tempChildNode = tree->leafPool->read(childNode[i]);
-                        tempChildNode.father = tempNode.offset;
-                        tree->leafPool->update(tempChildNode, tempChildNode.offset);
-                    }
-                }
-                else {
-                    for (int i = MIN_KEY_NUM + 1; i <= keyNumber; i++) {
-                        internalNode tempChildNode = tree->internalPool->read(childNode[i]);
-                        tempChildNode.father = tempNode.offset;
-                        tree->internalPool->update(tempChildNode, tempChildNode.offset);
-                    }
-                }
                 tempNode.keyNumber = keyNumber - MIN_KEY_NUM - 1;
                 keyNumber = MIN_KEY_NUM;
                 tree->internalPool->write(tempNode);
@@ -411,18 +375,6 @@ namespace RainyMemory {
                 keyNumber++;
                 leftNode.keyNumber--;
                 
-                //update child node's father
-                if (childNodeIsLeaf) {
-                    leafNode tempNode = tree->leafPool->read(childNode[0]);
-                    tempNode.father = offset;
-                    tree->leafPool->update(tempNode, tempNode.offset);
-                }
-                else {
-                    internalNode tempNode = tree->internalPool->read(childNode[0]);
-                    tempNode.father = offset;
-                    tree->internalPool->update(tempNode, tempNode.offset);
-                }
-                
                 tree->internalPool->update(fatherNode, fatherNode.offset);
                 tree->internalPool->update(*this, offset);
                 tree->internalPool->update(leftNode, leftNode.offset);
@@ -440,18 +392,6 @@ namespace RainyMemory {
                 rightNode.childNode[rightNode.keyNumber - 1] = rightNode.childNode[rightNode.keyNumber];
                 keyNumber++;
                 rightNode.keyNumber--;
-                
-                //update child node's father
-                if (childNodeIsLeaf) {
-                    leafNode tempNode = tree->leafPool->read(childNode[keyNumber]);
-                    tempNode.father = offset;
-                    tree->leafPool->update(tempNode, tempNode.offset);
-                }
-                else {
-                    internalNode tempNode = tree->internalPool->read(childNode[keyNumber]);
-                    tempNode.father = offset;
-                    tree->internalPool->update(tempNode, tempNode.offset);
-                }
                 
                 tree->internalPool->update(fatherNode, fatherNode.offset);
                 tree->internalPool->update(*this, offset);
@@ -487,22 +427,6 @@ namespace RainyMemory {
                 //update fatherNode info
                 //delete last element
                 fatherNode.keyNumber--;
-                
-                //update child node's father
-                if (childNodeIsLeaf) {
-                    for (int i = 0; i <= keyNumber; i++) {
-                        leafNode tempNode = tree->leafPool->read(childNode[i]);
-                        tempNode.father = leftNode.offset;
-                        tree->leafPool->update(tempNode, tempNode.offset);
-                    }
-                }
-                else {
-                    for (int i = 0; i <= keyNumber; i++) {
-                        internalNode tempNode = tree->internalPool->read(childNode[i]);
-                        tempNode.father = leftNode.offset;
-                        tree->internalPool->update(tempNode, tempNode.offset);
-                    }
-                }
                 
                 tree->internalPool->update(fatherNode, fatherNode.offset);
                 tree->internalPool->update(leftNode, leftNode.offset);
@@ -541,22 +465,6 @@ namespace RainyMemory {
                 }
                 fatherNode.keyNumber--;
                 
-                //update child node's father
-                if (childNodeIsLeaf) {
-                    for (int i = 0; i <= rightNode.keyNumber; i++) {
-                        leafNode tempNode = tree->leafPool->read(rightNode.childNode[i]);
-                        tempNode.father = offset;
-                        tree->leafPool->update(tempNode, tempNode.offset);
-                    }
-                }
-                else {
-                    for (int i = 0; i <= rightNode.keyNumber; i++) {
-                        internalNode tempNode = tree->internalPool->read(rightNode.childNode[i]);
-                        tempNode.father = offset;
-                        tree->internalPool->update(tempNode, tempNode.offset);
-                    }
-                }
-                
                 tree->internalPool->update(fatherNode, fatherNode.offset);
                 tree->internalPool->update(*this, offset);
                 tree->internalPool->erase(rightNode.offset);
@@ -567,7 +475,6 @@ namespace RainyMemory {
                     tree->info.root = childNode[0];
                     tree->internalPool->erase(offset);
                     internalNode tempNode = tree->internalPool->read(childNode[0]);
-                    tempNode.father = -1;
                     tree->internalPool->update(tempNode, tempNode.offset);
                 }
             }
@@ -599,7 +506,7 @@ namespace RainyMemory {
                             return true;
                         }
                     }
-                    else {
+                    else if (leftBrother >= 0 && rightBrother >= 0) {
                         internalNode leftNode = tree->internalPool->read(leftBrother);
                         if (leftNode.keyNumber > MIN_KEY_NUM) {
                             borrowLeft(tree, leftNode, fatherNode, index);
@@ -617,6 +524,7 @@ namespace RainyMemory {
                             }
                         }
                     }
+                    else return false;
                 }
                 else return false;
             }
@@ -626,7 +534,6 @@ namespace RainyMemory {
             void show() const {
                 cout << "[internalNode]" << endl;
                 cout << "offset: " << offset << endl;
-                cout << "father: " << father << endl;
                 cout << "leftBrother: " << leftBrother << endl;
                 cout << "rightBrother: " << rightBrother << endl;
                 cout << (childNodeIsLeaf ? "child node is leaf" : "child node is internal") << endl;
@@ -652,7 +559,6 @@ namespace RainyMemory {
             rootNode.childNode[0] = leafPool->tellWritePoint();
             internalPool->write(rootNode);
             leafNode tempNode;
-            tempNode.father = rootNode.offset;
             tempNode.offset = rootNode.childNode[0];
             tempNode.dataNumber = 1;
             tempNode.leafKey[0] = o1;
