@@ -24,7 +24,7 @@ using RainyMemory::MemoryPool;
 #define debug
 
 namespace RainyMemory {
-    template<class key, class data, int M = 1000, int L = 1000>
+    template<class key, class data, int M = 200, int L = 200>
     class BPlusTree {
     private:
         class leafNode;
