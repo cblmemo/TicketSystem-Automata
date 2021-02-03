@@ -5,6 +5,8 @@
 #ifndef RAINYMEMORY_BPLUSTREE_H
 #define RAINYMEMORY_BPLUSTREE_H
 
+//THIS VERSION DOES NOT SUPPORT REPEATED KEY!!!
+
 #include "MemoryPool.h"
 
 #include <iostream>
@@ -24,7 +26,7 @@ using RainyMemory::MemoryPool;
 #define debug
 
 namespace RainyMemory {
-    template<class key, class data, int M = 1000, int L = 1000>
+    template<class key, class data, int M = 200, int L = 200, data failedSignal = -1>
     class BPlusTree {
     private:
         class leafNode;
@@ -75,23 +77,21 @@ namespace RainyMemory {
                 tree->leafPool->update(*this, offset);
             }
             
-            bool deleteElement(BPlusTree *tree, const key &o1, const data &o2) {
-                int start = lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
-                int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
-                bool result = false;
-                for (int i = start; i < end; i++) {
-                    if (o2 == leafData[i]) {
-                        for (int j = i; j < dataNumber - 1; j++) {
+            bool deleteElement(BPlusTree *tree, const key &o) {
+                int pos = lower_bound(leafKey, leafKey + dataNumber, o) - leafKey;
+                if (pos == dataNumber)return false;
+                else {
+                    if (leafKey[pos] != o)return false;
+                    else {
+                        for (int j = pos; j < dataNumber - 1; j++) {
                             leafData[j] = leafData[j + 1];
                             leafKey[j] = leafKey[j + 1];
                         }
                         dataNumber--;
-                        result = true;
-                        break;
+                        tree->leafPool->update(*this, offset);
+                        return true;
                     }
                 }
-                if (result)tree->leafPool->update(*this, offset);
-                return result;
             }
             
             pair<int, key> splitNode(BPlusTree *tree) {
@@ -693,80 +693,43 @@ namespace RainyMemory {
             }
         }
         
-        //FIRST:
-        //        first:   fatherNode offset
-        //        second:  nowNode offset (to find index in fatherNode)
-        //SECOND:
-        //        first:   son node need resize
-        //        second:  delete successfully
-        pair<pair<int, int>, pair<bool, bool>> recursionErase(int now, const key &o1, const data &o2) {
+        //first:   son node need resize
+        //second:  delete successfully
+        pair<bool, bool> recursionErase(int now, const key &o) {
             internalNode nowNode = internalPool->read(now);
-            bool deleted = false;
             if (nowNode.childNodeIsLeaf) {
-                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
                 leafNode targetNode = leafPool->read(nowNode.childNode[index]);
-                bool flag = targetNode.deleteElement(this, o1, o2);
-                bool changeIndexFlag = false;
-                if (flag)deleted = true;
-                else {
-                    while (targetNode.leftBrother >= 0) {
-                        changeIndexFlag = true;
-                        targetNode = leafPool->read(targetNode.leftBrother);
-                        if (targetNode.deleteElement(this, o1, o2)) {
-                            deleted = true;
-                            break;
-                        }
-                    }
-                }
-                if (now != targetNode.father)nowNode = internalPool->read(targetNode.father);
-                if (changeIndexFlag)index = std::find(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, targetNode.offset) - nowNode.childNode;
-                pair<pair<int, int>, pair<bool, bool>> temp;
-                temp.first.first = nowNode.father;
-                temp.first.second = nowNode.offset;
-                if (targetNode.resize(this, nowNode, index))temp.second.first = true;
-                else temp.second.first = false;
-                temp.second.second = deleted;
+                pair<bool, bool> temp;
+                temp.second = targetNode.deleteElement(this, o);
+                temp.first = targetNode.resize(this, nowNode, index);
                 return temp;
             }
             else {
-                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
-                pair<pair<int, int>, pair<bool, bool>> temp = recursionErase(nowNode.childNode[index], o1, o2);
-                if (!temp.second.first || !temp.second.second)return temp;
+                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
+                pair<bool, bool> temp = recursionErase(nowNode.childNode[index], o);
+                if (!temp.first || !temp.second)return temp;
                 else {
-                    if (nowNode.offset != temp.first.first) nowNode = internalPool->read(temp.first.first);
-                    temp.first.first = nowNode.father;
-                    internalNode sonNode = internalPool->read(temp.first.second);
-                    //find index, use temp.first.second
-                    index = std::find(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, temp.first.second) - nowNode.childNode;
-                    temp.first.second = nowNode.offset;
-                    if (!sonNode.resize(this, nowNode, index))temp.second.first = false;
+                    internalNode sonNode = internalPool->read(nowNode.childNode[index]);
+                    temp.first = sonNode.resize(this, nowNode, index);
                     return temp;
                 }
             }
         }
         
-        void recursionFind(int now, const key &o, vector<data> &result) {
+        data recursionFind(int now, const key &o) {
             internalNode nowNode = internalPool->read(now);
             if (nowNode.childNodeIsLeaf) {
                 int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
-                int cur = nowNode.childNode[index];
-                bool flag = true;
-                while (cur >= 0 && flag) {
-                    leafNode targetNode = leafPool->read(cur);
-                    int pos = upper_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
-                    for (int i = pos - 1; i >= 0; i--) {
-                        if (o > targetNode.leafKey[i]) {
-                            flag = false;
-                            break;
-                        }
-                        result.push_back(targetNode.leafData[i]);
-                    }
-                    cur = targetNode.leftBrother;
-                }
+                leafNode targetNode = leafPool->read(nowNode.childNode[index]);
+                int pos = lower_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
+                if (pos == targetNode.dataNumber)return data(failedSignal);
+                if (targetNode.leafKey[pos] == o)return targetNode.leafData[pos];
+                else return data(failedSignal);
             }
             else {
                 int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
-                recursionFind(nowNode.childNode[index], o, result);
+                return recursionFind(nowNode.childNode[index], o);
             }
         }
     
@@ -822,41 +785,27 @@ namespace RainyMemory {
         }
         
         //return whether erase is successful
-        bool erase(const key &o1, const data &o2) {
+        bool erase(const key &o) {
             if (info.size == 0 || info.root == -1)return false;
             else {
                 internalNode rootNode = internalPool->read(info.root);
-                bool deleted = false;
+                bool deleted;
                 if (rootNode.childNodeIsLeaf) {
-                    int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                    int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                     leafNode targetNode = leafPool->read(rootNode.childNode[index]);
-                    bool flag = targetNode.deleteElement(this, o1, o2);
-                    bool changeIndexFlag = false;
-                    if (flag)deleted = true;
-                    else {
-                        while (targetNode.leftBrother >= 0) {
-                            changeIndexFlag = true;
-                            targetNode = leafPool->read(targetNode.leftBrother);
-                            if (targetNode.deleteElement(this, o1, o2)) {
-                                deleted = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (changeIndexFlag)index = std::find(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, targetNode.offset) - rootNode.childNode;
+                    deleted = targetNode.deleteElement(this, o);
                     if (deleted) {
                         if (targetNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
                     }
                 }
                 else {
-                    int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
-                    pair<pair<int, int>, pair<bool, bool>> temp = recursionErase(rootNode.childNode[index], o1, o2);
-                    if (!temp.second.second)return false;
+                    int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
+                    pair<bool, bool> temp = recursionErase(rootNode.childNode[index], o);
+                    if (!temp.second)return false;
                     else {
                         deleted = true;
-                        if (temp.second.first) {
-                            internalNode sonNode = internalPool->read(temp.first.second);
-                            index = std::find(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, temp.first.second) - rootNode.childNode;
+                        if (temp.first) {
+                            internalNode sonNode = internalPool->read(rootNode.childNode[index]);
                             if (sonNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
                         }
                     }
@@ -866,38 +815,27 @@ namespace RainyMemory {
             }
         }
         
-        void find(const key &o, vector<data> &result) {
-            if (info.size == 0 || info.root == -1)return;
+        data find(const key &o) {
+            if (info.size == 0 || info.root == -1)return data(failedSignal);
             else {
                 internalNode rootNode = internalPool->read(info.root);
                 if (rootNode.childNodeIsLeaf) {
                     int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
-                    int cur = rootNode.childNode[index];
-                    bool flag = true;
-                    while (cur >= 0 && flag) {
-                        leafNode targetNode = leafPool->read(cur);
-                        int pos = upper_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
-                        for (int i = pos - 1; i >= 0; i--) {
-                            if (o > targetNode.leafKey[i]) {
-                                flag = false;
-                                break;
-                            }
-                            result.push_back(targetNode.leafData[i]);
-                        }
-                        cur = targetNode.leftBrother;
-                    }
+                    leafNode targetNode = leafPool->read(rootNode.childNode[index]);
+                    int pos = lower_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o) - targetNode.leafKey;
+                    if (pos == targetNode.dataNumber)return data(failedSignal);
+                    if (targetNode.leafKey[pos] == o)return targetNode.leafData[pos];
+                    else return data(failedSignal);
                 }
                 else {
                     int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
-                    recursionFind(rootNode.childNode[index], o, result);
+                    return recursionFind(rootNode.childNode[index], o);
                 }
             }
         }
         
-        vector<data> operator[](const key &o) {
-            vector<data> result;
-            find(o, result);
-            return result;
+        data operator[](const key &o) {
+            return find(o);
         }
         
         void traversal(vector<data> &result) {

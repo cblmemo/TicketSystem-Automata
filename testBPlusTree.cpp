@@ -1,10 +1,11 @@
 #include "BPlusTree.h"
 #include <map>
+#include <sstream>
 
 using namespace std;
 using RainyMemory::BPlusTree;
 
-#define TESTSIZE 1000000
+#define TESTSIZE 100000
 
 void init() {
     fstream o;
@@ -66,7 +67,7 @@ void testIntAll() {
     map<int, vector<int>> answer;
     vector<int> store;
     init();
-    srand(30);
+    srand(22);
     int s;
     BPlusTree<int, int> temp("test");
     for (int i = 0; i < TESTSIZE; i++) {
@@ -84,7 +85,7 @@ void testIntAll() {
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Pushing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
     cout << endl;
-
+    
     for (int i = 0; i < TESTSIZE; i++) {
         if (i % 2 == 1) {
             if (!temp.erase(store[i], i))cerr << "[error]erase failed when erasing\nkey: " << store[i] << "\tdata: " << i << endl;
@@ -92,7 +93,7 @@ void testIntAll() {
         if (i % (TESTSIZE / 100) == 0)cout << "[count down] Erasing...\t" << i * 100 / TESTSIZE + 1 << "%" << endl;
     }
     cout << endl;
-    
+
 //    int testNumber = 30325;
 //    for (int i = 1; i < testNumber; i += 2) {
 //        int t = store[i];
@@ -154,7 +155,7 @@ void testRepeatedInsert() {
     }
     vector<int> tt;
     temp.find(a, tt);
-    if(tt.size()!=TESTSIZE)cerr<<"[error] size wrong!"<<endl;
+    if (tt.size() != TESTSIZE)cerr << "[error] size wrong!" << endl;
     else {
         sort(tt.begin(), tt.end());
         int cnt = 0;
@@ -166,10 +167,80 @@ void testRepeatedInsert() {
     
 }
 
+void commandLine() {
+//    init();
+    BPlusTree<int, int> bpt("test");
+    string cmd;
+    while (getline(cin, cmd)) {
+        if (cmd == "exit")break;
+        stringstream ss(cmd);
+        string cmdType;
+        ss >> cmdType;
+        if (cmdType == "insert") {
+            int key, offset;
+            ss >> key >> offset;
+            bpt.insert(key, offset);
+            cout << "Insert successful." << endl;
+        }
+        else if (cmdType == "erase") {
+            int key, offset;
+            ss >> key >> offset;
+            if (bpt.erase(key, offset))cout << "Erase successful." << endl;
+            else cout << "Erase failed." << endl;
+        }
+        else if (cmdType == "find") {
+            int key;
+            ss >> key;
+            vector<int> result;
+            bpt.find(key, result);
+            if (result.empty()) {
+                cout << "No result." << endl;
+            }
+            else {
+                cout << "[result]" << endl;
+                for (int i: result) {
+                    cout << i << " ";
+                }
+                cout << endl;
+            }
+        }
+        else if (cmdType == "show") {
+            bpt.showLeaves();
+        }
+        else if (cmdType == "size") {
+            if (bpt.empty())cout << "BPT is empty." << endl;
+            else cout << "[size] " << bpt.size() << endl;
+        }
+        else if (cmdType == "traversal") {
+            if (bpt.empty())cout << "BPT is empty." << endl;
+            else {
+                vector<int> result;
+                bpt.traversal(result);
+                cout << "[traversal]" << endl;
+                for (int i:result) {
+                    cout << i << " ";
+                }
+                cout << endl;
+            }
+        }
+        else if (cmdType == "showtree") {
+            bpt.show();
+        }
+        else if (cmdType == "clear") {
+            bpt.clear();
+            cout << "Clear successful." << endl;
+        }
+        else cout << "Invalid" << endl;
+    }
+}
+
+
 int main() {
     //testBPlusTreeString();
     //testInsertFind(21);
-    testIntAll();
+    //testIntAll();
     //testRepeatedInsert();
+    commandLine();
+    //testMemoryPool();
     return 0;
 }
