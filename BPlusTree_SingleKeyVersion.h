@@ -9,19 +9,16 @@
 //THIS VERSION DOES NOT SUPPORT REPEATED KEY!!!
 
 #include "MemoryPool.h"
+#include "algorithm.h"
 
 #include <iostream>
-#include <vector>
-#include <algorithm>
+//#include <algorithm>
 
 using std::cerr;
 using std::cout;
 using std::endl;
-using std::pair;
-using std::vector;
-using std::upper_bound;
-using std::lower_bound;
-
+using RainyMemory::upper_bound;
+using RainyMemory::lower_bound;
 using RainyMemory::MemoryPool;
 
 //#define debug
@@ -758,15 +755,15 @@ namespace RainyMemory {
             return find(o);
         }
         
-        void traversal(vector<data> &result) {
-            if (info.head == -1)return;
-            int cur = info.head;
-            while (cur >= 0) {
-                leafNode nowNode = leafPool->read(cur);
-                for (int i = 0; i < nowNode.dataNumber; i++)result.push_back(nowNode.leafData[i]);
-                cur = nowNode.rightBrother;
-            }
-        }
+//        void traversal(vector<data> &result) {
+//            if (info.head == -1)return;
+//            int cur = info.head;
+//            while (cur >= 0) {
+//                leafNode nowNode = leafPool->read(cur);
+//                for (int i = 0; i < nowNode.dataNumber; i++)result.push_back(nowNode.leafData[i]);
+//                cur = nowNode.rightBrother;
+//            }
+//        }
 
 #ifdef debug
         private:

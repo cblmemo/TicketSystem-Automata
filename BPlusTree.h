@@ -8,19 +8,17 @@
 //NOTE: class key need to overload operator= and operator< to support assignment and sort
 
 #include "MemoryPool.h"
+#include "algorithm.h"
 
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 using std::cerr;
 using std::cout;
 using std::endl;
-using std::pair;
 using std::vector;
-using std::upper_bound;
-using std::lower_bound;
-
+using RainyMemory::upper_bound;
+using RainyMemory::lower_bound;
 using RainyMemory::MemoryPool;
 
 //#define debug
@@ -34,12 +32,12 @@ namespace RainyMemory {
             key nodeKey;
         };
         
-        struct insertReturn {
+        struct insertReturn{
             bool childNodeNumberIncreased;
             splitNodeReturn node;
         };
         
-        struct eraseReturn {
+        struct eraseReturn{
             int fatherNodeOffset;
             int nowNodeOffset;//to find index in fatherNode
             bool sonNodeNeedResize;
@@ -734,11 +732,11 @@ namespace RainyMemory {
                     }
                 }
                 if (now != targetNode.father)nowNode = internalPool->read(targetNode.father);
-                if (changeIndexFlag)index = std::find(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, targetNode.offset) - nowNode.childNode;
+                if (changeIndexFlag)index = RainyMemory::find(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, targetNode.offset) - nowNode.childNode;
                 eraseReturn temp;
                 temp.fatherNodeOffset = nowNode.father;
                 temp.nowNodeOffset = nowNode.offset;
-                temp.sonNodeNeedResize = targetNode.resize(this, nowNode, index);
+                temp.sonNodeNeedResize =targetNode.resize(this, nowNode, index);
                 temp.eraseSucceed = deleted;
                 return temp;
             }
@@ -751,9 +749,9 @@ namespace RainyMemory {
                     temp.fatherNodeOffset = nowNode.father;
                     internalNode sonNode = internalPool->read(temp.nowNodeOffset);
                     //find index, use temp.first.second
-                    index = std::find(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, temp.nowNodeOffset) - nowNode.childNode;
+                    index = RainyMemory::find(nowNode.childNode, nowNode.childNode + nowNode.keyNumber + 1, temp.nowNodeOffset) - nowNode.childNode;
                     temp.nowNodeOffset = nowNode.offset;
-                    temp.sonNodeNeedResize = sonNode.resize(this, nowNode, index);
+                    temp.sonNodeNeedResize=sonNode.resize(this, nowNode, index);
                     return temp;
                 }
             }
@@ -857,7 +855,7 @@ namespace RainyMemory {
                             }
                         }
                     }
-                    if (changeIndexFlag)index = std::find(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, targetNode.offset) - rootNode.childNode;
+                    if (changeIndexFlag)index = RainyMemory::find(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, targetNode.offset) - rootNode.childNode;
                     if (deleted) {
                         if (targetNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
                     }
@@ -870,7 +868,7 @@ namespace RainyMemory {
                         deleted = true;
                         if (temp.sonNodeNeedResize) {
                             internalNode sonNode = internalPool->read(temp.nowNodeOffset);
-                            index = std::find(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, temp.nowNodeOffset) - rootNode.childNode;
+                            index = RainyMemory::find(rootNode.childNode, rootNode.childNode + rootNode.keyNumber + 1, temp.nowNodeOffset) - rootNode.childNode;
                             if (sonNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
                         }
                     }

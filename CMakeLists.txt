@@ -3,4 +3,4 @@ project(BPlusTree)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(BPlusTree testBPlusTree_SingleKeyVersion.cpp MemoryPool.h BPlusTree_SingleKeyVersion.h)
+add_executable(BPlusTree main.cpp TokenScanner.h Parser.h HashType.h algorithm.h)
