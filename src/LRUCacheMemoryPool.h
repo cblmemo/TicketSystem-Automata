@@ -1,9 +1,9 @@
 //
-// Created by Rainy Memory on 2021/1/28.
+// Created by Rainy Memory on 2021/3/17.
 //
 
-#ifndef RAINYMEMORY_MEMORYPOOL_H
-#define RAINYMEMORY_MEMORYPOOL_H
+#ifndef BPLUSTREE_LRUCACHEMEMORYPOOL_H
+#define BPLUSTREE_LRUCACHEMEMORYPOOL_H
 
 #include <string>
 #include <fstream>
@@ -63,13 +63,6 @@ namespace RainyMemory {
                 listSize++;
             }
             
-            void to_front(Node *n) {
-                n->pre->next = n->next;
-                n->next->pre = n->pre;
-                listSize--;
-                push_front(n);
-            }
-            
             Node *pop_back() {
                 Node *target = tail->pre;
                 target->pre->next = tail;
@@ -115,15 +108,13 @@ namespace RainyMemory {
         }
         
         void putInCache(int key, const T &o) {
-            if (existInCache(key)) {
-                cache.to_front(hashmap[key]);
-                *hashmap[key]->value = o;
-                return;
-            }
             auto newNode = new typename DoublyLinkedList::Node(key, o);
-            if (cache.full())discardLRU();
+            bool flag = false;
+            if (existInCache(key))cache.erase(hashmap[key]), flag = true;
+            else if (cache.full())discardLRU();
             cache.push_front(newNode);
             hashmap[key] = newNode;
+            hashmap[key]->dirtyBit = flag;
         }
         
         int writeInFile(const T &o) {
@@ -219,7 +210,6 @@ namespace RainyMemory {
         }
         
         void update(const T &o, int offset) {
-            hashmap[offset]->dirtyBit = true;
             putInCache(offset, o);
         }
         
@@ -257,4 +247,4 @@ namespace RainyMemory {
     };
 }
 
-#endif //RAINYMEMORY_MEMORYPOOL_H
+#endif //BPLUSTREE_LRUCACHEMEMORYPOOL_H
