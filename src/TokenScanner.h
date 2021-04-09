@@ -51,6 +51,7 @@ namespace RainyMemory {
         void resetBuffer(const string &buffer) {
             Buffer = buffer;
             pos = 0;
+            while (Buffer[pos] == Delim)pos++;
         }
         
         void resetDelim(char delim) {
@@ -71,11 +72,6 @@ namespace RainyMemory {
         TokenScanner &operator>>(int &o) {
             string s = nextToken();
             o = toInt(s);
-            return *this;
-        }
-        
-        TokenScanner &operator<<(const string &o) {
-            Buffer += o;
             return *this;
         }
     };

@@ -7,13 +7,13 @@
 
 #include "TokenScanner.h"
 
-enum commandType {
-    ADDUSER, LOGIN, LOGOUT, QUERYPROFILE, MODIFYPROFILE, ADDTRAIN,
-    RELEASETRAIN, QUERYTRAIN, DELETETRAIN, QUERYTICKET, QUERYTRANSFER,
-    BUYTICKET, QUERYORDER, REFUNDTICKET, CLEAN, EXIT, NONE
-};
-
 class Parser {
+public:
+    enum commandType {
+        ADDUSER, LOGIN, LOGOUT, QUERYPROFILE, MODIFYPROFILE, ADDTRAIN,
+        RELEASETRAIN, QUERYTRAIN, DELETETRAIN, QUERYTICKET, QUERYTRANSFER,
+        BUYTICKET, QUERYORDER, REFUNDTICKET, CLEAN, EXIT, NONE
+    };
 private:
     RainyMemory::TokenScanner ts;
     commandType type = NONE;
@@ -63,7 +63,6 @@ public:
     const string &operator[](const string &arg) const {
         return argument[arg[1] - 'a'];
     }
-    
 };
 
 #endif //BPLUSTREE_PARSER_H

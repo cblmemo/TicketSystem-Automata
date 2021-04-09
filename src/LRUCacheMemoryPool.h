@@ -1,5 +1,5 @@
 //
-// Created by Rainy Memory on 2021/3/17.
+// Created by Rainy Memory on 2021/3/18.
 //
 
 #ifndef BPLUSTREE_LRUCACHEMEMORYPOOL_H
@@ -63,6 +63,13 @@ namespace RainyMemory {
                 listSize++;
             }
             
+            void to_front(Node *n) {
+                n->pre->next = n->next;
+                n->next->pre = n->pre;
+                listSize--;
+                push_front(n);
+            }
+            
             Node *pop_back() {
                 Node *target = tail->pre;
                 target->pre->next = tail;
@@ -108,13 +115,15 @@ namespace RainyMemory {
         }
         
         void putInCache(int key, const T &o) {
+            if (existInCache(key)) {
+                cache.to_front(hashmap[key]);
+                *hashmap[key]->value = o;
+                return;
+            }
             auto newNode = new typename DoublyLinkedList::Node(key, o);
-            bool flag = false;
-            if (existInCache(key))cache.erase(hashmap[key]), flag = true;
-            else if (cache.full())discardLRU();
+            if (cache.full())discardLRU();
             cache.push_front(newNode);
             hashmap[key] = newNode;
-            hashmap[key]->dirtyBit = flag;
         }
         
         int writeInFile(const T &o) {
@@ -166,7 +175,7 @@ namespace RainyMemory {
         }
     
     public:
-        explicit LRUCacheMemoryPool(const string &_filename, int _capacity = 100) : filename(_filename), cache(_capacity) {
+        explicit LRUCacheMemoryPool(const string &_filename, int _capacity = 100) : filename(_filename), cache(_capacity), hashmap(_capacity) {
             fin.open(filename, ios::in);
             if (fin.fail()) {
                 fin.clear();
@@ -210,6 +219,7 @@ namespace RainyMemory {
         }
         
         void update(const T &o, int offset) {
+            hashmap[offset]->dirtyBit = true;
             putInCache(offset, o);
         }
         
