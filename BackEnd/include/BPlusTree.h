@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/1/28.
 //
 
-#ifndef RAINYMEMORY_BPLUSTREE_H
-#define RAINYMEMORY_BPLUSTREE_H
+#ifndef TICKETSYSTEM_AUTOMATA_BPLUSTREE_H
+#define TICKETSYSTEM_AUTOMATA_BPLUSTREE_H
 
 //NOTE: class key need to overload operator= and operator< to support assignment and sort
 
@@ -805,7 +805,7 @@ namespace RainyMemory {
         }
         
         void insert(const key &o1, const data &o2) {
-            if (info.root == -1) initialize(o1, o2);
+            if (info.root == -1)initialize(o1, o2);
             else {
                 internalNode rootNode = internalPool->read(info.root);
                 if (rootNode.childNodeIsLeaf) {
@@ -955,4 +955,4 @@ namespace RainyMemory {
     };
 }
 
-#endif //RAINYMEMORY_BPLUSTREE_H
+#endif //TICKETSYSTEM_AUTOMATA_BPLUSTREE_H

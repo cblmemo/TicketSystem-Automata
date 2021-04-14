@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/3/4.
 //
 
-#ifndef BPLUSTREE_TOKENSCANNER_H
-#define BPLUSTREE_TOKENSCANNER_H
+#ifndef TICKETSYSTEM_AUTOMATA_TOKENSCANNER_H
+#define TICKETSYSTEM_AUTOMATA_TOKENSCANNER_H
 
 #include <iostream>
 
@@ -79,4 +79,4 @@ namespace RainyMemory {
 }
 
 
-#endif //BPLUSTREE_TOKENSCANNER_H
+#endif //TICKETSYSTEM_AUTOMATA_TOKENSCANNER_H

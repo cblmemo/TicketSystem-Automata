@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/3/4.
 //
 
-#ifndef BPLUSTREE_PARSER_H
-#define BPLUSTREE_PARSER_H
+#ifndef TICKETSYSTEM_AUTOMATA_PARSER_H
+#define TICKETSYSTEM_AUTOMATA_PARSER_H
 
 #include "TokenScanner.h"
 
@@ -20,6 +20,7 @@ private:
     string argument[26];
     
     void reset() {
+        for (string i:argument)i.clear();
         string ty = ts.nextToken();
         if (ty == "add_user")type = ADDUSER;                     //N
         else if (ty == "login")type = LOGIN;                     //F
@@ -65,4 +66,4 @@ public:
     }
 };
 
-#endif //BPLUSTREE_PARSER_H
+#endif //TICKETSYSTEM_AUTOMATA_PARSER_H

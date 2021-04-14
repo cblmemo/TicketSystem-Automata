@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/3/6.
 //
 
-#ifndef BPLUSTREE_ALGORITHM_H
-#define BPLUSTREE_ALGORITHM_H
+#ifndef TICKETSYSTEM_AUTOMATA_ALGORITHM_H
+#define TICKETSYSTEM_AUTOMATA_ALGORITHM_H
 
 namespace RainyMemory {
     namespace inner {
@@ -158,4 +158,4 @@ namespace RainyMemory {
     
 }
 
-#endif //BPLUSTREE_ALGORITHM_H
+#endif //TICKETSYSTEM_AUTOMATA_ALGORITHM_H

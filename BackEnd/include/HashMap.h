@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/3/17.
 //
 
-#ifndef BPLUSTREE_HASHMAP_H
-#define BPLUSTREE_HASHMAP_H
+#ifndef TICKETSYSTEM_AUTOMATA_HASHMAP_H
+#define TICKETSYSTEM_AUTOMATA_HASHMAP_H
 
 #include <functional>
 
@@ -125,4 +125,4 @@ namespace RainyMemory {
     
 }
 
-#endif //BPLUSTREE_HASHMAP_H
+#endif //TICKETSYSTEM_AUTOMATA_HASHMAP_H

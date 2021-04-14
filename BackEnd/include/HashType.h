@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/3/6.
 //
 
-#ifndef BPLUSTREE_HASHTYPE_H
-#define BPLUSTREE_HASHTYPE_H
+#ifndef TICKETSYSTEM_AUTOMATA_HASHTYPE_H
+#define TICKETSYSTEM_AUTOMATA_HASHTYPE_H
 
 #include <iostream>
 
@@ -70,4 +70,4 @@ namespace RainyMemory{
     
 }
 
-#endif //BPLUSTREE_HASHTYPE_H
+#endif //TICKETSYSTEM_AUTOMATA_HASHTYPE_H

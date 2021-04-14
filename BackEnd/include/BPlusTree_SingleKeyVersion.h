@@ -2,8 +2,8 @@
 // Created by Rainy Memory on 2021/1/28.
 //
 
-#ifndef RAINYMEMORY_BPLUSTREE_H
-#define RAINYMEMORY_BPLUSTREE_H
+#ifndef TICKETSYSTEM_AUTOMATA_BPLUSTREE_H
+#define TICKETSYSTEM_AUTOMATA_BPLUSTREE_H
 
 //NOTE: class key need to overload operator= and operator< to support assignment and sort
 //THIS VERSION DOES NOT SUPPORT REPEATED KEY!!!
@@ -801,4 +801,4 @@ namespace RainyMemory {
     };
 }
 
-#endif //RAINYMEMORY_BPLUSTREE_H
+#endif //TICKETSYSTEM_AUTOMATA_BPLUSTREE_H
