@@ -101,7 +101,12 @@ namespace RainyMemory {
         }
         
         ~HashMap() {
-            delete[] buckets;
+            delete[]buckets;
+        }
+        
+        void clear() {
+            delete[]buckets;
+            buckets = new LinkedList[capacity];
         }
         
         bool containsKey(const Key &k) const {
@@ -111,7 +116,7 @@ namespace RainyMemory {
         
         Value &operator[](const Key &k) {
             int index = hash(k) % capacity;
-            if(containsKey(k))return *buckets[index].find(k)->value;
+            if (containsKey(k))return *buckets[index].find(k)->value;
             else {
                 buckets[index].insert(k, Value());
                 return *buckets[index].head->value;

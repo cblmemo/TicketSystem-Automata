@@ -5,6 +5,7 @@
 #ifndef TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H
 #define TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H
 
+#include "UserManager.h"
 
 class Administrator {
 

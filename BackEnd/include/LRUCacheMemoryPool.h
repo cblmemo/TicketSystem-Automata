@@ -5,7 +5,7 @@
 #ifndef TICKETSYSTEM_AUTOMATA_LRUCACHEMEMORYPOOL_H
 #define TICKETSYSTEM_AUTOMATA_LRUCACHEMEMORYPOOL_H
 
-#include <string>
+#include <iostream>
 #include <fstream>
 #include "HashMap.h"
 
@@ -14,7 +14,7 @@ using std::fstream;
 using std::ios;
 
 namespace RainyMemory {
-    template<class T, class extraMessage>
+    template<class T, class extraMessage = char>
     class LRUCacheMemoryPool {
     private:
         class DoublyLinkedList {
@@ -53,6 +53,18 @@ namespace RainyMemory {
                     delete temp;
                     temp = head;
                 }
+            }
+            
+            void clear() {
+                listSize = 0;
+                Node *temp = head;
+                while (head != nullptr) {
+                    head = head->next;
+                    delete temp;
+                    temp = head;
+                }
+                head = new Node(), tail = new Node();
+                head->next = tail, tail->pre = head;
             }
             
             void push_front(Node *n) {
@@ -226,6 +238,22 @@ namespace RainyMemory {
         void erase(int offset) {
             if (existInCache(offset))eraseInCache(offset);
             eraseInFile(offset);
+        }
+        
+        //todo debug
+        void clear() {
+            hashmap.clear();
+            cache.clear();
+            fout.open(filename, ios::out | ios::binary);
+            fout.close();
+            writePoint = -1;
+            extraMessage temp;
+            fout.open(filename, ios::in | ios::out | ios::binary);
+            fout.seekp(0);
+            fout.write(reinterpret_cast<const char *>(&temp), sizeof(extraMessage));
+            fout.seekp(sizeof(extraMessage));
+            fout.write(reinterpret_cast<const char *>(&writePoint), sizeof(int));
+            fout.close();
         }
         
         extraMessage readExtraMessage() {
