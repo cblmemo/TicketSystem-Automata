@@ -187,7 +187,7 @@ namespace RainyMemory {
         }
     
     public:
-        explicit LRUCacheMemoryPool(const string &_filename, int _capacity = 100) : filename(_filename), cache(_capacity), hashmap(_capacity) {
+        explicit LRUCacheMemoryPool(const string &_filename, const extraMessage &ex = extraMessage {}, int _capacity = 100) : filename(_filename), cache(_capacity), hashmap(_capacity) {
             fin.open(filename, ios::in);
             if (fin.fail()) {
                 fin.clear();
@@ -195,7 +195,7 @@ namespace RainyMemory {
                 fout.open(filename, ios::out | ios::binary);
                 fout.close();
                 writePoint = -1;
-                extraMessage temp;
+                extraMessage temp(ex);
                 fout.open(filename, ios::in | ios::out | ios::binary);
                 fout.seekp(0);
                 fout.write(reinterpret_cast<const char *>(&temp), sizeof(extraMessage));
@@ -241,13 +241,13 @@ namespace RainyMemory {
         }
         
         //todo debug
-        void clear() {
+        void clear(extraMessage ex = extraMessage {}) {
             hashmap.clear();
             cache.clear();
             fout.open(filename, ios::out | ios::binary);
             fout.close();
             writePoint = -1;
-            extraMessage temp;
+            extraMessage temp(ex);
             fout.open(filename, ios::in | ios::out | ios::binary);
             fout.seekp(0);
             fout.write(reinterpret_cast<const char *>(&temp), sizeof(extraMessage));

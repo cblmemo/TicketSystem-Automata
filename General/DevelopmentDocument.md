@@ -60,7 +60,7 @@
 
 
 
-### MyString.h
+### string_t.h
 
 长度为模板类参数，定长，可写入文件的string
 
@@ -78,14 +78,14 @@
 
 负责所有用户相关的操作
 
-内嵌类：`userType`
+内嵌类：`user_t`
 
 | 变量类型     | 变量名称  | 备注                       |
 | ------------ | --------- | -------------------------- |
-| MyString<20> | username  |                            |
-| MyString<30> | password  |                            |
-| MyString<10> | name      | 一个汉字占据两个char的空间 |
-| MyString<30> | mailAddr  |                            |
+| string_t<20> | username  |                            |
+| string_t<30> | password  |                            |
+| string_t<10> | name      | 一个汉字占据两个char的空间 |
+| string_t<30> | mailAddr  |                            |
 | int          | privilege |                            |
 
 
@@ -96,7 +96,7 @@
 | ----------------------------- | ------------ | ------------------ |
 | HashMap<username, bool>       | loginPool    | 存储用户登录态     |
 | BPlusTree<username, int>      | indexPool    | username的索引文件 |
-| LRUCacheMemoryPool\<userType> | storagePool  | 存储用户信息       |
+| LRUCacheMemoryPool\<user_t> | storagePool  | 存储用户信息       |
 | std::ostream&                 | defaultOut   | 输出信息           |
 
 
@@ -131,9 +131,9 @@ void clear();//清空信息
 
 | 变量类型          | 变量名称      | 备注                       |
 | ----------------- | ------------- | -------------------------- |
-| MyString<20>      | trainID       |                            |
+| string_t<20>      | trainID       |                            |
 | int               | stationNum    |                            |
-| MyString<20>[100] | stations      | 一个汉字占据两个char的空间 |
+| string_t<20>[100] | stations      | 一个汉字占据两个char的空间 |
 | int               | seatNum       |                            |
 | int[100]          | prices        |                            |
 | Time              | startTime     |                            |
@@ -191,10 +191,10 @@ void clear();//清空信息
 | 变量类型     | 变量名称     | 备注                     |
 | ------------ | ------------ | ------------------------ |
 | enum         | status       |                          |
-| MyString<20> | trainID      |                          |
-| MyString<20> | from         |                          |
+| string_t<20> | trainID      |                          |
+| string_t<20> | from         |                          |
 | Time         | leavingTime  |                          |
-| MyString<20> | to           |                          |
+| string_t<20> | to           |                          |
 | Time         | arrivingTime | 需在构造时读取火车的数据 |
 | int          | price        |                          |
 | int          | num          |                          |

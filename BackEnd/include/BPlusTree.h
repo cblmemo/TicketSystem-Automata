@@ -801,7 +801,7 @@ namespace RainyMemory {
                 return recursionFindNth(nowNode.childNode[index], o, n);
             }
         }
-        
+
 //        void recursionUpdateNth(int now, const key &o1, const data &o2, int n) {
 //            internalNode nowNode = internalPool->read(now);
 //            if (nowNode.childNodeIsLeaf) {
@@ -832,8 +832,8 @@ namespace RainyMemory {
     
     public:
         explicit BPlusTree(const string &name) {
-            leafPool = new LRUCacheMemoryPool<leafNode, basicInfo>("leaf_" + name + ".dat");
-            internalPool = new LRUCacheMemoryPool<internalNode, basicInfo>("internal_" + name + ".dat");
+            leafPool = new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name);
+            internalPool = new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name);
             info = leafPool->readExtraMessage();
         }
         
@@ -976,7 +976,7 @@ namespace RainyMemory {
                 return recursionFindNth(rootNode.childNode[index], o, n);
             }
         }
-        
+
 //        //todo debug
 //        void updateNth(const key &o1, const data &o2, int n) {
 //            if (info.size == 0 || info.root == -1)return; //to-do: throw an exception
@@ -1006,6 +1006,13 @@ namespace RainyMemory {
 //                recursionUpdateNth(rootNode.childNode[index], o1, o2, n);
 //            }
 //        }
+        
+        //todo debug
+        bool containsKey(const key &k) {
+            vector<data> temp;
+            find(k, temp);
+            return !temp.empty();
+        }
         
         void traversal(vector<data> &result) {
             if (info.head == -1)return;
