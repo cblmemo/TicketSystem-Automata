@@ -4,10 +4,10 @@
 
 #include "Administrator.h"
 
-Administrator RhineLab;
-
 int main() {
-    
+    Administrator RhineLab;
+    RhineLab.runProgramme();
+//    RhineLab.analyzeData();
     return 0;
 }
 

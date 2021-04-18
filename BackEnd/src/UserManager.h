@@ -17,14 +17,23 @@ using RainyMemory::Parser;
 class UserManager {
 private:
     enum sizeInfo {
-        HASHMAP_CAPACITY = 127,
+        HASHMAP_CAPACITY = 178,
         MEMORYPOOL_CAPACITY = 100
     };
     
     using username_t = string_t<20>;
     using password_t = string_t<30>;
-    using name_t = string_t<10>;
+    using name_t = string_t<lengthOfChineseCharacters(5)>;
     using mailAddr_t = string_t<30>;
+    
+    struct hash_username_t {
+        int operator()(const username_t &o) const {
+            int len = o.length();
+            int h = len;
+            for (int i = 0; i < len; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
+            return h;
+        }
+    };
     
     class user_t {
     public:
@@ -34,24 +43,24 @@ private:
         mailAddr_t mailAddr;
         int privilege = 0;
         
+        user_t() = default;
+        
         user_t(const string &_u, const string &_p, const string &_n, const string &_m, int _g) :
                 username(_u), password(_p), name(_n), mailAddr(_m), privilege(_g) {}
     };
     
-    HashMap<username_t, bool> loginPool;
+    HashMap<username_t, bool, hash_username_t> loginPool;
     BPlusTree<username_t, int> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     std::ostream &defaultOut;
     
-    void outputSuccess();
+    inline void outputSuccess();
     
-    void outputFailure();
+    inline void outputFailure();
     
-    void printUser(const user_t &u);
+    inline void printUser(const user_t &u);
     
     int getPrivilege(const username_t &u);
-    
-//    bool greaterPrivilege(const username_t &u1, const username_t &u2);
     
     bool checkPassword(const username_t &u, const password_t &p);
 

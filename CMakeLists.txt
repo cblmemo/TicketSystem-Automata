@@ -8,4 +8,4 @@ add_executable(TicketSystem_Automata
         BackEnd/src/Administrator.cpp
         BackEnd/src/UserManager.cpp
         BackEnd/src/TrainManager.cpp
-        BackEnd/src/OrderManager.cpp BackEnd/src/GLobal.h)
+        BackEnd/src/OrderManager.cpp)

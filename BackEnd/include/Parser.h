@@ -15,13 +15,15 @@ namespace RainyMemory {
             RELEASETRAIN, QUERYTRAIN, DELETETRAIN, QUERYTICKET, QUERYTRANSFER,
             BUYTICKET, QUERYORDER, REFUNDTICKET, CLEAN, EXIT, NONE
         };
+    
     private:
         RainyMemory::TokenScanner ts;
         commandType type = NONE;
         string argument[26];
+        bool exist[26];
         
         void reset() {
-            for (string i:argument)i.clear();
+            for (int i = 0; i < 26; i++)exist[i] = false;
             string ty = ts.nextToken();
             if (ty == "add_user")type = ADDUSER;                     //N
             else if (ty == "login")type = LOGIN;                     //F
@@ -43,6 +45,7 @@ namespace RainyMemory {
             while (!ts.empty()) {
                 ty = ts.nextToken();
                 argument[ty[1] - 'a'] = ts.nextToken();
+                exist[ty[1] - 'a'] = true;
             }
         }
         
@@ -68,7 +71,15 @@ namespace RainyMemory {
             return type;
         }
         
-        const string &operator[](const string &arg) const {
+        bool haveThisArgument(const char *arg) const {
+            return exist[arg[1] - 'a'];
+        }
+
+//        const string &operator[](const string &arg) const {
+//            return argument[arg[1] - 'a'];
+//        }
+        
+        const string &operator[](const char *arg) const {
             return argument[arg[1] - 'a'];
         }
         

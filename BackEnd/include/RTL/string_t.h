@@ -6,6 +6,7 @@
 #define TICKETSYSTEM_AUTOMATA_STRING_T_H
 
 #include <iostream>
+#include <cstring>
 
 template<int len>
 class string_t {
@@ -33,8 +34,9 @@ public:
     }
     
     string_t &operator=(const string_t<len> &o) {
+        if (this == &o)return *this;
         strcpy(store, o.store);
-        store[strlen(o)] = '\0';
+        store[len] = '\0';
         return *this;
     }
     
@@ -42,27 +44,39 @@ public:
         return std::string(store);
     }
     
-    bool operator==(const string_t<len> &o) {
+    int length() const {
+        return strlen(store);
+    }
+    
+    char &operator[](int index) {
+        return store[index];
+    }
+    
+    const char &operator[](int index) const {
+        return store[index];
+    }
+    
+    bool operator==(const string_t<len> &o) const {
         return strcmp(store, o.store) == 0;
     }
     
-    bool operator!=(const string_t<len> &o) {
+    bool operator!=(const string_t<len> &o) const {
         return strcmp(store, o.store) != 0;
     }
     
-    bool operator<(const string_t<len> &o) {
+    bool operator<(const string_t<len> &o) const {
         return strcmp(store, o.store) < 0;
     }
     
-    bool operator>(const string_t<len> &o) {
+    bool operator>(const string_t<len> &o) const {
         return strcmp(store, o.store) > 0;
     }
     
-    bool operator<=(const string_t<len> &o) {
+    bool operator<=(const string_t<len> &o) const {
         return strcmp(store, o.store) <= 0;
     }
     
-    bool operator>=(const string_t<len> &o) {
+    bool operator>=(const string_t<len> &o) const {
         return strcmp(store, o.store) >= 0;
     }
     

@@ -89,7 +89,12 @@ namespace RainyMemory {
         int capacity = 0;
         LinkedList *buckets;
         Hash hash;
-    
+        
+        inline int calculateIndex(const Key &k) const {
+            int index = hash(k) % capacity;
+            if (index < 0)index += capacity;
+            return index;
+        }
     
     public:
         explicit HashMap(int _capacity) : capacity(_capacity) {
@@ -110,12 +115,12 @@ namespace RainyMemory {
         }
         
         bool containsKey(const Key &k) const {
-            int index = hash(k) % capacity;
+            int index = calculateIndex(k);
             return !(buckets[index].empty() || buckets[index].find(k) == nullptr);
         }
         
         Value &operator[](const Key &k) {
-            int index = hash(k) % capacity;
+            int index = calculateIndex(k);
             if (containsKey(k))return *buckets[index].find(k)->value;
             else {
                 buckets[index].insert(k, Value());
@@ -124,7 +129,8 @@ namespace RainyMemory {
         }
         
         void erase(const Key &k) {
-            buckets[hash(k) % capacity].erase(k);
+            int index = calculateIndex(k);
+            buckets[index].erase(k);
         }
     };
     

@@ -752,7 +752,7 @@ namespace RainyMemory {
             }
         }
         
-        void recursionFind(int now, const key &o, vector<data> &result) {
+        void recursionFind(int now, const key &o, vector<data> &result) const {
             internalNode nowNode = internalPool->read(now);
             if (nowNode.childNodeIsLeaf) {
                 int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
@@ -924,7 +924,7 @@ namespace RainyMemory {
             return deleted;
         }
         
-        void find(const key &o, vector<data> &result) {
+        void find(const key &o, vector<data> &result) const {
             if (info.size == 0 || info.root == -1)return;
             internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
@@ -1025,39 +1025,40 @@ namespace RainyMemory {
         }
 
 #ifdef debug
-        private:
-            void show(int offset, bool isLeaf) const {
-                std::cout << "[pos] " << offset << std::endl;
-                if (isLeaf) {
-                    leafNode tempNode = leafPool->read(offset);
-                    tempNode.show();
+    private:
+        void show(int offset, bool isLeaf) const {
+            std::cout << "[pos] " << offset << std::endl;
+            if (isLeaf) {
+                leafNode tempNode = leafPool->read(offset);
+                tempNode.show();
+            }
+            else {
+                internalNode tempNode = internalPool->read(offset);
+                tempNode.show();
+                std::cout << std::endl;
+                for (int i = 0; i <= tempNode.keyNumber; i++) {
+                    if (tempNode.childNodeIsLeaf)show(tempNode.childNode[i], true);
+                    else show(tempNode.childNode[i], false);
                 }
-                else {
-                    internalNode tempNode = internalPool->read(offset);
-                    tempNode.show();
-                    std::cout << std::endl;
-                    for (int i = 0; i <= tempNode.keyNumber; i++) {
-                        if (tempNode.childNodeIsLeaf)show(tempNode.childNode[i], true);
-                        else show(tempNode.childNode[i], false);
-                    }
-                }
-            };
+            }
+        };
+    
+    public:
+        void show() const {
+            std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
+            show(info.root, false);
+            std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
+        }
         
-        public:
-            void show() const {
-                std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
-                show(info.root, false);
-                std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
+        void showLeaves() const {
+            int cur = info.head;
+            while (cur >= 0) {
+                leafNode nowNode = leafPool->read(cur);
+                nowNode.show();
+                cur = nowNode.rightBrother;
             }
-            
-            void showLeaves() const {
-                int cur = info.head;
-                while (cur >= 0) {
-                    leafNode nowNode = leafPool->read(cur);
-                    nowNode.show();
-                    cur = nowNode.rightBrother;
-                }
-            }
+        }
+
 #endif
     };
 }
