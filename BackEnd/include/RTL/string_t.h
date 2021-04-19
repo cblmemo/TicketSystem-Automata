@@ -40,6 +40,11 @@ public:
         return *this;
     }
     
+    string_t &operator=(const std::string &o) {
+        strcpy(store, o.c_str());
+        store[o.length()] = '\0';
+    }
+    
     operator std::string() {
         return std::string(store);
     }

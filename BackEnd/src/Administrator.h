@@ -19,7 +19,10 @@ private:
     using path_t = const std::string;
     
     path_t UserIndexPath = "UserIndex.dat";
-    path_t UserStoragePath = "userStorage.dat";
+    path_t UserStoragePath = "UserStorage.dat";
+    path_t TrainIndexPath = "TrainIndex.dat";
+    path_t TrainStoragePath = "TrainStorage.dat";
+    path_t TrainStationPath = "TrainStation.dat";
     
     void initialize(std::ostream &os = std::cout);
     

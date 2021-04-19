@@ -7,7 +7,7 @@
 void Administrator::initialize(std::ostream &os) {
     Ptilopsis = new Parser;
     Saria = new UserManager(UserIndexPath, UserStoragePath, os);
-//    Silence = new TrainManager;
+    Silence = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, os);
 //    Ifrit = new OrderManager;
 }
 
@@ -27,6 +27,7 @@ Administrator::~Administrator() {
 }
 
 void Administrator::runProgramme(std::istream &is, std::ostream &os) {
+    std::ios::sync_with_stdio(false);
     initialize(os);
     string cmd;
     bool flag = true;
@@ -48,6 +49,18 @@ void Administrator::runProgramme(std::istream &is, std::ostream &os) {
                 break;
             case Parser::MODIFYPROFILE:
                 Saria->modifyProfile(*Ptilopsis);
+                break;
+            case Parser::ADDTRAIN:
+                Silence->addTrain(*Ptilopsis);
+                break;
+            case Parser::RELEASETRAIN:
+                Silence->releaseTrain(*Ptilopsis);
+                break;
+            case Parser::QUERYTRAIN:
+                Silence->queryTrain(*Ptilopsis);
+                break;
+            case Parser::DELETETRAIN:
+                Silence->deleteTrain(*Ptilopsis);
                 break;
             case Parser::CLEAN:
                 clean();
@@ -75,7 +88,7 @@ void Administrator::analyzeData(std::istream &is, std::ostream &os) {
         cnt[Ptilopsis->getType()]++;
     }
     for (int i = 0; i < 17; i++) {
-        os << "Command [" << commands[i] << "] haveThisArgument [" << cnt[i] << "] times." << endl;
+        os << "Command [" << commands[i] << "] appears [" << cnt[i] << "] times." << endl;
     }
 }
 

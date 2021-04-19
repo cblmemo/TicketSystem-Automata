@@ -35,12 +35,11 @@ private:
         }
     };
     
-    class user_t {
-    public:
-        username_t username;
-        password_t password;
-        name_t name;
-        mailAddr_t mailAddr;
+    struct user_t {
+        username_t username {};
+        password_t password {};
+        name_t name {};
+        mailAddr_t mailAddr {};
         int privilege = 0;
         
         user_t() = default;

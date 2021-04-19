@@ -22,26 +22,42 @@ namespace RainyMemory {
         string argument[26];
         bool exist[26];
         
+        const string commands[16] = {"query_profile", "query_ticket", "buy_ticket", "login", "logout",
+                                     "modify_profile", "query_order", "add_user", "add_train", "release_train",
+                                     "query_train", "delete_train", "query_transfer", "refund_ticket", "clean", "exit"};
+        
+        const commandType types[16] = {QUERYPROFILE, QUERYTICKET, BUYTICKET, LOGIN, LOGOUT,
+                                       MODIFYPROFILE, QUERYORDER, ADDUSER, ADDTRAIN, RELEASETRAIN,
+                                       QUERYTRAIN, DELETETRAIN, QUERYTRANSFER, REFUNDTICKET, CLEAN, EXIT};
+        
+        commandType getTypeFromString(const string &o) {
+//            if (ty == "add_user")type = ADDUSER;                     //N
+//            else if (ty == "login")type = LOGIN;                     //F
+//            else if (ty == "logout")type = LOGOUT;                   //F
+//            else if (ty == "query_profile")type = QUERYPROFILE;      //SF
+//            else if (ty == "modify_profile")type = MODIFYPROFILE;    //F
+//            else if (ty == "add_train")type = ADDTRAIN;              //N
+//            else if (ty == "release_train")type = RELEASETRAIN;      //N
+//            else if (ty == "query_train")type = QUERYTRAIN;          //N
+//            else if (ty == "delete_train")type = DELETETRAIN;        //N
+//            else if (ty == "query_ticket")type = QUERYTICKET;        //SF
+//            else if (ty == "query_transfer")type = QUERYTRANSFER;    //N
+//            else if (ty == "buy_ticket")type = BUYTICKET;            //SF
+//            else if (ty == "query_order")type = QUERYORDER;          //F
+//            else if (ty == "refund_ticket")type = REFUNDTICKET;      //N
+//            else if (ty == "clean")type = CLEAN;                     //R
+//            else if (ty == "exit")type = EXIT;                       //R
+//            else type = NONE;
+            for (int i = 0; i < 16; i++) {
+                if (o == commands[i])return types[i];
+            }
+            return NONE;
+        }
+        
         void reset() {
             for (int i = 0; i < 26; i++)exist[i] = false;
             string ty = ts.nextToken();
-            if (ty == "add_user")type = ADDUSER;                     //N
-            else if (ty == "login")type = LOGIN;                     //F
-            else if (ty == "logout")type = LOGOUT;                   //F
-            else if (ty == "query_profile")type = QUERYPROFILE;      //SF
-            else if (ty == "modify_profile")type = MODIFYPROFILE;    //F
-            else if (ty == "add_train")type = ADDTRAIN;              //N
-            else if (ty == "release_train")type = RELEASETRAIN;      //N
-            else if (ty == "query_train")type = QUERYTRAIN;          //N
-            else if (ty == "delete_train")type = DELETETRAIN;        //N
-            else if (ty == "query_ticket")type = QUERYTICKET;        //SF
-            else if (ty == "query_transfer")type = QUERYTRANSFER;    //N
-            else if (ty == "buy_ticket")type = BUYTICKET;            //SF
-            else if (ty == "query_order")type = QUERYORDER;          //F
-            else if (ty == "refund_ticket")type = REFUNDTICKET;      //N
-            else if (ty == "clean")type = CLEAN;                     //R
-            else if (ty == "exit")type = EXIT;                       //R
-            else type = NONE;
+            type = getTypeFromString(ty);
             while (!ts.empty()) {
                 ty = ts.nextToken();
                 argument[ty[1] - 'a'] = ts.nextToken();
@@ -74,16 +90,12 @@ namespace RainyMemory {
         bool haveThisArgument(const char *arg) const {
             return exist[arg[1] - 'a'];
         }
-
-//        const string &operator[](const string &arg) const {
-//            return argument[arg[1] - 'a'];
-//        }
         
         const string &operator[](const char *arg) const {
             return argument[arg[1] - 'a'];
         }
         
-        int operator()(const string &arg) const {
+        int operator()(const char *arg) const {
             return to_int(argument[arg[1] - 'a']);
         }
     };

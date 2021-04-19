@@ -16,7 +16,7 @@ namespace RainyMemory {
         char Delim = ' ';
         int pos = 0;
         
-        static int toInt(const string &o) {
+        static int to_int(const string &o) {
             int res = 0;
             for (char i:o)res = (res << 3) + (res << 1) + i - '0';
             return res;
@@ -38,6 +38,10 @@ namespace RainyMemory {
                 return Buffer.substr(_pos, next - _pos);
             }
             else return "";
+        }
+        
+        int nextIntToken() {
+            return to_int(nextToken());
         }
         
         bool empty() const {
@@ -71,7 +75,7 @@ namespace RainyMemory {
         
         TokenScanner &operator>>(int &o) {
             string s = nextToken();
-            o = toInt(s);
+            o = to_int(s);
             return *this;
         }
     };

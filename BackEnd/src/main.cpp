@@ -7,7 +7,6 @@
 int main() {
     Administrator RhineLab;
     RhineLab.runProgramme();
-//    RhineLab.analyzeData();
     return 0;
 }
 
