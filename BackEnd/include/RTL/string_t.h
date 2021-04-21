@@ -43,6 +43,7 @@ public:
     string_t &operator=(const std::string &o) {
         strcpy(store, o.c_str());
         store[o.length()] = '\0';
+        return *this;
     }
     
     operator std::string() {

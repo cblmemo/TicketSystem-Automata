@@ -13,7 +13,7 @@ void Administrator::initialize(std::ostream &os) {
 
 void Administrator::clean() {
     Saria->clear();
-//    Silence->clear();
+    Silence->clear();
 //    Ifrit->clear();
 }
 
