@@ -6,15 +6,15 @@
 
 void Administrator::initialize(std::ostream &os) {
     Ptilopsis = new Parser;
-    Saria = new UserManager(UserIndexPath, UserStoragePath, os);
-    Silence = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, os);
-//    Ifrit = new OrderManager;
+    Saria     = new UserManager(UserIndexPath, UserStoragePath, os);
+    Silence   = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, os);
+    Ifrit     = new OrderManager(Saria, Silence, OrderIndexPath, OrderStoragePath, OrderPendingPath, os);
 }
 
 void Administrator::clean() {
-    Saria->clear();
-    Silence->clear();
-//    Ifrit->clear();
+    Saria   -> clear();
+    Silence -> clear();
+    Ifrit   -> clear();
 }
 
 Administrator::Administrator() = default;
@@ -27,48 +27,67 @@ Administrator::~Administrator() {
 }
 
 void Administrator::runProgramme(std::istream &is, std::ostream &os) {
+#ifdef speedup
     std::ios::sync_with_stdio(false);
+#endif
     initialize(os);
     string cmd;
     bool flag = true;
     while (flag && getline(is, cmd)) {
-//        os << "# " << cmd << endl;
         Ptilopsis->resetBuffer(cmd);
         switch (Ptilopsis->getType()) {
             case Parser::ADDUSER:
-                Saria->addUser(*Ptilopsis);
+                Saria   -> addUser(*Ptilopsis);
                 break;
             case Parser::LOGIN:
-                Saria->login(*Ptilopsis);
+                Saria   -> login(*Ptilopsis);
                 break;
             case Parser::LOGOUT:
-                Saria->logout(*Ptilopsis);
+                Saria   -> logout(*Ptilopsis);
                 break;
             case Parser::QUERYPROFILE:
-                Saria->queryProfile(*Ptilopsis);
+                Saria   -> queryProfile(*Ptilopsis);
                 break;
             case Parser::MODIFYPROFILE:
-                Saria->modifyProfile(*Ptilopsis);
+                Saria   -> modifyProfile(*Ptilopsis);
                 break;
             case Parser::ADDTRAIN:
-                Silence->addTrain(*Ptilopsis);
+                Silence -> addTrain(*Ptilopsis);
                 break;
             case Parser::RELEASETRAIN:
-                Silence->releaseTrain(*Ptilopsis);
+                Silence -> releaseTrain(*Ptilopsis);
                 break;
             case Parser::QUERYTRAIN:
-                Silence->queryTrain(*Ptilopsis);
+                Silence -> queryTrain(*Ptilopsis);
                 break;
             case Parser::DELETETRAIN:
-                Silence->deleteTrain(*Ptilopsis);
+                Silence -> deleteTrain(*Ptilopsis);
+                break;
+            case Parser::QUERYTICKET:
+                Silence -> queryTicket(*Ptilopsis);
+                break;
+            case Parser::QUERYTRANSFER:
+                Silence -> queryTransfer(*Ptilopsis);
+                break;
+            case Parser::BUYTICKET:
+                Ifrit   -> buyTicket(*Ptilopsis);
+                break;
+            case Parser::QUERYORDER:
+                Ifrit   -> queryOrder(*Ptilopsis);
+                break;
+            case Parser::REFUNDTICKET:
+                Ifrit   -> refundTicket(*Ptilopsis);
                 break;
             case Parser::CLEAN:
                 clean();
                 os << "0" << endl;
                 break;
-            default:
+            case Parser::EXIT://exit
                 flag = false;
                 os << "bye" << endl;
+                break;
+            default:
+                os << "[Error]Invalid command." << endl;
                 break;
         }
     }

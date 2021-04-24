@@ -92,10 +92,12 @@ namespace RainyMemory {
         }
         
         const string &operator[](const char *arg) const {
+            if (!exist[arg[1] - 'a'])return argument[25];
             return argument[arg[1] - 'a'];
         }
         
         int operator()(const char *arg) const {
+            if (!exist[arg[1] - 'a'])return -1;
             return to_int(argument[arg[1] - 'a']);
         }
     };

@@ -19,9 +19,6 @@ inline void UserManager::printUser(const UserManager::user_t &u) {
 int UserManager::getPrivilege(const UserManager::username_t &u) {
     vector<int> temp;
     indexPool.find(u, temp);
-#ifdef debug
-    if (temp.empty())throw inexistUser();
-#endif
     user_t tempUser = storagePool.read(temp[0]);
     return tempUser.privilege;
 }
@@ -46,16 +43,15 @@ void UserManager::addUser(const Parser &p) {
         user_t newUser(p["-u"], p["-p"], p["-n"], p["-m"], 10);
         int index = storagePool.write(newUser);
         indexPool.insert(newUser.username, index);
-        outputSuccess();
-        return;
+        return outputSuccess();
     }
     if (isLogin(p["-c"]) && !indexPool.containsKey(p["-u"]) && getPrivilege(p["-c"]) > p("-g")) {
         user_t newUser(p["-u"], p["-p"], p["-n"], p["-m"], p("-g"));
         int index = storagePool.write(newUser);
         indexPool.insert(newUser.username, index);
-        outputSuccess();
+        return outputSuccess();
     }
-    else outputFailure();
+    outputFailure();
 }
 
 void UserManager::login(const Parser &p) {
@@ -73,21 +69,17 @@ void UserManager::queryProfile(const Parser &p) {
         if (p["-c"] == p["-u"]) {
             vector<int> temp;
             indexPool.find(p["-u"], temp);
-            user_t queryUser(storagePool.read(temp[0]));
-            printUser(queryUser);
+            user_t qUser(storagePool.read(temp[0]));
+            return printUser(qUser);
         }
-        else {
-            vector<int> temp1, temp2;
-            indexPool.find(p["-c"], temp1), indexPool.find(p["-u"], temp2);
-            if (temp1.size() == 1 && temp2.size() == 1) {
-                user_t nowUser(storagePool.read(temp1[0])), queryUser(storagePool.read(temp2[0]));
-                if (nowUser.privilege > queryUser.privilege)printUser(queryUser);
-                else outputFailure();
-            }
-            else outputFailure();
+        vector<int> temp1, temp2;
+        indexPool.find(p["-c"], temp1), indexPool.find(p["-u"], temp2);
+        if (temp1.size() == 1 && temp2.size() == 1) {
+            user_t cUser(storagePool.read(temp1[0])), qUser(storagePool.read(temp2[0]));
+            if (cUser.privilege > qUser.privilege)return printUser(qUser);
         }
     }
-    else outputFailure();
+    outputFailure();
 }
 
 void UserManager::modifyProfile(const Parser &p) {
@@ -95,33 +87,29 @@ void UserManager::modifyProfile(const Parser &p) {
         if (p["-c"] == p["-u"]) {
             vector<int> temp;
             indexPool.find(p["-u"], temp);
-            user_t modifyUser(storagePool.read(temp[0]));
-            if (p.haveThisArgument("-p"))modifyUser.password = p["-p"];
-            if (p.haveThisArgument("-n"))modifyUser.name = p["-n"];
-            if (p.haveThisArgument("-m"))modifyUser.mailAddr = p["-m"];
-            if (p.haveThisArgument("-g") && p("-g") < modifyUser.privilege)modifyUser.privilege = p("-g");
-            storagePool.update(modifyUser, temp[0]);
-            printUser(modifyUser);
+            user_t mUser(storagePool.read(temp[0]));
+            if (p.haveThisArgument("-p"))mUser.password = p["-p"];
+            if (p.haveThisArgument("-n"))mUser.name = p["-n"];
+            if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
+            if (p.haveThisArgument("-g") && p("-g") < mUser.privilege)mUser.privilege = p("-g");
+            storagePool.update(mUser, temp[0]);
+            return printUser(mUser);
         }
-        else {
-            vector<int> temp1, temp2;
-            indexPool.find(p["-c"], temp1), indexPool.find(p["-u"], temp2);
-            if (temp1.size() == 1 && temp2.size() == 1) {
-                user_t nowUser(storagePool.read(temp1[0])), modifyUser(storagePool.read(temp2[0]));
-                if (nowUser.privilege > modifyUser.privilege) {
-                    if (p.haveThisArgument("-p"))modifyUser.password = p["-p"];
-                    if (p.haveThisArgument("-n"))modifyUser.name = p["-n"];
-                    if (p.haveThisArgument("-m"))modifyUser.mailAddr = p["-m"];
-                    if (p.haveThisArgument("-g") && p("-g") < nowUser.privilege)modifyUser.privilege = p("-g");
-                    storagePool.update(modifyUser, temp2[0]);
-                    printUser(modifyUser);
-                }
-                else outputFailure();
+        vector<int> temp1, temp2;
+        indexPool.find(p["-c"], temp1), indexPool.find(p["-u"], temp2);
+        if (temp1.size() == 1 && temp2.size() == 1) {
+            user_t cUser(storagePool.read(temp1[0])), mUser(storagePool.read(temp2[0]));
+            if (cUser.privilege > mUser.privilege) {
+                if (p.haveThisArgument("-p"))mUser.password = p["-p"];
+                if (p.haveThisArgument("-n"))mUser.name = p["-n"];
+                if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
+                if (p.haveThisArgument("-g") && p("-g") < cUser.privilege)mUser.privilege = p("-g");
+                storagePool.update(mUser, temp2[0]);
+                return printUser(mUser);
             }
-            else outputFailure();
         }
     }
-    else outputFailure();
+    outputFailure();
 }
 
 void UserManager::clear() {

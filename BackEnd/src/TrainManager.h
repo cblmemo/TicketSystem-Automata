@@ -6,10 +6,6 @@
 #define TICKETSYSTEM_AUTOMATA_TRAINMANAGER_H
 
 #include "GLobal.h"
-#include "../include/BPlusTree.h"
-#include "../include/RTL/string_t.h"
-#include "../include/Parser.h"
-#include "../include/RTL/Clock.h"
 
 using RainyMemory::BPlusTree;
 using RainyMemory::TokenScanner;
@@ -67,7 +63,13 @@ private:
             return *this;
         }
         
+        int operator-(const station_time_t &o) const {
+            //assume this is later than o, return distance in minute
+            return dateDistance(o) * 24 * 60 + (hour - o.hour) * 60 + minute - o.minute;
+        }
+        
         int dateDistance(const station_time_t &o) const {
+            //assume this is later than o
             int ret = day - o.day;
             switch (month - o.month) {
                 case 2:
@@ -80,10 +82,52 @@ private:
             return ret;
         }
         
-        void updateDate(int da) {
+        station_time_t &updateDate(int da) {
             day += da;
             if (month == 6 && day > 30)day -= 30, month++;
             if (day > 31)day -= 31, month++;
+            return *this;
+        }
+        
+        bool operator<(const station_time_t &o) const {
+            if (month < o.month)return true;
+            else if (month > o.month)return false;
+            if (day < o.day)return true;
+            else if (day > o.day)return false;
+            if (hour < o.hour)return true;
+            else if (hour > o.hour)return false;
+            if (minute < o.minute)return true;
+            else return false;
+        }
+        
+        bool lessOrEqualDate(const station_time_t &o) const {
+            if (month < o.month)return true;
+            else if (month > o.month)return false;
+            if (day <= o.day)return true;
+            else return false;
+        }
+    };
+    
+    struct ticket_t {
+        trainID_t trainID {};
+        station_t from {};
+        station_t to {};
+        station_time_t departureTime {};
+        station_time_t arrivalTime {};
+        int time = 0;
+        int price = 0;
+        int seat = 0;
+        
+        ticket_t() = default;
+        
+        ticket_t(const trainID_t &i, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int s) :
+                trainID(i), from(f), to(t), departureTime(d), arrivalTime(a), price(p), seat(s) {
+            time = arrivalTime - departureTime;
+        }
+        
+        friend std::ostream &operator<<(std::ostream &os, const ticket_t &t) {
+            os << t.trainID << " " << t.from << " " << t.departureTime << " -> " << t.to << " " << t.arrivalTime << " " << t.price << " " << t.seat;
+            return os;
         }
     };
     
@@ -99,11 +143,12 @@ private:
         int travelTimes[100] = {0};
         int stopoverTimes[100] = {0};
         //the following variable include startTime
-        station_time_t startTime {};
-        station_time_t endTime {};
+        station_time_t startTime {};//salesDate.first + startTime(in README.md)
+        station_time_t endTime {};//salesDate.second + startTime(in README.md)
         char type = '0';
         bool released = false;
-        int remainSeats[70][100] = {0};
+        int remainSeats[100][100] = {0};//[date distance with startTime][k'th station]
+        int dateGap = 0;//endTime - startTime
         
         train_t() = default;
         
@@ -135,6 +180,10 @@ public:
     void queryTrain(const Parser &p);
     
     void deleteTrain(const Parser &p);
+    
+    void queryTicket(const Parser &p);
+    
+    void queryTransfer(const Parser &p);
     
     void clear();
 };

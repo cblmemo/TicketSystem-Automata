@@ -6,9 +6,6 @@
 #define TICKETSYSTEM_AUTOMATA_USERMANAGER_H
 
 #include "GLobal.h"
-#include "../include/BPlusTree.h"
-#include "../include/RTL/string_t.h"
-#include "../include/Parser.h"
 
 using RainyMemory::HashMap;
 using RainyMemory::BPlusTree;
@@ -16,6 +13,8 @@ using RainyMemory::Parser;
 
 class UserManager {
 private:
+    friend class OrderManager;
+    
     enum sizeInfo {
         HASHMAP_CAPACITY = 178,
         MEMORYPOOL_CAPACITY = 100
