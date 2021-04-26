@@ -72,8 +72,8 @@ void TrainManager::addTrain(const Parser &p) {
     for (auto &remainSeat : newTrain.remainSeats)
         for (int &j : remainSeat)
             j = newTrain.seatNum;
-    int index = storagePool.write(newTrain);
-    indexPool.insert(newTrain.trainID, index);
+    int offset = storagePool.write(newTrain);
+    indexPool.insert(newTrain.trainID, offset);
     outputSuccess();
 }
 
@@ -176,11 +176,13 @@ void TrainManager::queryTransfer(const Parser &p) {
                                 int eDist = sTrain.arrivalTimes[k].dateDistance(eTrain.departureTimes[l]);
                                 ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], eTrain.departureTimes[l].updateDate(eDist),
                                                  eTrain.arrivalTimes[j.second].updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
-                                int tempSeat = 20000000, tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time;
+                                int tempSeat = 2000000, tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time;
                                 for (int si = i.second; si <= k; si++)tempSeat = min(tempSeat, sTrain.remainSeats[sDist][si]);
                                 for (int si = l; si <= j.second; si++)tempSeat = min(tempSeat, eTrain.remainSeats[eDist][si]);
                                 tempSt.seat = tempEn.seat = tempSeat;
-                                if (hasResult && ((sortByTime && tempTime < nowTime) || (!sortByTime && tempPrice < nowPrice)))st = tempSt, en = tempEn;
+                                bool timeJudge = tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time;
+                                bool priceJudge = tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price;
+                                if (hasResult && ((sortByTime && timeJudge) || (!sortByTime && priceJudge)))st = tempSt, en = tempEn;
                                 else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
                             }
                         }

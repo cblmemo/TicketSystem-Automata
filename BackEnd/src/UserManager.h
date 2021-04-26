@@ -63,7 +63,7 @@ private:
     bool checkPassword(const username_t &u, const password_t &p);
 
 public:
-    UserManager(const string &indexPath, const string &storagePath, std::ostream &dft = std::cout) :
+    UserManager(const string &indexPath, const string &storagePath, std::ostream &dft) :
             loginPool(HASHMAP_CAPACITY), indexPool(indexPath), storagePool(storagePath, true, MEMORYPOOL_CAPACITY), defaultOut(dft) {}
     
     bool isLogin(const username_t &u);

@@ -196,7 +196,7 @@ private:
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft = std::cout) :
+    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft) :
             indexPool(indexPath), storagePool(storagePath, 0, MEMORYPOOL_CAPACITY), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);

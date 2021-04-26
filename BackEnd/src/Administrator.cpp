@@ -82,7 +82,7 @@ void Administrator::runProgramme(std::istream &is, std::ostream &os) {
                 clean();
                 os << "0" << endl;
                 break;
-            case Parser::EXIT://exit
+            case Parser::EXIT:
                 flag = false;
                 os << "bye" << endl;
                 break;

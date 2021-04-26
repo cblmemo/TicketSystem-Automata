@@ -41,14 +41,14 @@ void UserManager::addUser(const Parser &p) {
     if (storagePool.readExtraMessage()) {
         storagePool.updateExtraMessage(false);
         user_t newUser(p["-u"], p["-p"], p["-n"], p["-m"], 10);
-        int index = storagePool.write(newUser);
-        indexPool.insert(newUser.username, index);
+        int offset = storagePool.write(newUser);
+        indexPool.insert(newUser.username, offset);
         return outputSuccess();
     }
     if (isLogin(p["-c"]) && !indexPool.containsKey(p["-u"]) && getPrivilege(p["-c"]) > p("-g")) {
         user_t newUser(p["-u"], p["-p"], p["-n"], p["-m"], p("-g"));
-        int index = storagePool.write(newUser);
-        indexPool.insert(newUser.username, index);
+        int offset = storagePool.write(newUser);
+        indexPool.insert(newUser.username, offset);
         return outputSuccess();
     }
     outputFailure();
