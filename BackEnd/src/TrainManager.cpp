@@ -114,8 +114,8 @@ void TrainManager::queryTicket(const Parser &p) {
     vector<ticket_t> result;
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
-    for (const auto &i:sTrains) {
-        for (const auto &j:eTrains) {
+    for (const std::pair<trainID_t, int> &i:sTrains) {
+        for (const std::pair<trainID_t, int> &j:eTrains) {
             if (i.first == j.first && i.second < j.second) {
                 vector<int> temp;
                 indexPool.find(i.first, temp);
@@ -144,7 +144,7 @@ void TrainManager::queryTicket(const Parser &p) {
             else return o1.trainID < o2.trainID;
         });
     defaultOut << result.size() << endl;
-    for (const auto &i:result)defaultOut << i << endl;
+    for (const ticket_t &i:result)defaultOut << i << endl;
 }
 
 void TrainManager::queryTransfer(const Parser &p) {
@@ -155,8 +155,8 @@ void TrainManager::queryTransfer(const Parser &p) {
     int nowTime, nowPrice;
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
-    for (const auto &i:sTrains) {
-        for (const auto &j:eTrains) {
+    for (const std::pair<trainID_t, int> &i:sTrains) {
+        for (const std::pair<trainID_t, int> &j:eTrains) {
             if (i.first != j.first) {
                 vector<int> temp1, temp2;
                 indexPool.find(i.first, temp1), indexPool.find(j.first, temp2);

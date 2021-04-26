@@ -14,8 +14,8 @@ namespace RainyMemory {
     class vector {
     private:
         T **store = nullptr;
-        size_t tail;
-        size_t length;
+        int tail;
+        int length;
         
         void double_space() {
             length *= 2;
@@ -225,6 +225,10 @@ namespace RainyMemory {
             store = new T *[length];
         }
         
+        vector(int capacity) : length(capacity), tail(0) {
+            store = new T *[length];
+        }
+        
         vector(const vector &other) : length(other.length), tail(other.tail) {
             store = new T *[length];
             for (int i = 0; i < tail; i++)store[i] = new T(*(other.store[i]));
@@ -297,7 +301,7 @@ namespace RainyMemory {
             else return false;
         }
         
-        size_t size() const {
+        int size() const {
             return tail;
         }
         

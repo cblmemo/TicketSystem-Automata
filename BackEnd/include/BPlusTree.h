@@ -777,7 +777,7 @@ namespace RainyMemory {
             }
         }
         
-        data recursionFindNth(int now, const key &o, int n) {
+        std::pair<data, bool> recursionFindNth(int now, const key &o, int n) {
             internalNode nowNode = internalPool->read(now);
             if (nowNode.childNodeIsLeaf) {
                 int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
@@ -791,44 +791,17 @@ namespace RainyMemory {
                             flag = false;
                             break;
                         }
-                        if (--n == 0)return targetNode.leafData[i];
+                        if (--n == 0)return std::pair<data, bool> {targetNode.leafData[i], true};
                     }
                     cur = targetNode.leftBrother;
                 }
+                return std::pair<data, bool> {data(), false};
             }
             else {
                 int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o) - nowNode.nodeKey;
                 return recursionFindNth(nowNode.childNode[index], o, n);
             }
         }
-
-//        void recursionUpdateNth(int now, const key &o1, const data &o2, int n) {
-//            internalNode nowNode = internalPool->read(now);
-//            if (nowNode.childNodeIsLeaf) {
-//                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
-//                int cur = nowNode.childNode[index];
-//                bool flag = true;
-//                while (cur >= 0 && flag) {
-//                    leafNode targetNode = leafPool->read(cur);
-//                    int pos = upper_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o1) - targetNode.leafKey;
-//                    for (int i = pos - 1; i >= 0; i--) {
-//                        if (o1 > targetNode.leafKey[i]) {
-//                            flag = false;
-//                            break;
-//                        }
-//                        if (--n == 0) {
-//                            targetNode.leafData[i] = o2;
-//                            return;
-//                        }
-//                    }
-//                    cur = targetNode.leftBrother;
-//                }
-//            }
-//            else {
-//                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
-//                recursionUpdateNth(nowNode.childNode[index], o1, o2, n);
-//            }
-//        }
     
     public:
         explicit BPlusTree(const string &name) {
@@ -951,8 +924,8 @@ namespace RainyMemory {
         }
         
         //todo debug
-        data findNth(const key &o, int n) {
-            if (info.size == 0 || info.root == -1)return data(0); //to-do: throw an exception
+        std::pair<data, bool> findNth(const key &o, int n) {
+            if (info.size == 0 || info.root == -1)return std::pair<data, bool> {data(), false};
             internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
@@ -966,46 +939,17 @@ namespace RainyMemory {
                             flag = false;
                             break;
                         }
-                        if (--n == 0)return targetNode.leafData[i];
+                        if (--n == 0)return std::pair<data, bool> {targetNode.leafData[i], true};
                     }
                     cur = targetNode.leftBrother;
                 }
+                return std::pair<data, bool> {data(), false};
             }
             else {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 return recursionFindNth(rootNode.childNode[index], o, n);
             }
         }
-
-//        //todo debug
-//        void updateNth(const key &o1, const data &o2, int n) {
-//            if (info.size == 0 || info.root == -1)return; //to-do: throw an exception
-//            internalNode rootNode = internalPool->read(info.root);
-//            if (rootNode.childNodeIsLeaf) {
-//                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
-//                int cur = rootNode.childNode[index];
-//                bool flag = true;
-//                while (cur >= 0 && flag) {
-//                    leafNode targetNode = leafPool->read(cur);
-//                    int pos = upper_bound(targetNode.leafKey, targetNode.leafKey + targetNode.dataNumber, o1) - targetNode.leafKey;
-//                    for (int i = pos - 1; i >= 0; i--) {
-//                        if (o1 > targetNode.leafKey[i]) {
-//                            flag = false;
-//                            break;
-//                        }
-//                        if (--n == 0) {
-//                            targetNode.leafData[i] = o2;
-//                            return;
-//                        }
-//                    }
-//                    cur = targetNode.leftBrother;
-//                }
-//            }
-//            else {
-//                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
-//                recursionUpdateNth(rootNode.childNode[index], o1, o2, n);
-//            }
-//        }
         
         //todo debug
         bool containsKey(const key &k) {
@@ -1025,39 +969,39 @@ namespace RainyMemory {
         }
 
 #ifdef debug
-    private:
-        void show(int offset, bool isLeaf) const {
-            std::cout << "[pos] " << offset << std::endl;
-            if (isLeaf) {
-                leafNode tempNode = leafPool->read(offset);
-                tempNode.show();
+        private:
+            void show(int offset, bool isLeaf) const {
+                std::cout << "[pos] " << offset << std::endl;
+                if (isLeaf) {
+                    leafNode tempNode = leafPool->read(offset);
+                    tempNode.show();
+                }
+                else {
+                    internalNode tempNode = internalPool->read(offset);
+                    tempNode.show();
+                    std::cout << std::endl;
+                    for (int i = 0; i <= tempNode.keyNumber; i++) {
+                        if (tempNode.childNodeIsLeaf)show(tempNode.childNode[i], true);
+                        else show(tempNode.childNode[i], false);
+                    }
+                }
+            };
+        
+        public:
+            void show() const {
+                std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
+                show(info.root, false);
+                std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
             }
-            else {
-                internalNode tempNode = internalPool->read(offset);
-                tempNode.show();
-                std::cout << std::endl;
-                for (int i = 0; i <= tempNode.keyNumber; i++) {
-                    if (tempNode.childNodeIsLeaf)show(tempNode.childNode[i], true);
-                    else show(tempNode.childNode[i], false);
+            
+            void showLeaves() const {
+                int cur = info.head;
+                while (cur >= 0) {
+                    leafNode nowNode = leafPool->read(cur);
+                    nowNode.show();
+                    cur = nowNode.rightBrother;
                 }
             }
-        };
-    
-    public:
-        void show() const {
-            std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
-            show(info.root, false);
-            std::cout << "[show]--------------------------------------------------------------------------------" << std::endl;
-        }
-        
-        void showLeaves() const {
-            int cur = info.head;
-            while (cur >= 0) {
-                leafNode nowNode = leafPool->read(cur);
-                nowNode.show();
-                cur = nowNode.rightBrother;
-            }
-        }
 
 #endif
     };
