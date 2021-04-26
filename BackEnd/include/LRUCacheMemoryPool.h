@@ -101,13 +101,15 @@ namespace RainyMemory {
                 return listSize == capacity;
             }
         };
+        
+        using node_t = typename DoublyLinkedList::Node;
     
     private:
         int writePoint;
         const string filename;
         fstream fin, fout;
         
-        HashMap<int, typename DoublyLinkedList::Node *> hashmap;
+        HashMap<int, node_t *> hashmap;
         DoublyLinkedList cache;
         
         bool existInCache(int key) {
@@ -115,7 +117,7 @@ namespace RainyMemory {
         }
         
         void discardLRU() {
-            typename DoublyLinkedList::Node *target = cache.pop_back();
+            node_t *target = cache.pop_back();
             hashmap.erase(target->key);
             if (target->dirtyBit)updateInFile(target->key, *target->value);
             delete target;
@@ -132,7 +134,7 @@ namespace RainyMemory {
                 *hashmap[key]->value = o;
                 return;
             }
-            auto newNode = new typename DoublyLinkedList::Node(key, o);
+            auto newNode = new node_t(key, o);
             if (cache.full())discardLRU();
             cache.push_front(newNode);
             hashmap[key] = newNode;
@@ -211,7 +213,7 @@ namespace RainyMemory {
         }
         
         ~LRUCacheMemoryPool() {
-            typename DoublyLinkedList::Node *now = cache.head->next;
+            node_t *now = cache.head->next;
             while (now != cache.tail) {
                 if (now->dirtyBit)updateInFile(now->key, *now->value);
                 now = now->next;

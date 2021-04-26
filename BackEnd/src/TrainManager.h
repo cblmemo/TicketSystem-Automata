@@ -10,6 +10,7 @@
 using RainyMemory::BPlusTree;
 using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
+using RainyMemory::sortVector;
 
 class TrainManager {
 private:
@@ -100,6 +101,29 @@ private:
             else return false;
         }
         
+        bool operator==(const station_time_t &o) const {
+            return month == o.month && day == o.day && hour == o.hour && minute == o.minute;
+        }
+        
+        bool operator!=(const station_time_t &o) const {
+            return !(*this == o);
+        }
+        
+        bool operator>(const station_time_t &o) const {
+            if (*this == o)return false;
+            return !(*this < o);
+        }
+        
+        bool operator<=(const station_time_t &o) const {
+            if (*this == o)return true;
+            return *this < o;
+        }
+        
+        bool operator>=(const station_time_t &o) const {
+            if (*this == o)return true;
+            return !(*this < o);
+        }
+        
         bool lessOrEqualDate(const station_time_t &o) const {
             if (month < o.month)return true;
             else if (month > o.month)return false;
@@ -120,7 +144,7 @@ private:
         
         ticket_t() = default;
         
-        ticket_t(const trainID_t &i, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int s) :
+        ticket_t(const trainID_t &i, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int s = 0) :
                 trainID(i), from(f), to(t), departureTime(d), arrivalTime(a), price(p), seat(s) {
             time = arrivalTime - departureTime;
         }
@@ -168,6 +192,8 @@ private:
     inline void outputFailure();
     
     inline void printTrain(const train_t &t, int date);
+    
+    static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
     TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft = std::cout) :

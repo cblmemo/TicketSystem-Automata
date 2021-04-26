@@ -12,9 +12,9 @@
 class Administrator {
 private:
     Parser       *Ptilopsis = nullptr;
-    UserManager  *Saria = nullptr;
-    TrainManager *Silence = nullptr;
-    OrderManager *Ifrit = nullptr;
+    UserManager  *Saria     = nullptr;
+    TrainManager *Silence   = nullptr;
+    OrderManager *Ifrit     = nullptr;
     
     using path_t = const std::string;
     

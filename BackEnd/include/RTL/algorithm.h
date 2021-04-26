@@ -199,11 +199,26 @@ namespace RainyMemory {
                 intro_sort(vec, mid + 1, high, compare, depth_limitation - 1);
             }
         }
+        
+        template<class iter>
+        void iter_swap(iter a, iter b) {
+            using std::swap;
+            swap(*a, *b);
+        }
     }
     
     template<class T>
     void sortVector(RainyMemory::vector<T> &vec, bool (*compare)(const T &, const T &) = [](const T &o1, const T &o2) -> bool { return o1 < o2; }) {
         inner_vector::intro_sort(vec, 0, vec.size() - 1, compare, inner_vector::_lg(vec.size() - 1) * 2);
+    }
+    
+    //todo debug
+    template<class T>
+    void reverseVector(RainyMemory::vector<T> &vec) {
+        typename RainyMemory::vector<T>::iterator first {vec.begin()}, last {vec.end()};
+        while ((first != last) && (first != --last)) {
+            inner_vector::iter_swap(first++, last);
+        }
     }
     
     template<class ptr, class T>

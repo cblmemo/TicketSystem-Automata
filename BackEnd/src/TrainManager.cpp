@@ -125,26 +125,34 @@ void TrainManager::queryTicket(const Parser &p) {
                     int dist = departureDate.dateDistance(targetTrain.departureTimes[i.second]);
                     ticket_t ticket {targetTrain.trainID, targetTrain.stations[i.second], targetTrain.stations[j.second],
                                      targetTrain.departureTimes[i.second].updateDate(dist), targetTrain.arrivalTimes[j.second].updateDate(dist),
-                                     targetTrain.prices[j.second] - targetTrain.prices[i.second], targetTrain.remainSeats[dist][i.second]};
-                    for (int k = i.second; k <= j.second; k++)
-                        if (targetTrain.remainSeats[dist][k] < ticket.seat)ticket.seat = targetTrain.remainSeats[dist][k];
+                                     targetTrain.prices[j.second] - targetTrain.prices[i.second], 20000000};
+                    for (int k = i.second; k <= j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
                     result.push_back(ticket);
                 }
             }
         }
     }
     if (result.empty())return outputFailure();
-    if (sortByTime)RainyMemory::sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.time < o2.time; });
-    else RainyMemory::sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.price < o2.price; });
+    if (sortByTime)
+        sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool {
+            if (o1.time != o2.time)return o1.time < o2.time;
+            else return o1.trainID < o2.trainID;
+        });
+    else
+        sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool {
+            if (o1.price != o2.price)return o1.price < o2.price;
+            else return o1.trainID < o2.trainID;
+        });
     defaultOut << result.size() << endl;
     for (const auto &i:result)defaultOut << i << endl;
 }
 
 void TrainManager::queryTransfer(const Parser &p) {
-    bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
-    station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
+    bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
+    station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     vector<std::pair<trainID_t, int>> sTrains, eTrains;
-    vector<ticket_t> result;
+    ticket_t st {}, en {};
+    int nowTime, nowPrice;
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
     for (const auto &i:sTrains) {
@@ -153,10 +161,36 @@ void TrainManager::queryTransfer(const Parser &p) {
                 vector<int> temp1, temp2;
                 indexPool.find(i.first, temp1), indexPool.find(j.first, temp2);
                 train_t sTrain {storagePool.read(temp1[0])}, eTrain {storagePool.read(temp2[0])};
-                
+                for (int k = i.second; k < sTrain.stationNum; k++) {
+                    for (int l = 0; l < j.second; l++) {
+                        if (sTrain.stations[k] == eTrain.stations[l]) {
+                            bool judge1 = departureDate <= sTrain.departureTimes[i.second];//can boarding on sTrain
+                            int dist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
+                            station_time_t dTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
+                            dTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
+                            bool judge2 = dTime <= lastTime;
+                            if (judge1 && judge2) {
+                                int sDist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
+                                ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], sTrain.departureTimes[i.second].updateDate(sDist),
+                                                 sTrain.arrivalTimes[k].updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second]};
+                                int eDist = sTrain.arrivalTimes[k].dateDistance(eTrain.departureTimes[l]);
+                                ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], eTrain.departureTimes[l].updateDate(eDist),
+                                                 eTrain.arrivalTimes[j.second].updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
+                                int tempSeat = 20000000, tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time;
+                                for (int si = i.second; si <= k; si++)tempSeat = min(tempSeat, sTrain.remainSeats[sDist][si]);
+                                for (int si = l; si <= j.second; si++)tempSeat = min(tempSeat, eTrain.remainSeats[eDist][si]);
+                                tempSt.seat = tempEn.seat = tempSeat;
+                                if (hasResult && ((sortByTime && tempTime < nowTime) || (!sortByTime && tempPrice < nowPrice)))st = tempSt, en = tempEn;
+                                else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+    if (hasResult)defaultOut << st << endl << en << endl;
+    else defaultOut << "0" << endl;
 }
 
 void TrainManager::clear() {

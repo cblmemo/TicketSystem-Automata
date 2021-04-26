@@ -8,6 +8,8 @@
 #include "UserManager.h"
 #include "TrainManager.h"
 
+using RainyMemory::reverseVector;
+
 class OrderManager {
 private:
     enum sizeInfo {
