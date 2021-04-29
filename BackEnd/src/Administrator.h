@@ -36,7 +36,7 @@ public:
     
     ~Administrator();
     
-    void runProgramme(std::istream &is = std::cin, std::ostream &os = std::cout);
+    void runProgramme(std::istream &is, std::ostream &os);
 
 #ifdef debug
     

@@ -8,8 +8,6 @@
 #include "UserManager.h"
 #include "TrainManager.h"
 
-using RainyMemory::reverseVector;
-
 class OrderManager {
 private:
     enum sizeInfo {
@@ -50,13 +48,15 @@ private:
     TrainManager *trainManager;
     BPlusTree<username_t, int> indexPool;
     LRUCacheMemoryPool<order_t> storagePool;
-    BPlusTree<trainID_t, int> pendingList;//int is the pending order's offset
+    BPlusTree<trainID_t, int> pendingList;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     std::ostream &defaultOut;
     
     inline void outputSuccess(int message = 0);
     
     inline void outputFailure();
+    
+    inline void outputQueue();
     
     inline void printOrder(const order_t &o);
     

@@ -34,6 +34,7 @@ void Administrator::runProgramme(std::istream &is, std::ostream &os) {
     string cmd;
     bool flag = true;
     while (flag && getline(is, cmd)) {
+//        os << "# " << cmd << endl;
         Ptilopsis->resetBuffer(cmd);
         switch (Ptilopsis->getType()) {
             case Parser::ADDUSER:

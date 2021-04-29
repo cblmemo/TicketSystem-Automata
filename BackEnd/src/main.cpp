@@ -6,7 +6,7 @@
 
 int main() {
     Administrator RhineLab;
-    RhineLab.runProgramme();
+    RhineLab.runProgramme(std::cin, std::cout);
 //    RhineLab.analyzeData();
     return 0;
 }

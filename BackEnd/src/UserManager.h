@@ -5,11 +5,7 @@
 #ifndef TICKETSYSTEM_AUTOMATA_USERMANAGER_H
 #define TICKETSYSTEM_AUTOMATA_USERMANAGER_H
 
-#include "GLobal.h"
-
-using RainyMemory::HashMap;
-using RainyMemory::BPlusTree;
-using RainyMemory::Parser;
+#include "Global.h"
 
 class UserManager {
 private:

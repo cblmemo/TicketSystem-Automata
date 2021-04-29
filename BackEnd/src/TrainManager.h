@@ -5,12 +5,7 @@
 #ifndef TICKETSYSTEM_AUTOMATA_TRAINMANAGER_H
 #define TICKETSYSTEM_AUTOMATA_TRAINMANAGER_H
 
-#include "GLobal.h"
-
-using RainyMemory::BPlusTree;
-using RainyMemory::TokenScanner;
-using RainyMemory::Parser;
-using RainyMemory::sortVector;
+#include "Global.h"
 
 class TrainManager {
 private:
