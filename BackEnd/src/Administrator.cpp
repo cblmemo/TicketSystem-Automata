@@ -34,9 +34,8 @@ void Administrator::runProgramme(std::istream &is, std::ostream &os) {
     string cmd;
     bool flag = true;
     while (flag && getline(is, cmd)) {
-//        os << "# " << cmd << endl;
-        Ptilopsis->resetBuffer(cmd);
-        switch (Ptilopsis->getType()) {
+        Ptilopsis -> resetBuffer(cmd);
+        switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:
                 Saria   -> addUser(*Ptilopsis);
                 break;
@@ -93,23 +92,3 @@ void Administrator::runProgramme(std::istream &is, std::ostream &os) {
         }
     }
 }
-
-#ifdef debug
-
-void Administrator::analyzeData(std::istream &is, std::ostream &os) {
-    Ptilopsis = new Parser;
-    string cmd;
-    int cnt[17] = {0};
-    string commands[17] = {"add_user", "login", "logout", "query_profile", "modify_profile", "add_train", "release_train", "query_train",
-                           "delete_train", "query_ticket", "query_transfer", "buy_ticket", "query_order", "refund_ticket", "clean", "exit", "none"};
-    while (getline(is, cmd)) {
-        Ptilopsis->resetBuffer(cmd);
-        if (Ptilopsis->getType() == Parser::EXIT)break;
-        cnt[Ptilopsis->getType()]++;
-    }
-    for (int i = 0; i < 17; i++) {
-        os << "Command [" << commands[i] << "] appears [" << cnt[i] << "] times." << endl;
-    }
-}
-
-#endif

@@ -37,12 +37,6 @@ public:
     ~Administrator();
     
     void runProgramme(std::istream &is, std::ostream &os);
-
-#ifdef debug
-    
-    void analyzeData(std::istream &is = std::cin, std::ostream &os = std::cout);
-
-#endif
 };
 
 #endif //TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H

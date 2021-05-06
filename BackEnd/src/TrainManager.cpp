@@ -136,16 +136,8 @@ void TrainManager::queryTicket(const Parser &p) {
         }
     }
 //    if (result.empty())return outputFailure();
-    if (sortByTime)
-        sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool {
-            if (o1.time != o2.time)return o1.time < o2.time;
-            else return o1.trainID < o2.trainID;
-        });
-    else
-        sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool {
-            if (o1.price != o2.price)return o1.price < o2.price;
-            else return o1.trainID < o2.trainID;
-        });
+    if (sortByTime)sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.time != o2.time ? o1.time < o2.time : o1.trainID < o2.trainID; });
+    else sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.price != o2.price ? o1.price < o2.price : o1.trainID < o2.trainID; });
     defaultOut << result.size() << endl;
     for (const ticket_t &i : result)defaultOut << i << endl;
 }
@@ -179,7 +171,7 @@ void TrainManager::queryTransfer(const Parser &p) {
                                 int eDist = sTrain.arrivalTimes[k].dateDistance(eTrain.departureTimes[l]);
                                 ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], eTrain.departureTimes[l].updateDate(eDist),
                                                  eTrain.arrivalTimes[j.second].updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
-                                int tempSeat = 2000000, tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time;
+                                int tempSeat = 2000000, tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time + (eTrain.departureTimes[l] - sTrain.arrivalTimes[k]);
                                 for (int si = i.second; si < k; si++)tempSeat = min(tempSeat, sTrain.remainSeats[sDist][si]);
                                 for (int si = l; si < j.second; si++)tempSeat = min(tempSeat, eTrain.remainSeats[eDist][si]);
                                 tempSt.seat = tempEn.seat = tempSeat;

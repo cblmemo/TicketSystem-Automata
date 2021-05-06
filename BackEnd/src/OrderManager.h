@@ -27,7 +27,6 @@ private:
     struct order_t {
         status_t status = SUCCESS;
         trainID_t trainID {};
-        username_t username {};
         station_t fromStation {};
         station_t toStation {};
         station_time_t departureTime {};
@@ -40,15 +39,15 @@ private:
         
         order_t() = default;
         
-        order_t(status_t s, const trainID_t &i, const username_t &u, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int n, int fk, int tk, int di) :
-                status(s), trainID(i), username(u), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk) {}
+        order_t(status_t s, const trainID_t &i, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int n, int fk, int tk, int di) :
+                status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {}
     };
     
     UserManager *userManager;
     TrainManager *trainManager;
     BPlusTree<username_t, int> indexPool;
     LRUCacheMemoryPool<order_t> storagePool;
-    BPlusTree<trainID_t, int> pendingList;
+    BPlusTree<trainID_t, int> pendingPool;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     std::ostream &defaultOut;
     
@@ -64,7 +63,7 @@ private:
 
 public:
     OrderManager(UserManager *um, TrainManager *tm, const string &indexPath, const string &storagePath, const string &pendingPath, std::ostream &dft) :
-            userManager(um), trainManager(tm), indexPool(indexPath), storagePool(storagePath, 0, MEMORYPOOL_CAPACITY), pendingList(pendingPath), defaultOut(dft) {}
+            userManager(um), trainManager(tm), indexPool(indexPath), storagePool(storagePath, 0, MEMORYPOOL_CAPACITY), pendingPool(pendingPath), defaultOut(dft) {}
     
     void buyTicket(const Parser &p);
     

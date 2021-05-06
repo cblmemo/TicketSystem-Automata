@@ -17,7 +17,6 @@ using RainyMemory::sortVector;
 using RainyMemory::reverseVector;
 
 //#define speedup
-#define debug
 
 #ifdef speedup
 const char endl = '\n';

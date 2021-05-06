@@ -206,7 +206,7 @@ void clear();//清空信息
 | 成员变量类型                   | 成员变量名称 | 作用                                    |
 | ------------------------------ | ------------ | --------------------------------------- |
 | BPlusTree<username, int>       | indexPool    | 存储每个用户的所有order对应的索引       |
-| BPlusTree<trainID, int>        | pendingList  | 对于每辆车，存储pending的订单对应的索引 |
+| BPlusTree<trainID, int>        | pendingPool  | 对于每辆车，存储pending的订单对应的索引 |
 | LRUCacheMemoryPool\<orderType> | storagePool  | 存储订单信息                            |
 
 
