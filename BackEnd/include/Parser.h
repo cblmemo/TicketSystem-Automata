@@ -31,23 +31,6 @@ namespace RainyMemory {
                                        QUERYTRAIN, DELETETRAIN, QUERYTRANSFER, REFUNDTICKET, CLEAN, EXIT};
         
         commandType getTypeFromString(const string &o) {
-//            if (ty == "add_user")type = ADDUSER;                     //N
-//            else if (ty == "login")type = LOGIN;                     //F
-//            else if (ty == "logout")type = LOGOUT;                   //F
-//            else if (ty == "query_profile")type = QUERYPROFILE;      //SF
-//            else if (ty == "modify_profile")type = MODIFYPROFILE;    //F
-//            else if (ty == "add_train")type = ADDTRAIN;              //N
-//            else if (ty == "release_train")type = RELEASETRAIN;      //N
-//            else if (ty == "query_train")type = QUERYTRAIN;          //N
-//            else if (ty == "delete_train")type = DELETETRAIN;        //N
-//            else if (ty == "query_ticket")type = QUERYTICKET;        //SF
-//            else if (ty == "query_transfer")type = QUERYTRANSFER;    //N
-//            else if (ty == "buy_ticket")type = BUYTICKET;            //SF
-//            else if (ty == "query_order")type = QUERYORDER;          //F
-//            else if (ty == "refund_ticket")type = REFUNDTICKET;      //N
-//            else if (ty == "clean")type = CLEAN;                     //R
-//            else if (ty == "exit")type = EXIT;                       //R
-//            else type = NONE;
             for (int i = 0; i < 16; i++) {
                 if (o == commands[i])return types[i];
             }

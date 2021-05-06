@@ -65,6 +65,7 @@ private:
         }
         
         int dateDistance(const station_time_t &o) const {
+            if ((*this) <= o)return 0;
             //assume this is later than o
             int ret = day - o.day;
             switch (month - o.month) {

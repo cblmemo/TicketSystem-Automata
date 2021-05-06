@@ -27,7 +27,7 @@ void OrderManager::buyTicket(const Parser &p) {
     if (temp.size() != 1)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp[0])};
     station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
-    int from = -1, to = -1, num = 2000000;
+    int from = -1, to = -1, num = SEAT_NUM_INFINITY;
     for (int i = 0; i < targetTrain.stationNum; i++) {
         if (targetTrain.stations[i] == p["-f"])from = i;
         if (targetTrain.stations[i] == p["-t"])to = i;
@@ -87,7 +87,7 @@ void OrderManager::refundTicket(const Parser &p) {
     for (int i : offset)pOrder.push_back(storagePool.read(i));
     int num;
     for (int k = 0; k < pOrder.size(); k++) {
-        num = 2000000;
+        num = SEAT_NUM_INFINITY;
         for (int i = pOrder[k].from; i < pOrder[k].to; i++)num = min(num, rTrain.remainSeats[pOrder[k].dist][i]);
         if (num < pOrder[k].num)continue;
         for (int i = pOrder[k].from; i < pOrder[k].to; i++)rTrain.remainSeats[pOrder[k].dist][i] -= pOrder[k].num;

@@ -126,16 +126,15 @@ void TrainManager::queryTicket(const Parser &p) {
                 station_time_t dDate {targetTrain.departureTimes[i.second]};
                 if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                     int dist = departureDate.dateDistance(targetTrain.departureTimes[i.second]);
-                    ticket_t ticket {targetTrain.trainID, targetTrain.stations[i.second], targetTrain.stations[j.second],
-                                     targetTrain.departureTimes[i.second].updateDate(dist), targetTrain.arrivalTimes[j.second].updateDate(dist),
-                                     targetTrain.prices[j.second] - targetTrain.prices[i.second], 20000000};
+                    station_time_t tempTime1 {targetTrain.departureTimes[i.second]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
+                    ticket_t ticket {targetTrain.trainID, targetTrain.stations[i.second], targetTrain.stations[j.second], tempTime1.updateDate(dist),
+                                     tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i.second], SEAT_NUM_INFINITY};
                     for (int k = i.second; k < j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
                     result.push_back(ticket);
                 }
             }
         }
     }
-//    if (result.empty())return outputFailure();
     if (sortByTime)sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.time != o2.time ? o1.time < o2.time : o1.trainID < o2.trainID; });
     else sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.price != o2.price ? o1.price < o2.price : o1.trainID < o2.trainID; });
     defaultOut << result.size() << endl;
@@ -159,22 +158,26 @@ void TrainManager::queryTransfer(const Parser &p) {
                 for (int k = i.second; k < sTrain.stationNum; k++) {
                     for (int l = 0; l < j.second; l++) {
                         if (sTrain.stations[k] == eTrain.stations[l]) {
-                            bool judge1 = departureDate <= sTrain.departureTimes[i.second];//can boarding on sTrain
+                            station_time_t dDate {sTrain.departureTimes[i.second]};
+                            bool judge1 = dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(sTrain.dateGap));//can boarding on sTrain
                             int dist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                            station_time_t dTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
-                            dTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
-                            bool judge2 = dTime <= lastTime;
+                            station_time_t aTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
+                            aTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
+                            bool judge2 = aTime <= lastTime;
                             if (judge1 && judge2) {
                                 int sDist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                                ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], sTrain.departureTimes[i.second].updateDate(sDist),
-                                                 sTrain.arrivalTimes[k].updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second]};
-                                int eDist = sTrain.arrivalTimes[k].dateDistance(eTrain.departureTimes[l]);
-                                ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], eTrain.departureTimes[l].updateDate(eDist),
-                                                 eTrain.arrivalTimes[j.second].updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
-                                int tempSeat = 2000000, tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time + (eTrain.departureTimes[l] - sTrain.arrivalTimes[k]);
-                                for (int si = i.second; si < k; si++)tempSeat = min(tempSeat, sTrain.remainSeats[sDist][si]);
-                                for (int si = l; si < j.second; si++)tempSeat = min(tempSeat, eTrain.remainSeats[eDist][si]);
-                                tempSt.seat = tempEn.seat = tempSeat;
+                                station_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
+                                        tempTime3 {eTrain.departureTimes[l]}, tempTime4 {eTrain.arrivalTimes[j.second]};
+                                ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
+                                                 tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second]};
+                                int eDist = aTime.dateDistance(eTrain.departureTimes[l]);
+                                ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),
+                                                 tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
+                                int sTempSeat = SEAT_NUM_INFINITY, eTempSeat = SEAT_NUM_INFINITY;
+                                int tempPrice = tempSt.price + tempEn.price, tempTime = tempSt.time + tempEn.time + (tempTime3 - tempTime2);
+                                for (int si = i.second; si < k; si++)sTempSeat = min(sTempSeat, sTrain.remainSeats[sDist][si]);
+                                for (int si = l; si < j.second; si++)eTempSeat = min(eTempSeat, eTrain.remainSeats[eDist][si]);
+                                tempSt.seat = sTempSeat, tempEn.seat = eTempSeat;
                                 bool timeJudge = tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time;
                                 bool priceJudge = tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price;
                                 if (hasResult && ((sortByTime && timeJudge) || (!sortByTime && priceJudge)))st = tempSt, en = tempEn;

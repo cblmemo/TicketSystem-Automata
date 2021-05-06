@@ -18,6 +18,10 @@ using RainyMemory::reverseVector;
 
 //#define speedup
 
+enum coefficient {
+    SEAT_NUM_INFINITY = 2000000
+};
+
 #ifdef speedup
 const char endl = '\n';
 #else
