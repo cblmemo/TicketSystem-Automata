@@ -14,7 +14,7 @@ using std::fstream;
 using std::ios;
 
 namespace RainyMemory {
-    template<class T, class extraMessage = char>
+    template<class T, class extraMessage = int>
     class LRUCacheMemoryPool {
     private:
         class DoublyLinkedList {
@@ -233,8 +233,8 @@ namespace RainyMemory {
         }
         
         void update(const T &o, int offset) {
-            hashmap[offset]->dirtyBit = true;//todo runtime error at here..
             putInCache(offset, o);
+            hashmap[offset]->dirtyBit = true;
         }
         
         void erase(int offset) {

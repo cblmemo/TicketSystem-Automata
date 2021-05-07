@@ -89,6 +89,7 @@ void OrderManager::refundTicket(const Parser &p) {
     for (int i : offset)pOrder.push_back(storagePool.read(i));
     int num;
     for (int k = 0; k < pOrder.size(); k++) {
+        if (pOrder[k].dist != rOrder.dist)continue;
         num = SEAT_NUM_INFINITY;
         for (int i = pOrder[k].from; i < pOrder[k].to; i++)num = min(num, rTrain.remainSeats[pOrder[k].dist][i]);
         if (num < pOrder[k].num)continue;

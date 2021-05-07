@@ -61,8 +61,9 @@ private:
         }
         
         int operator-(const station_time_t &o) const {
-            //assume this is later than o, return distance in minute
-            return dateDistance(o) * 24 * 60 + (hour - o.hour) * 60 + minute - o.minute;
+            //return distance in minute
+            if (*this > o)return dateDistance(o) * 24 * 60 + (hour - o.hour) * 60 + minute - o.minute;
+            else return o.dateDistance(*this) * 24 * 60 + (o.hour - hour) * 60 + o.minute - minute;
         }
         
         int dateDistance(const station_time_t &o) const {
