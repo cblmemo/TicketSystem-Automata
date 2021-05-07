@@ -6,15 +6,18 @@ import filecmp
 time_Limit = 30  # s
 
 
-def clean_sh():
+def clean_all():
     os.system('bash ./clean.sh')
     os.system('rm output.txt')
 
 
+def clean_sh():
+    os.system('bash ./clean.sh')
+
+
 def run_basic_case(id):
     if id <= 2:
-        os.system(
-            'timeout ' + str(time_Limit) + 's ' + './code < data/basic_' + str(id) + '/1.in > output.txt 2>/dev/null')
+        os.system('timeout ' + str(time_Limit) + 's ' + './code < data/basic_' + str(id) + '/1.in > output.txt 2>/dev/null')
         return filecmp.cmp('data/basic_' + str(id) + '/1.out', 'output.txt')
     if 3 <= id <= 4:
         for i in range(1, 6):
@@ -22,12 +25,14 @@ def run_basic_case(id):
                 i) + '.in >> output.txt 2>/dev/null')
             if not filecmp.cmp('data/basic_' + str(id) + '/' + str(i) + '.out', 'output.txt'):
                 return False
+            os.system('rm output.txt')
     if 5 <= id <= 6:
         for i in range(1, 11):
             os.system('timeout ' + str(time_Limit) + 's ' + './code < data/basic_' + str(id) + '/' + str(
                 i) + '.in >> output.txt 2>/dev/null')
             if not filecmp.cmp('data/basic_' + str(id) + '/' + str(i) + '.out', 'output.txt'):
                 return False
+            os.system('rm output.txt')
     return True
 
 
@@ -38,7 +43,11 @@ def run_basic():
             print('Basic Testpoint ' + str(i) + ' Accepted!')
         else:
             print('Basic Testpoint ' + str(i) + ' Failed!')
-        clean_sh()
+        if 1 <= i <= 2:
+            clean_all()
+        else:
+            clean_sh()
+
 
 
 clean_sh()
