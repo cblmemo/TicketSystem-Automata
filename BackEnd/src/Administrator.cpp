@@ -4,11 +4,11 @@
 
 #include "Administrator.h"
 
-void Administrator::initialize(std::ostream &os) {
+void Administrator::initialize() {
     Ptilopsis = new Parser;
-    Saria     = new UserManager(UserIndexPath, UserStoragePath, os);
-    Silence   = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, os);
-    Ifrit     = new OrderManager(Saria, Silence, OrderIndexPath, OrderStoragePath, OrderPendingPath, os);
+    Saria     = new UserManager(UserIndexPath, UserStoragePath, defaultOut);
+    Silence   = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, defaultOut);
+    Ifrit     = new OrderManager(Saria, Silence, OrderIndexPath, OrderStoragePath, OrderPendingPath, defaultOut);
 }
 
 void Administrator::clean() {
@@ -17,7 +17,7 @@ void Administrator::clean() {
     Ifrit   -> clear();
 }
 
-Administrator::Administrator() = default;
+Administrator::Administrator(std::istream &is, std::ostream &os) : defaultIn(is), defaultOut(os) {}
 
 Administrator::~Administrator() {
     delete Ptilopsis;
@@ -26,68 +26,68 @@ Administrator::~Administrator() {
     delete Ifrit;
 }
 
-void Administrator::runProgramme(std::istream &is, std::ostream &os) {
+void Administrator::runProgramme() {
 #ifdef speedup
     std::ios::sync_with_stdio(false);
 #endif
-    initialize(os);
+    initialize();
     string cmd;
     bool flag = true;
-    while (flag && getline(is, cmd)) {
+    while (flag && getline(defaultIn, cmd)) {
         Ptilopsis -> resetBuffer(cmd);
         switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:
-                Saria   -> addUser(*Ptilopsis);
+                Saria   ->addUser(*Ptilopsis);
                 break;
             case Parser::LOGIN:
-                Saria   -> login(*Ptilopsis);
+                Saria   ->login(*Ptilopsis);
                 break;
             case Parser::LOGOUT:
-                Saria   -> logout(*Ptilopsis);
+                Saria   ->logout(*Ptilopsis);
                 break;
             case Parser::QUERYPROFILE:
-                Saria   -> queryProfile(*Ptilopsis);
+                Saria   ->queryProfile(*Ptilopsis);
                 break;
             case Parser::MODIFYPROFILE:
-                Saria   -> modifyProfile(*Ptilopsis);
+                Saria   ->modifyProfile(*Ptilopsis);
                 break;
             case Parser::ADDTRAIN:
-                Silence -> addTrain(*Ptilopsis);
+                Silence ->addTrain(*Ptilopsis);
                 break;
             case Parser::RELEASETRAIN:
-                Silence -> releaseTrain(*Ptilopsis);
+                Silence ->releaseTrain(*Ptilopsis);
                 break;
             case Parser::QUERYTRAIN:
-                Silence -> queryTrain(*Ptilopsis);
+                Silence ->queryTrain(*Ptilopsis);
                 break;
             case Parser::DELETETRAIN:
-                Silence -> deleteTrain(*Ptilopsis);
+                Silence ->deleteTrain(*Ptilopsis);
                 break;
             case Parser::QUERYTICKET:
-                Silence -> queryTicket(*Ptilopsis);
+                Silence ->queryTicket(*Ptilopsis);
                 break;
             case Parser::QUERYTRANSFER:
-                Silence -> queryTransfer(*Ptilopsis);
+                Silence ->queryTransfer(*Ptilopsis);
                 break;
             case Parser::BUYTICKET:
-                Ifrit   -> buyTicket(*Ptilopsis);
+                Ifrit   ->buyTicket(*Ptilopsis);
                 break;
             case Parser::QUERYORDER:
-                Ifrit   -> queryOrder(*Ptilopsis);
+                Ifrit   ->queryOrder(*Ptilopsis);
                 break;
             case Parser::REFUNDTICKET:
-                Ifrit   -> refundTicket(*Ptilopsis);
+                Ifrit   ->refundTicket(*Ptilopsis);
                 break;
             case Parser::CLEAN:
                 clean();
-                os << "0" << endl;
+                defaultOut << "0" << endl;
                 break;
             case Parser::EXIT:
                 flag = false;
-                os << "bye" << endl;
+                defaultOut << "bye" << endl;
                 break;
             default:
-                os << "[Error]Invalid command." << endl;
+                defaultOut << "[Error]Invalid command." << endl;
                 break;
         }
     }

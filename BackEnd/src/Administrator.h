@@ -11,10 +11,12 @@
 
 class Administrator {
 private:
-    Parser       *Ptilopsis = nullptr;
-    UserManager  *Saria     = nullptr;
-    TrainManager *Silence   = nullptr;
-    OrderManager *Ifrit     = nullptr;
+    Parser       *Ptilopsis;
+    UserManager  *Saria;
+    TrainManager *Silence;
+    OrderManager *Ifrit;
+    std::istream &defaultIn;
+    std::ostream &defaultOut;
     
     using path_t = const std::string;
     
@@ -27,16 +29,16 @@ private:
     path_t OrderStoragePath {"OrderStorage.dat"};
     path_t OrderPendingPath {"OrderPending.dat"};
     
-    void initialize(std::ostream &os = std::cout);
+    void initialize();
     
     void clean();
 
 public:
-    Administrator();
+    Administrator(std::istream &is, std::ostream &os);
     
     ~Administrator();
     
-    void runProgramme(std::istream &is, std::ostream &os);
+    void runProgramme();
 };
 
 #endif //TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H

@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.17)
-project(TicketSystem_Automata)
+cmake_minimum_required(VERSION 3.15)
+project(code)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(TicketSystem_Automata
+add_executable(code
         BackEnd/src/main.cpp
         BackEnd/src/Administrator.cpp
         BackEnd/src/UserManager.cpp

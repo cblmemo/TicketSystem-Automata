@@ -185,7 +185,7 @@ private:
     
     BPlusTree<trainID_t, int> indexPool;
     LRUCacheMemoryPool<train_t> storagePool;
-    BPlusTree<station_t, std::pair<trainID_t, int>> stationPool;//store every train pass through a station, and k'th station
+    BPlusTree<station_t, std::pair<trainID_t, int>> stationPool;//store every train pass through a station, and the serial number (station index)
     TokenScanner splitTool;
     std::ostream &defaultOut;
     

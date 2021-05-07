@@ -44,6 +44,7 @@ void TrainManager::addTrain(const Parser &p) {
     splitTool.resetBuffer(p["-s"]);
     for (int i = 0; i < newTrain.stationNum; i++)newTrain.stations[i] = splitTool.nextToken();
     splitTool.resetBuffer(p["-p"]);
+    //prices is store as prefix sum (from starting station)
     newTrain.prices[0] = 0;
     for (int i = 1; i < newTrain.stationNum; i++)newTrain.prices[i] = splitTool.nextIntToken() + newTrain.prices[i - 1];
     string st {p["-x"]};
@@ -59,6 +60,7 @@ void TrainManager::addTrain(const Parser &p) {
     st = splitTool.nextToken();
     newTrain.endTime.month = (st[0] - '0') * 10 + st[1] - '0', newTrain.endTime.day = (st[3] - '0') * 10 + st[4] - '0';
     newTrain.dateGap = newTrain.endTime.dateDistance(newTrain.startTime);
+    //departure time and arrival time store the first train(departure at start time)'s timetable
     station_time_t nowTime {newTrain.startTime};
     newTrain.departureTimes[0] = nowTime;
     for (int i = 1; i < newTrain.stationNum - 1; i++) {
@@ -166,6 +168,7 @@ void TrainManager::queryTransfer(const Parser &p) {
                             bool judge2 = aTime <= lastTime;
                             if (judge1 && judge2) {
                                 int sDist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
+                                //tempTimex: avoid updateDate(int) deals changes in original train_t
                                 station_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
                                         tempTime3 {eTrain.departureTimes[l]}, tempTime4 {eTrain.arrivalTimes[j.second]};
                                 ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
@@ -180,12 +183,12 @@ void TrainManager::queryTransfer(const Parser &p) {
                                 for (int si = i.second; si < k; si++)sTempSeat = min(sTempSeat, sTrain.remainSeats[sDist][si]);
                                 for (int si = l; si < j.second; si++)eTempSeat = min(eTempSeat, eTrain.remainSeats[eDist][si]);
                                 tempSt.seat = sTempSeat, tempEn.seat = eTempSeat;
-                                if (!hasResult) hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
-                                else {
+                                if (hasResult) {
                                     bool timeJudge = tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time;
                                     bool priceJudge = tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price;
                                     if (sortByTime && timeJudge || !sortByTime && priceJudge)nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
                                 }
+                                else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
                             }
                         }
                     }
