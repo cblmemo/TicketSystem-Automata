@@ -233,7 +233,7 @@ namespace RainyMemory {
         }
         
         void update(const T &o, int offset) {
-            hashmap[offset]->dirtyBit = true;
+            hashmap[offset]->dirtyBit = true;//todo runtime error at here..
             putInCache(offset, o);
         }
         

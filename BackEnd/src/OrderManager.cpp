@@ -73,9 +73,11 @@ void OrderManager::refundTicket(const Parser &p) {
     std::pair<int, bool> o = indexPool.findNth(p["-u"], n);
     if (!o.second)return outputFailure();
     order_t rOrder {storagePool.read(o.first)};
-    if (rOrder.status != SUCCESS)return outputFailure();
+    if (rOrder.status == REFUNDED)return outputFailure();
+    bool newTicket = rOrder.status == SUCCESS;
     rOrder.status = REFUNDED;
     storagePool.update(rOrder, o.first);
+    if (!newTicket)return outputSuccess();
     vector<int> temp;
     trainManager->indexPool.find(rOrder.trainID, temp);
     train_t rTrain {trainManager->storagePool.read(temp[0])};

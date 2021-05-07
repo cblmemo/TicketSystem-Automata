@@ -50,7 +50,8 @@ private:
             hour %= 24;
             day += da / 24;
             if (month == 6 && day > 30)day -= 30, month++;
-            if (day > 31)day -= 31, month++;
+            if (month == 7 && day > 31)day -= 31, month++;
+            if (month == 8 && day > 31)day -= 31, month++;
             return *this;
         }
         
@@ -69,6 +70,9 @@ private:
             //assume this is later than o
             int ret = day - o.day;
             switch (month - o.month) {
+                case 3:
+                    ret += 92;
+                    break;
                 case 2:
                     ret += 61;
                     break;
@@ -82,7 +86,8 @@ private:
         station_time_t &updateDate(int da) {
             day += da;
             if (month == 6 && day > 30)day -= 30, month++;
-            if (day > 31)day -= 31, month++;
+            if (month == 7 && day > 31)day -= 31, month++;
+            if (month == 8 && day > 31)day -= 31, month++;
             return *this;
         }
         
