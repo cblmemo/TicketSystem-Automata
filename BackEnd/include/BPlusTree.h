@@ -106,6 +106,22 @@ namespace RainyMemory {
                 return result;
             }
             
+            //todo debug
+            bool updateElement(BPlusTree *tree, const key &o1, const data &o2, const data &newData) {
+                int start = lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+                int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+                bool result = false;
+                for (int i = start; i < end; i++) {
+                    if (o2 == leafData[i]) {
+                        leafData[i] = newData;
+                        result = true;
+                        break;
+                    }
+                }
+                if (result)tree->leafPool->update(*this, offset);
+                return result;
+            }
+            
             splitNodeReturn splitNode(BPlusTree *tree) {
                 leafNode tempNode;
                 tempNode.leftBrother = offset;
@@ -777,6 +793,25 @@ namespace RainyMemory {
             }
         }
         
+        //todo debug
+        void recursionUpdate(int now, const key &o1, const data &o2, const data &newData) {
+            internalNode nowNode = internalPool->read(now);
+            if (nowNode.childNodeIsLeaf) {
+                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                leafNode targetNode = leafPool->read(nowNode.childNode[index]);
+                if (!targetNode.updateElement(this, o1, o2, newData)) {
+                    while (targetNode.leftBrother >= 0) {
+                        targetNode = leafPool->read(targetNode.leftBrother);
+                        if (targetNode.updateElement(this, o1, o2, newData))break;
+                    }
+                }
+            }
+            else {
+                int index = upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                recursionUpdate(nowNode.childNode[index], o1, o2, newData);
+            }
+        }
+        
         std::pair<data, bool> recursionFindNth(int now, const key &o, int n) {
             internalNode nowNode = internalPool->read(now);
             if (nowNode.childNodeIsLeaf) {
@@ -920,6 +955,26 @@ namespace RainyMemory {
             else {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 recursionFind(rootNode.childNode[index], o, result);
+            }
+        }
+        
+        //todo debug
+        void update(const key &o1, const data &o2, const data &newData) {
+            if (info.size == 0 || info.root == -1)return;
+            internalNode rootNode = internalPool->read(info.root);
+            if (rootNode.childNodeIsLeaf) {
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                leafNode targetNode = leafPool->read(rootNode.childNode[index]);
+                if (!targetNode.updateElement(this, o1, o2, newData)) {
+                    while (targetNode.leftBrother >= 0) {
+                        targetNode = leafPool->read(targetNode.leftBrother);
+                        if (targetNode.updateElement(this, o1, o2, newData))break;
+                    }
+                }
+            }
+            else {
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                recursionUpdate(rootNode.childNode[index], o1, o2, newData);
             }
         }
         

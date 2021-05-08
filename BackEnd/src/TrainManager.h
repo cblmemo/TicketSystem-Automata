@@ -18,6 +18,15 @@ private:
     using trainID_t = string_t<20>;
     using station_t = string_t<lengthOfChineseCharacters(10)>;
     
+    struct hash_station_t {
+        int operator()(const station_t &o) const {
+            int len = o.length();
+            int h = len;
+            for (int i = 0; i < len; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
+            return h;
+        }
+    };
+    
     struct station_time_t {
         int month = 6;
         int day = 1;
