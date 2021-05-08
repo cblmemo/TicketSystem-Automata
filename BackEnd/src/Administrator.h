@@ -11,10 +11,10 @@
 
 class Administrator {
 private:
-    Parser       *Ptilopsis;
-    UserManager  *Saria;
-    TrainManager *Silence;
-    OrderManager *Ifrit;
+    Parser       *Ptilopsis = nullptr;
+    UserManager  *Saria     = nullptr;
+    TrainManager *Silence   = nullptr;
+    OrderManager *Ifrit     = nullptr;
     std::istream &defaultIn;
     std::ostream &defaultOut;
     
@@ -26,7 +26,6 @@ private:
     path_t TrainStoragePath {"TrainStorage.dat"};
     path_t TrainStationPath {"TrainStation.dat"};
     path_t OrderIndexPath   {"OrderIndex.dat"};
-    path_t OrderStoragePath {"OrderStorage.dat"};
     path_t OrderPendingPath {"OrderPending.dat"};
     
     void initialize();

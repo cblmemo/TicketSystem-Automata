@@ -8,7 +8,7 @@ void Administrator::initialize() {
     Ptilopsis = new Parser;
     Saria     = new UserManager(UserIndexPath, UserStoragePath, defaultOut);
     Silence   = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, defaultOut);
-    Ifrit     = new OrderManager(Saria, Silence, OrderIndexPath, OrderStoragePath, OrderPendingPath, defaultOut);
+    Ifrit     = new OrderManager(Saria, Silence, OrderIndexPath, OrderPendingPath, defaultOut);
 }
 
 void Administrator::clean() {
