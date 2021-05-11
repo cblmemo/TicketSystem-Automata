@@ -53,12 +53,12 @@ private:
     inline void outputFailure();
     
     inline void printUser(const user_t &u);
+    
+    bool isLogin(const username_t &u);
 
 public:
     UserManager(const string &indexPath, const string &storagePath, std::ostream &dft) :
             loginPool(HASHMAP_CAPACITY), indexPool(indexPath), storagePool(storagePath, true, MEMORYPOOL_CAPACITY), defaultOut(dft) {}
-    
-    bool isLogin(const username_t &u);
     
     void addUser(const Parser &p);
     

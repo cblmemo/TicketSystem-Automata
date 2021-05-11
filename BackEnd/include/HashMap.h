@@ -106,11 +106,11 @@ namespace RainyMemory {
         }
         
         ~HashMap() {
-            delete[]buckets;
+            delete[] buckets;
         }
         
         void clear() {
-            delete[]buckets;
+            delete[] buckets;
             buckets = new LinkedList[capacity];
         }
         

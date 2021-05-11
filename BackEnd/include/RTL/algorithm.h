@@ -213,13 +213,13 @@ namespace RainyMemory {
     }
     
     //todo debug
-    template<class T>
-    void reverseVector(RainyMemory::vector<T> &vec) {
-        typename RainyMemory::vector<T>::iterator first {vec.begin()}, last {vec.end()};
-        while ((first != last) && (first != --last)) {
-            inner_vector::iter_swap(first++, last);
-        }
-    }
+//    template<class T>
+//    void reverseVector(RainyMemory::vector<T> &vec) {
+//        typename RainyMemory::vector<T>::iterator first {vec.begin()}, last {vec.end()};
+//        while ((first != last) && (first != --last)) {
+//            inner_vector::iter_swap(first++, last);
+//        }
+//    }
     
     template<class ptr, class T>
     ptr lower_bound(ptr first, ptr last, const T &val) {
@@ -261,17 +261,6 @@ namespace RainyMemory {
         }
         return last;
     }
-    
-    template<class T>
-    const T &min(const T &o1, const T &o2) {
-        return o1 < o2 ? o1 : o2;
-    }
-    
-    template<class T>
-    const T &max(const T &o1, const T &o2) {
-        return !(o1 < o2) ? o1 : o2;
-    }
-    
 }
 
 #endif //TICKETSYSTEM_AUTOMATA_ALGORITHM_H
