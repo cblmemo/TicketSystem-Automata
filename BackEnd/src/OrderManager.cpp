@@ -26,6 +26,7 @@ void OrderManager::buyTicket(const Parser &p) {
     trainManager->indexPool.find(p["-i"], temp);
     if (temp.size() != 1)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp[0])};
+    if (!targetTrain.released)return outputFailure();
     station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     int from = -1, to = -1, num = SEAT_NUM_INFINITY;
     for (int i = 0; i < targetTrain.stationNum; i++) {

@@ -24,13 +24,13 @@ bool UserManager::isLogin(const UserManager::username_t &u) {
 void UserManager::addUser(const Parser &p) {
     if (storagePool.readExtraMessage()) {
         storagePool.updateExtraMessage(false);
-        user_t newUser(p["-u"], p["-p"], p["-n"], p["-m"], 10);
+        user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], 10};
         int offset = storagePool.write(newUser);
         indexPool.insert(newUser.username, offset);
         return outputSuccess();
     }
     if (isLogin(p["-c"]) && !indexPool.containsKey(p["-u"]) && loginPool[p["-c"]] > p("-g")) {
-        user_t newUser(p["-u"], p["-p"], p["-n"], p["-m"], p("-g"));
+        user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], p("-g")};
         int offset = storagePool.write(newUser);
         indexPool.insert(newUser.username, offset);
         return outputSuccess();
@@ -43,7 +43,7 @@ void UserManager::login(const Parser &p) {
         vector<int> temp;
         indexPool.find(p["-u"], temp);
         if (temp.empty())return outputFailure();
-        user_t tempUser = storagePool.read(temp[0]);
+        user_t tempUser {storagePool.read(temp[0])};
         if (tempUser.password == p["-p"]) {
             loginPool[p["-u"]] = tempUser.privilege;
             return outputSuccess();
