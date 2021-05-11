@@ -15,7 +15,7 @@ void TrainManager::outputFailure() {
 void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
     //int date: the distance between query train argument -d and startTime sate
     defaultOut << t.trainID << " " << t.type << endl;
-    train_time_t temp {};
+    station_time_t temp {};
     for (int i = 0; i < t.stationNum; i++) {
         defaultOut << t.stations[i] << " ";
         if (i == 0)defaultOut << "xx-xx xx:xx";
@@ -40,8 +40,6 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
 
 void TrainManager::addTrain(const Parser &p) {
     if (indexPool.containsKey(p["-i"]))return outputFailure();
-    int travelTimes[100] = {0};
-    int stopoverTimes[100] = {0};
     train_t newTrain {p["-i"], p("-n"), p("-m"), p["-y"][0]};
     splitTool.resetBuffer(p["-s"]);
     for (int i = 0; i < newTrain.stationNum; i++)newTrain.stations[i] = splitTool.nextToken();
@@ -53,9 +51,9 @@ void TrainManager::addTrain(const Parser &p) {
     newTrain.startTime.hour = (st[0] - '0') * 10 + st[1] - '0', newTrain.startTime.minute = (st[3] - '0') * 10 + st[4] - '0';
     newTrain.endTime.hour = newTrain.startTime.hour, newTrain.endTime.minute = newTrain.startTime.minute;
     splitTool.resetBuffer(p["-t"]);
-    for (int i = 0; i < newTrain.stationNum - 1; i++)travelTimes[i] = splitTool.nextIntToken();
+    for (int i = 0; i < newTrain.stationNum - 1; i++)newTrain.travelTimes[i] = splitTool.nextIntToken();
     splitTool.resetBuffer(p["-o"]);
-    for (int i = 0; i < newTrain.stationNum - 2; i++)stopoverTimes[i] = splitTool.nextIntToken();
+    for (int i = 0; i < newTrain.stationNum - 2; i++)newTrain.stopoverTimes[i] = splitTool.nextIntToken();
     splitTool.resetBuffer(p["-d"]);
     st = splitTool.nextToken();
     newTrain.startTime.month = (st[0] - '0') * 10 + st[1] - '0', newTrain.startTime.day = (st[3] - '0') * 10 + st[4] - '0';
@@ -63,15 +61,15 @@ void TrainManager::addTrain(const Parser &p) {
     newTrain.endTime.month = (st[0] - '0') * 10 + st[1] - '0', newTrain.endTime.day = (st[3] - '0') * 10 + st[4] - '0';
     newTrain.dateGap = newTrain.endTime.dateDistance(newTrain.startTime);
     //departure time and arrival time store the first train(departure at start time)'s timetable
-    train_time_t nowTime {newTrain.startTime};
+    station_time_t nowTime {newTrain.startTime};
     newTrain.departureTimes[0] = nowTime;
     for (int i = 1; i < newTrain.stationNum - 1; i++) {
-        nowTime += travelTimes[i - 1];
+        nowTime += newTrain.travelTimes[i - 1];
         newTrain.arrivalTimes[i] = nowTime;
-        nowTime += stopoverTimes[i - 1];
+        nowTime += newTrain.stopoverTimes[i - 1];
         newTrain.departureTimes[i] = nowTime;
     }
-    nowTime += travelTimes[newTrain.stationNum - 2];
+    nowTime += newTrain.travelTimes[newTrain.stationNum - 2];
     newTrain.arrivalTimes[newTrain.stationNum - 1] = nowTime;
     for (auto &remainSeat : newTrain.remainSeats)
         for (int &j : remainSeat)
@@ -98,7 +96,7 @@ void TrainManager::queryTrain(const Parser &p) {
     if (temp.size() != 1)return outputFailure();
     train_t qTrain(storagePool.read(temp[0]));
     string st = p["-d"];
-    train_time_t ti {(st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0'};
+    station_time_t ti {(st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0'};
     if (!(qTrain.startTime.lessOrEqualDate(ti) && ti.lessOrEqualDate(qTrain.endTime)))return outputFailure();
     printTrain(qTrain, ti.dateDistance(qTrain.startTime));
 }
@@ -116,7 +114,7 @@ void TrainManager::deleteTrain(const Parser &p) {
 
 void TrainManager::queryTicket(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
-    train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
+    station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
     vector<std::pair<trainID_t, int>> sTrains, eTrains;
     vector<ticket_t> result;
     stationPool.find(p["-s"], sTrains);
@@ -127,10 +125,10 @@ void TrainManager::queryTicket(const Parser &p) {
                 vector<int> temp;
                 indexPool.find(i.first, temp);
                 train_t targetTrain {storagePool.read(temp[0])};
-                train_time_t dDate {targetTrain.departureTimes[i.second]};
+                station_time_t dDate {targetTrain.departureTimes[i.second]};
                 if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                     int dist = departureDate.dateDistance(targetTrain.departureTimes[i.second]);
-                    train_time_t tempTime1 {targetTrain.departureTimes[i.second]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
+                    station_time_t tempTime1 {targetTrain.departureTimes[i.second]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
                     ticket_t ticket {targetTrain.trainID, targetTrain.stations[i.second], targetTrain.stations[j.second], tempTime1.updateDate(dist),
                                      tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i.second], SEAT_NUM_INFINITY};
                     for (int k = i.second; k < j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
@@ -201,7 +199,7 @@ void TrainManager::queryTransfer(const Parser &p) {
     if (hasResult)defaultOut << st << endl << en << endl;
     else defaultOut << "0" << endl;*/
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
-    train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
+    station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     vector<std::pair<trainID_t, int>> sTrains, eTrains;
     ticket_t st {}, en {};
     int nowTime, nowPrice;
@@ -218,20 +216,20 @@ void TrainManager::queryTransfer(const Parser &p) {
                 for (int l = 0; l < j.second; l++) {
                     if (hashmap.containsKey(eTrain.stations[l])) {
                         int k = hashmap[eTrain.stations[l]];
-                        train_time_t dDate {sTrain.departureTimes[i.second]};
+                        station_time_t dDate {sTrain.departureTimes[i.second]};
                         bool judge1 = dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(sTrain.dateGap));//can boarding on sTrain
                         int dist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                        train_time_t aTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
+                        station_time_t aTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
                         aTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
                         bool judge2 = aTime <= lastTime;
                         if (judge1 && judge2) {
                             int sDist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
                             //tempTimex: avoid updateDate(int) deals changes in original train_t
-                            train_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
+                            station_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
                                     tempTime3 {eTrain.departureTimes[l]}, tempTime4 {eTrain.arrivalTimes[j.second]};
                             ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
                                              tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second]};
-                            train_time_t tempTime0 {eTrain.departureTimes[l]};
+                            station_time_t tempTime0 {eTrain.departureTimes[l]};
                             int eDist = aTime.dateDistance(tempTime0);
                             if (aTime > tempTime0.updateDate(eDist))eDist++;
                             ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),

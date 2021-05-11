@@ -41,24 +41,28 @@ void OrderManager::buyTicket(const Parser &p) {
     bool queue = num < n, candidate = p["-q"] == "true";
     if (queue) {
         if (!candidate)return outputFailure();
-        order_t order {p["-u"], PENDING, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
+        order_t order {PENDING, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                        targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
-        indexPool.insert(p["-u"], order);
-        pendingPool.insert(targetTrain.trainID, order);
+        int offset = storagePool.write(order);
+        indexPool.insert(p["-u"], offset);
+        pendingPool.insert(targetTrain.trainID, offset);
         return outputQueue();
     }
     for (int i = from; i < to; i++)targetTrain.remainSeats[dist][i] -= n;
     trainManager->storagePool.update(targetTrain, temp[0]);
-    order_t order {p["-u"], SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
+    order_t order {SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                    targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
-    indexPool.insert(p["-u"], order);
+    int offset = storagePool.write(order);
+    indexPool.insert(p["-u"], offset);
     outputSuccess(price * n);
 }
 
 void OrderManager::queryOrder(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
-    vector<order_t> result;
-    indexPool.find(p["-u"], result);
+    vector<int> offset;
+    indexPool.find(p["-u"], offset);
+    vector<order_t> result(offset.size());
+    for (int i : offset)result.push_back(storagePool.read(i));
     defaultOut << result.size() << endl;
     for (const order_t &i : result)printOrder(i);
 }
@@ -66,36 +70,33 @@ void OrderManager::queryOrder(const Parser &p) {
 void OrderManager::refundTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     int n = p.haveThisArgument("-n") ? p("-n") : 1;
-    std::pair<order_t, bool> o = indexPool.findNth(p["-u"], n);
+    std::pair<int, bool> o = indexPool.findNth(p["-u"], n);
     if (!o.second)return outputFailure();
-    order_t rOrder {o.first};
+    order_t rOrder {storagePool.read(o.first)};
     if (rOrder.status == REFUNDED)return outputFailure();
     bool newTicket = rOrder.status == SUCCESS;
     rOrder.status = REFUNDED;
-    indexPool.update(p["-u"], o.first, rOrder);
-    if (!newTicket) {
-        pendingPool.erase(o.first.trainID, o.first);
-        return outputSuccess();
-    }
+    storagePool.update(rOrder, o.first);
+    if (!newTicket)return outputSuccess();
     vector<int> temp;
     trainManager->indexPool.find(rOrder.trainID, temp);
     train_t rTrain {trainManager->storagePool.read(temp[0])};
     for (int i = rOrder.from; i < rOrder.to; i++)rTrain.remainSeats[rOrder.dist][i] += rOrder.num;
-    vector<order_t> pOrder;
-    pendingPool.find(rOrder.trainID, pOrder);
-//    reverseVector(pOrder);
+    vector<int> offset;
+    pendingPool.find(rOrder.trainID, offset);
+    reverseVector(offset);
+    vector<order_t> pOrder(offset.size());
+    for (int i : offset)pOrder.push_back(storagePool.read(i));
     int num;
-    for (int i = pOrder.size() - 1; i >= 0; i--) {
-        const order_t &k = pOrder[i];
-        if (k.dist != rOrder.dist)continue;
+    for (int k = 0; k < pOrder.size(); k++) {
+        if (pOrder[k].dist != rOrder.dist)continue;
         num = SEAT_NUM_INFINITY;
-        for (int j = k.from; j < k.to; j++)num = min(num, rTrain.remainSeats[k.dist][j]);
-        if (num < k.num)continue;
-        for (int j = k.from; j < k.to; j++)rTrain.remainSeats[k.dist][j] -= k.num;
-        order_t mOrder {k};
-        mOrder.status = SUCCESS;
-        indexPool.update(k.username, k, mOrder);
-        pendingPool.erase(k.trainID, k);
+        for (int i = pOrder[k].from; i < pOrder[k].to; i++)num = min(num, rTrain.remainSeats[pOrder[k].dist][i]);
+        if (num < pOrder[k].num)continue;
+        for (int i = pOrder[k].from; i < pOrder[k].to; i++)rTrain.remainSeats[pOrder[k].dist][i] -= pOrder[k].num;
+        pOrder[k].status = SUCCESS;
+        storagePool.update(pOrder[k], offset[k]);
+        pendingPool.erase(pOrder[k].trainID, offset[k]);
     }
     trainManager->storagePool.update(rTrain, temp[0]);
     outputSuccess();
@@ -103,5 +104,6 @@ void OrderManager::refundTicket(const Parser &p) {
 
 void OrderManager::clear() {
     indexPool.clear();
+    storagePool.clear();
     pendingPool.clear();
 }

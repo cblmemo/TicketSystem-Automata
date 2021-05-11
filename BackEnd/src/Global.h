@@ -8,14 +8,13 @@
 #include "../include/RTL/string_t.h"
 #include "../include/BPlusTree.h"
 #include "../include/Parser.h"
-#include <chrono>
 
 using RainyMemory::BPlusTree;
 using RainyMemory::HashMap;
 using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
 using RainyMemory::sortVector;
-//using RainyMemory::reverseVector;
+using RainyMemory::reverseVector;
 
 //#define speedup
 
