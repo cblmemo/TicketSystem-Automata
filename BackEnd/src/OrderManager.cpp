@@ -83,16 +83,13 @@ void OrderManager::refundTicket(const Parser &p) {
     for (int i = rOrder.from; i < rOrder.to; i++)rTrain.remainSeats[rOrder.dist][i] += rOrder.num;
     vector<order_t> pOrder;
     pendingPool.find(rOrder.trainID, pOrder);
-    int num, invalid_num = -1;
+    int num;
     for (int i = pOrder.size() - 1; i >= 0; i--) {
         const order_t &k = pOrder[i];
-        if (k.dist != rOrder.dist || invalid_num != -1 && k.num > invalid_num)continue;
+        if (k.dist != rOrder.dist)continue;
         num = SEAT_NUM_INFINITY;
         for (int j = k.from; j < k.to; j++)num = min(num, rTrain.remainSeats[k.dist][j]);
-        if (num < k.num) {
-            invalid_num = max(invalid_num, k.num);
-            continue;
-        }
+        if (num < k.num)continue;
         for (int j = k.from; j < k.to; j++)rTrain.remainSeats[k.dist][j] -= k.num;
         order_t mOrder {k};
         mOrder.status = SUCCESS;

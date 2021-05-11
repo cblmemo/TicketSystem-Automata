@@ -16,7 +16,7 @@ using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
 using RainyMemory::sortVector;
 
-//#define speedup
+#define speedup
 
 enum coefficient {
     SEAT_NUM_INFINITY = 200000000
