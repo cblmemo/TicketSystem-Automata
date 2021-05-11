@@ -10,10 +10,6 @@
 
 class OrderManager {
 private:
-    enum sizeInfo {
-        MEMORYPOOL_CAPACITY = 100
-    };
-    
     enum status_t {
         SUCCESS, PENDING, REFUNDED
     };
@@ -22,7 +18,7 @@ private:
     using train_t = TrainManager::train_t;
     using trainID_t = TrainManager::trainID_t;
     using station_t = TrainManager::station_t;
-    using station_time_t = TrainManager::station_time_t;
+    using station_time_t = TrainManager::train_time_t;
     
     struct order_t {
         username_t username {};
@@ -43,8 +39,9 @@ private:
         
         order_t(const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int n, int fk, int tk, int di) :
                 username(u), status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {
-            std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-            timeStamp = (long long)(ms.count());
+            //use time stamp to judge whether two order is same, avoid exactly same orders interfere BPLusTree's delete
+            std::chrono::nanoseconds ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
+            timeStamp = (long long)(ns.count());
         }
         
         order_t &operator=(const order_t &o) = default;

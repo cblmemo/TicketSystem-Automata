@@ -37,46 +37,46 @@ void Administrator::runProgramme() {
         Ptilopsis -> resetBuffer(cmd);
         switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:
-                Saria   ->addUser(*Ptilopsis);
+                Saria   -> addUser(*Ptilopsis);
                 break;
             case Parser::LOGIN:
-                Saria   ->login(*Ptilopsis);
+                Saria   -> login(*Ptilopsis);
                 break;
             case Parser::LOGOUT:
-                Saria   ->logout(*Ptilopsis);
+                Saria   -> logout(*Ptilopsis);
                 break;
             case Parser::QUERYPROFILE:
-                Saria   ->queryProfile(*Ptilopsis);
+                Saria   -> queryProfile(*Ptilopsis);
                 break;
             case Parser::MODIFYPROFILE:
-                Saria   ->modifyProfile(*Ptilopsis);
+                Saria   -> modifyProfile(*Ptilopsis);
                 break;
             case Parser::ADDTRAIN:
-                Silence ->addTrain(*Ptilopsis);
+                Silence -> addTrain(*Ptilopsis);
                 break;
             case Parser::RELEASETRAIN:
-                Silence ->releaseTrain(*Ptilopsis);
+                Silence -> releaseTrain(*Ptilopsis);
                 break;
             case Parser::QUERYTRAIN:
-                Silence ->queryTrain(*Ptilopsis);
+                Silence -> queryTrain(*Ptilopsis);
                 break;
             case Parser::DELETETRAIN:
-                Silence ->deleteTrain(*Ptilopsis);
+                Silence -> deleteTrain(*Ptilopsis);
                 break;
             case Parser::QUERYTICKET:
-                Silence ->queryTicket(*Ptilopsis);
+                Silence -> queryTicket(*Ptilopsis);
                 break;
             case Parser::QUERYTRANSFER:
-                Silence ->queryTransfer(*Ptilopsis);
+                Silence -> queryTransfer(*Ptilopsis);
                 break;
             case Parser::BUYTICKET:
-                Ifrit   ->buyTicket(*Ptilopsis);
+                Ifrit   -> buyTicket(*Ptilopsis);
                 break;
             case Parser::QUERYORDER:
-                Ifrit   ->queryOrder(*Ptilopsis);
+                Ifrit   -> queryOrder(*Ptilopsis);
                 break;
             case Parser::REFUNDTICKET:
-                Ifrit   ->refundTicket(*Ptilopsis);
+                Ifrit   -> refundTicket(*Ptilopsis);
                 break;
             case Parser::CLEAN:
                 clean();
