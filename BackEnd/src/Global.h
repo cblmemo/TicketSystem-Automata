@@ -15,12 +15,11 @@ using RainyMemory::HashMap;
 using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
 using RainyMemory::sortVector;
-//using RainyMemory::reverseVector;
 
 //#define speedup
 
 enum coefficient {
-    SEAT_NUM_INFINITY = 2000000
+    SEAT_NUM_INFINITY = 200000000
 };
 
 #ifdef speedup
