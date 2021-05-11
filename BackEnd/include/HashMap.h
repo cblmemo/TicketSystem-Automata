@@ -6,11 +6,29 @@
 #define TICKETSYSTEM_AUTOMATA_HASHMAP_H
 
 #include <functional>
+#include "RTL/algorithm.h"
 
 namespace RainyMemory {
     template<class Key, class Value, class Hash = std::hash<Key>>
     class HashMap {
     private:
+        static const int PrimeNum = 25;
+        
+        const int PrimeList[PrimeNum] = {
+                53, 97, 193, 389, 769,
+                1543, 3079, 6151, 12289, 24593,
+                49157, 98317, 196613, 393241, 786433,
+                1572869, 3145739, 6291469, 12582917, 25165843,
+                50331653, 100663319, 201326611, 402653189, 805306457
+        };
+        
+        inline int nextPrime(int n) {
+            const int *first = PrimeList;
+            const int *last = PrimeList + PrimeNum;
+            const int *pos = RainyMemory::lower_bound(first, last, n);
+            return pos == last ? *(last - 1) : *pos;
+        }
+        
         class LinkedList {
         public:
             class Node {
@@ -79,14 +97,17 @@ namespace RainyMemory {
             bool empty() const {
                 return listSize == 0;
             }
-        };
-    
-    private:
-        enum Info {
-            DEFAULT_CAPACITY = 127
+            
+            void addNode(Node *n) {
+                n->next = head;
+                head = n;
+            }
         };
         
+        using node_t = typename LinkedList::Node;
+        
         int capacity = 0;
+        int number = 0;
         LinkedList *buckets;
         Hash hash;
         
@@ -95,13 +116,27 @@ namespace RainyMemory {
             if (index < 0)index += capacity;
             return index;
         }
+        
+        void resize() {
+            int n = nextPrime(capacity);
+            if (n <= capacity)return;
+            LinkedList *temp = new LinkedList[n];
+            for (int i = 0; i < capacity; i++) {
+                node_t *p = buckets[i].head;
+                while (p != nullptr) {
+                    int index = (hash(*p->key) % n + n) % n;
+                    buckets[i].head = p->next;
+                    temp[index].addNode(p);
+                    p = buckets[i].head;
+                }
+            }
+            capacity = n;
+            delete[] buckets;
+            buckets = temp;
+        }
     
     public:
-        explicit HashMap(int _capacity) : capacity(_capacity) {
-            buckets = new LinkedList[capacity];
-        }
-        
-        HashMap() : capacity(DEFAULT_CAPACITY) {
+        HashMap() : capacity(PrimeList[0]) {
             buckets = new LinkedList[capacity];
         }
         
@@ -112,6 +147,7 @@ namespace RainyMemory {
         void clear() {
             delete[] buckets;
             buckets = new LinkedList[capacity];
+            number = 0;
         }
         
         bool containsKey(const Key &k) const {
@@ -123,7 +159,9 @@ namespace RainyMemory {
             int index = calculateIndex(k);
             if (containsKey(k))return *buckets[index].find(k)->value;
             else {
+                if (number + 1 > capacity)resize();
                 buckets[index].insert(k, Value());
+                number++;
                 return *buckets[index].head->value;
             }
         }
@@ -131,6 +169,7 @@ namespace RainyMemory {
         void erase(const Key &k) {
             int index = calculateIndex(k);
             buckets[index].erase(k);
+            number--;
         }
     };
     

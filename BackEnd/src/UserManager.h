@@ -12,7 +12,6 @@ private:
     friend class OrderManager;
     
     enum sizeInfo {
-        HASHMAP_CAPACITY = 127,
         MEMORYPOOL_CAPACITY = 1000
     };
     
@@ -58,7 +57,7 @@ private:
 
 public:
     UserManager(const string &indexPath, const string &storagePath, std::ostream &dft) :
-            loginPool(HASHMAP_CAPACITY), indexPool(indexPath), storagePool(storagePath, true, MEMORYPOOL_CAPACITY), defaultOut(dft) {}
+            loginPool(), indexPool(indexPath), storagePool(storagePath, true, MEMORYPOOL_CAPACITY), defaultOut(dft) {}
     
     void addUser(const Parser &p);
     
