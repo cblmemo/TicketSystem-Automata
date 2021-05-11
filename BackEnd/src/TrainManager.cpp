@@ -146,60 +146,6 @@ void TrainManager::queryTicket(const Parser &p) {
 }
 
 void TrainManager::queryTransfer(const Parser &p) {
-/*    bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
-    station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
-    vector<std::pair<trainID_t, int>> sTrains, eTrains;
-    ticket_t st {}, en {};
-    int nowTime, nowPrice;
-    stationPool.find(p["-s"], sTrains);
-    stationPool.find(p["-t"], eTrains);
-    for (const std::pair<trainID_t, int> &i : sTrains) {
-        for (const std::pair<trainID_t, int> &j : eTrains) {
-            if (i.first != j.first) {
-                vector<int> temp1, temp2;
-                indexPool.find(i.first, temp1), indexPool.find(j.first, temp2);
-                train_t sTrain {storagePool.read(temp1[0])}, eTrain {storagePool.read(temp2[0])};
-                for (int k = i.second + 1; k < sTrain.stationNum; k++) {
-                    for (int l = 0; l < j.second; l++) {
-                        if (sTrain.stations[k] == eTrain.stations[l]) {
-                            station_time_t dDate {sTrain.departureTimes[i.second]};
-                            bool judge1 = dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(sTrain.dateGap));//can boarding on sTrain
-                            int dist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                            station_time_t aTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
-                            aTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
-                            bool judge2 = aTime <= lastTime;
-                            if (judge1 && judge2) {
-                                int sDist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                                //tempTimex: avoid updateDate(int) deals changes in original train_t
-                                station_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
-                                        tempTime3 {eTrain.departureTimes[l]}, tempTime4 {eTrain.arrivalTimes[j.second]};
-                                ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
-                                                 tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second]};
-                                station_time_t tempTime0 {eTrain.departureTimes[l]};
-                                int eDist = aTime.dateDistance(tempTime0);
-                                if (aTime > tempTime0.updateDate(eDist))eDist++;
-                                ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),
-                                                 tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
-                                int sTempSeat = SEAT_NUM_INFINITY, eTempSeat = SEAT_NUM_INFINITY;
-                                int tempPrice = tempSt.price + tempEn.price, tempTime = tempTime4 - tempTime1;
-                                for (int si = i.second; si < k; si++)sTempSeat = min(sTempSeat, sTrain.remainSeats[sDist][si]);
-                                for (int si = l; si < j.second; si++)eTempSeat = min(eTempSeat, eTrain.remainSeats[eDist][si]);
-                                tempSt.seat = sTempSeat, tempEn.seat = eTempSeat;
-                                if (hasResult) {
-                                    bool timeJudge = tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time;
-                                    bool priceJudge = tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price;
-                                    if (sortByTime && timeJudge || !sortByTime && priceJudge)nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
-                                }
-                                else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (hasResult)defaultOut << st << endl << en << endl;
-    else defaultOut << "0" << endl;*/
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     vector<std::pair<trainID_t, int>> sTrains, eTrains;
