@@ -92,7 +92,7 @@ namespace RainyMemory {
                 int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
                 bool result = false;
                 for (int i = start; i < end; i++) {
-                    if (o2 == leafData[i]) {
+                    if (o1 == leafKey[i] && o2 == leafData[i]) {
                         for (int j = i; j < dataNumber - 1; j++) {
                             leafData[j] = leafData[j + 1];
                             leafKey[j] = leafKey[j + 1];
@@ -112,7 +112,7 @@ namespace RainyMemory {
                 int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
                 bool result = false;
                 for (int i = start; i < end; i++) {
-                    if (o2 == leafData[i]) {
+                    if (o1 == leafKey[i] && o2 == leafData[i]) {
                         leafData[i] = newData;
                         result = true;
                         break;
