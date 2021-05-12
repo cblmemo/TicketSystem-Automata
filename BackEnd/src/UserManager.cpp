@@ -42,7 +42,7 @@ void UserManager::login(const Parser &p) {
     if (!isLogin(p["-u"])) {
         vector<int> temp;
         indexPool.find(p["-u"], temp);
-        if (temp.empty())return outputFailure();
+        if (temp.size() != 1)return outputFailure();
         user_t tempUser {storagePool.read(temp[0])};
         if (tempUser.password == p["-p"]) {
             loginPool[p["-u"]] = {tempUser, temp[0]};
