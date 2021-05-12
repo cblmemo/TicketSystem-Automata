@@ -89,6 +89,7 @@ void OrderManager::refundTicket(const Parser &p) {
     for (int i = pOrder.size() - 1; i >= 0; i--) {
         const order_t &k = pOrder[i];
         if (k.dist != rOrder.dist)continue;
+        if (k.to < rOrder.from || rOrder.to < k.from)continue;
         num = SEAT_NUM_INFINITY;
         for (int j = k.from; j < k.to; j++)num = min(num, rTrain.remainSeats[k.dist][j]);
         if (num < k.num)continue;
