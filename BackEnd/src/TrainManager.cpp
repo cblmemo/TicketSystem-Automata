@@ -121,21 +121,22 @@ void TrainManager::queryTicket(const Parser &p) {
     vector<ticket_t> result;
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
-    for (const std::pair<trainID_t, int> &i : sTrains) {
-        for (const std::pair<trainID_t, int> &j : eTrains) {
-            if (i.first == j.first && i.second < j.second) {
-                vector<int> temp;
-                indexPool.find(i.first, temp);
-                train_t targetTrain {storagePool.read(temp[0])};
-                train_time_t dDate {targetTrain.departureTimes[i.second]};
-                if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
-                    int dist = departureDate.dateDistance(targetTrain.departureTimes[i.second]);
-                    train_time_t tempTime1 {targetTrain.departureTimes[i.second]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
-                    ticket_t ticket {targetTrain.trainID, targetTrain.stations[i.second], targetTrain.stations[j.second], tempTime1.updateDate(dist),
-                                     tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i.second], SEAT_NUM_INFINITY};
-                    for (int k = i.second; k < j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
-                    result.push_back(ticket);
-                }
+    HashMap<trainID_t, int, hash_trainID_t> hashmap;
+    for (const std::pair<trainID_t, int> &i : sTrains)hashmap[i.first] = i.second;
+    for (const std::pair<trainID_t, int> &j : eTrains) {
+        int i;
+        if (hashmap.containsKey(j.first) && (i = hashmap[j.first]) < j.second) {
+            vector<int> temp;
+            indexPool.find(j.first, temp);
+            train_t targetTrain {storagePool.read(temp[0])};
+            train_time_t dDate {targetTrain.departureTimes[i]};
+            if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
+                int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
+                train_time_t tempTime1 {targetTrain.departureTimes[i]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
+                ticket_t ticket {targetTrain.trainID, targetTrain.stations[i], targetTrain.stations[j.second], tempTime1.updateDate(dist),
+                                 tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], SEAT_NUM_INFINITY};
+                for (int k = i; k < j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
+                result.push_back(ticket);
             }
         }
     }

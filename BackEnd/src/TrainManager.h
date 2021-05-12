@@ -27,6 +27,15 @@ private:
         }
     };
     
+    struct hash_trainID_t {
+        int operator()(const trainID_t &o) const {
+            int len = o.length();
+            int h = len;
+            for (int i = 0; i < len; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
+            return h;
+        }
+    };
+    
     struct train_time_t {
         int month = 6;
         int day = 1;
