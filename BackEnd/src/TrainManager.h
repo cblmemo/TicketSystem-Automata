@@ -12,7 +12,7 @@ private:
     friend class OrderManager;
     
     enum sizeInfo {
-        MEMORYPOOL_CAPACITY = 400
+        MEMORYPOOL_CAPACITY = 300
     };
     
     using trainID_t = string_t<20>;

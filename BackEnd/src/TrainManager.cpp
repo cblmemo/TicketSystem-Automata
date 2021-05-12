@@ -97,8 +97,7 @@ void TrainManager::queryTrain(const Parser &p) {
     indexPool.find(p["-i"], temp);
     if (temp.size() != 1)return outputFailure();
     train_t qTrain {storagePool.read(temp[0])};
-    string st = p["-d"];
-    train_time_t ti {(st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0'};
+    train_time_t ti {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
     if (!(qTrain.startTime.lessOrEqualDate(ti) && ti.lessOrEqualDate(qTrain.endTime)))return outputFailure();
     printTrain(qTrain, ti.dateDistance(qTrain.startTime));
 }
