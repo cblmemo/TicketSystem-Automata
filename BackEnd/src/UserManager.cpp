@@ -98,16 +98,15 @@ void UserManager::modifyProfile(const Parser &p) {
         else {
             vector<int> temp;
             indexPool.find(p["-u"], temp);
-            if (temp.size() == 1) {
-                user_t mUser {storagePool.read(temp[0])};
-                if (loginPool[p["-c"]].first.privilege > mUser.privilege) {
-                    if (p.haveThisArgument("-p"))mUser.password = p["-p"];
-                    if (p.haveThisArgument("-n"))mUser.name = p["-n"];
-                    if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
-                    if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
-                    storagePool.update(mUser, temp[0]);
-                    return printUser(mUser);
-                }
+            if (temp.size() != 1)return outputFailure();
+            user_t mUser {storagePool.read(temp[0])};
+            if (loginPool[p["-c"]].first.privilege > mUser.privilege) {
+                if (p.haveThisArgument("-p"))mUser.password = p["-p"];
+                if (p.haveThisArgument("-n"))mUser.name = p["-n"];
+                if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
+                if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
+                storagePool.update(mUser, temp[0]);
+                return printUser(mUser);
             }
         }
     }

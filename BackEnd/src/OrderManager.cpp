@@ -27,6 +27,7 @@ void OrderManager::buyTicket(const Parser &p) {
     if (temp.size() != 1)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp[0])};
     if (!targetTrain.released)return outputFailure();
+    if (targetTrain.seatNum < p("-n"))return outputFailure();
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     int from = -1, to = -1, num = SEAT_NUM_INFINITY;
     for (int i = 0; i < targetTrain.stationNum; i++) {
@@ -53,7 +54,7 @@ void OrderManager::buyTicket(const Parser &p) {
     order_t order {p["-u"], SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                    targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
     indexPool.insert(p["-u"], order);
-    outputSuccess((long long)price * (long long)n);
+    outputSuccess((long long) price * (long long) n);
 }
 
 void OrderManager::queryOrder(const Parser &p) {

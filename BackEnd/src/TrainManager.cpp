@@ -121,6 +121,7 @@ void TrainManager::queryTicket(const Parser &p) {
     vector<ticket_t> result;
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
+    if (sTrains.empty() || eTrains.empty())return outputSuccess();
     HashMap<trainID_t, int, hash_trainID_t> hashmap;
     for (const std::pair<trainID_t, int> &i : sTrains)hashmap[i.first] = i.second;
     for (const std::pair<trainID_t, int> &j : eTrains) {
