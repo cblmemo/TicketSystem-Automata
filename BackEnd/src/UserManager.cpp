@@ -29,7 +29,7 @@ void UserManager::addUser(const Parser &p) {
         indexPool.insert(newUser.username, offset);
         return outputSuccess();
     }
-    if (isLogin(p["-c"]) && !indexPool.containsKey(p["-u"]) && loginPool[p["-c"]] > p("-g")) {
+    if (isLogin(p["-c"]) && !indexPool.containsKey(p["-u"]) && loginPool[p["-c"]].first.privilege > p("-g")) {
         user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], p("-g")};
         int offset = storagePool.write(newUser);
         indexPool.insert(newUser.username, offset);
@@ -45,7 +45,7 @@ void UserManager::login(const Parser &p) {
         if (temp.empty())return outputFailure();
         user_t tempUser {storagePool.read(temp[0])};
         if (tempUser.password == p["-p"]) {
-            loginPool[p["-u"]] = tempUser.privilege;
+            loginPool[p["-u"]] = {tempUser, temp[0]};
             return outputSuccess();
         }
     }
@@ -59,46 +59,55 @@ void UserManager::logout(const Parser &p) {
 
 void UserManager::queryProfile(const Parser &p) {
     if (isLogin(p["-c"])) {
-        if (p["-c"] == p["-u"]) {
-            vector<int> temp;
-            indexPool.find(p["-u"], temp);
-            user_t qUser {storagePool.read(temp[0])};
-            return printUser(qUser);
-        }
+        if (p["-c"] == p["-u"])return printUser(loginPool[p["-u"]].first);
+        if (isLogin(p["-u"]) && loginPool[p["-c"]].first.privilege > loginPool[p["-u"]].first.privilege)return printUser(loginPool[p["-u"]].first);
         vector<int> temp;
         indexPool.find(p["-u"], temp);
         if (temp.size() == 1) {
             user_t qUser {storagePool.read(temp[0])};
-            if (loginPool[p["-c"]] > qUser.privilege)return printUser(qUser);
+            if (loginPool[p["-c"]].first.privilege > qUser.privilege)return printUser(qUser);
         }
     }
     outputFailure();
 }
 
 void UserManager::modifyProfile(const Parser &p) {
-    if (isLogin(p["-c"]) && p("-g") < loginPool[p["-c"]]) {
+    if (isLogin(p["-c"]) && p("-g") < loginPool[p["-c"]].first.privilege) {
         if (p["-c"] == p["-u"]) {
-            vector<int> temp;
-            indexPool.find(p["-u"], temp);
-            user_t mUser {storagePool.read(temp[0])};
+            user_t mUser {loginPool[p["-u"]].first};
             if (p.haveThisArgument("-p"))mUser.password = p["-p"];
             if (p.haveThisArgument("-n"))mUser.name = p["-n"];
             if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
             if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
-            storagePool.update(mUser, temp[0]);
+            storagePool.update(mUser, loginPool[p["-u"]].second);
+            loginPool[p["-u"]].first = mUser;
             return printUser(mUser);
         }
-        vector<int> temp;
-        indexPool.find(p["-u"], temp);
-        if (temp.size() == 1) {
-            user_t mUser {storagePool.read(temp[0])};
-            if (loginPool[p["-c"]] > mUser.privilege) {
+        if (isLogin(p["-u"])) {
+            user_t mUser {loginPool[p["-u"]].first};
+            if (loginPool[p["-c"]].first.privilege > mUser.privilege) {
                 if (p.haveThisArgument("-p"))mUser.password = p["-p"];
                 if (p.haveThisArgument("-n"))mUser.name = p["-n"];
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
                 if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
-                storagePool.update(mUser, temp[0]);
+                storagePool.update(mUser, loginPool[p["-u"]].second);
+                loginPool[p["-u"]].first = mUser;
                 return printUser(mUser);
+            }
+        }
+        else {
+            vector<int> temp;
+            indexPool.find(p["-u"], temp);
+            if (temp.size() == 1) {
+                user_t mUser {storagePool.read(temp[0])};
+                if (loginPool[p["-c"]].first.privilege > mUser.privilege) {
+                    if (p.haveThisArgument("-p"))mUser.password = p["-p"];
+                    if (p.haveThisArgument("-n"))mUser.name = p["-n"];
+                    if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
+                    if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
+                    storagePool.update(mUser, temp[0]);
+                    return printUser(mUser);
+                }
             }
         }
     }

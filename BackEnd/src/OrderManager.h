@@ -18,7 +18,7 @@ private:
     using train_t = TrainManager::train_t;
     using trainID_t = TrainManager::trainID_t;
     using station_t = TrainManager::station_t;
-    using station_time_t = TrainManager::train_time_t;
+    using train_time_t = TrainManager::train_time_t;
     
     struct order_t {
         username_t username {};
@@ -27,8 +27,8 @@ private:
         trainID_t trainID {};
         station_t fromStation {};
         station_t toStation {};
-        station_time_t departureTime {};
-        station_time_t arrivalTime {};
+        train_time_t departureTime {};
+        train_time_t arrivalTime {};
         int price = 0;
         int num = 0;
         int from = 0;
@@ -37,7 +37,7 @@ private:
         
         order_t() = default;
         
-        order_t(const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const station_time_t &d, const station_time_t &a, int p, int n, int fk, int tk, int di) :
+        order_t(const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int n, int fk, int tk, int di) :
                 username(u), status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {
             //use time stamp to judge whether two order is same, avoid exactly same orders interfere BPLusTree's delete
             std::chrono::nanoseconds ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());

@@ -27,14 +27,14 @@ void OrderManager::buyTicket(const Parser &p) {
     if (temp.size() != 1)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp[0])};
     if (!targetTrain.released)return outputFailure();
-    station_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
+    train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     int from = -1, to = -1, num = SEAT_NUM_INFINITY;
     for (int i = 0; i < targetTrain.stationNum; i++) {
         if (targetTrain.stations[i] == p["-f"])from = i;
         if (targetTrain.stations[i] == p["-t"])to = i;
     }
     if (from == -1 || to == -1 || from >= to)return outputFailure();
-    station_time_t dTimes {targetTrain.departureTimes[from]};
+    train_time_t dTimes {targetTrain.departureTimes[from]};
     if (!(dTimes.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dTimes.updateDate(targetTrain.dateGap))))return outputFailure();
     int dist = departureDate.dateDistance(targetTrain.departureTimes[from]);
     for (int i = from; i < to; i++)num = min(num, targetTrain.remainSeats[dist][i]);

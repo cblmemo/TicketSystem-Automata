@@ -12,7 +12,7 @@ private:
     friend class OrderManager;
     
     enum sizeInfo {
-        MEMORYPOOL_CAPACITY = 2000
+        MEMORYPOOL_CAPACITY = 100000
     };
     
     using username_t = string_t<20>;
@@ -42,7 +42,7 @@ private:
                 username(_u), password(_p), name(_n), mailAddr(_m), privilege(_g) {}
     };
     
-    HashMap<username_t, int, hash_username_t> loginPool;//store login users' privilege
+    HashMap<username_t, std::pair<user_t, int>, hash_username_t> loginPool;//store login users' privilege
     BPlusTree<username_t, int> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     std::ostream &defaultOut;
