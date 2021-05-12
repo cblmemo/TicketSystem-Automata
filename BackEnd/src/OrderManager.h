@@ -59,7 +59,7 @@ private:
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     std::ostream &defaultOut;
     
-    inline void outputSuccess(int message = 0);
+    inline void outputSuccess(long long message = 0);
     
     inline void outputFailure();
     

@@ -840,8 +840,8 @@ namespace RainyMemory {
     
     public:
         explicit BPlusTree(const string &name) {
-            leafPool = new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name);
-            internalPool = new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name);
+            leafPool = new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 200);
+            internalPool = new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, 200);
             info = leafPool->readExtraMessage();
         }
         

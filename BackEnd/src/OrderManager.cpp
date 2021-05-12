@@ -4,7 +4,7 @@
 
 #include "OrderManager.h"
 
-void OrderManager::outputSuccess(int message) {
+void OrderManager::outputSuccess(long long message) {
     defaultOut << message << endl;
 }
 
@@ -53,7 +53,7 @@ void OrderManager::buyTicket(const Parser &p) {
     order_t order {p["-u"], SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                    targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
     indexPool.insert(p["-u"], order);
-    outputSuccess(price * n);
+    outputSuccess((long long)price * (long long)n);
 }
 
 void OrderManager::queryOrder(const Parser &p) {
