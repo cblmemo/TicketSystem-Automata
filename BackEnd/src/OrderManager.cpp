@@ -39,7 +39,7 @@ void OrderManager::buyTicket(const Parser &p) {
     int dist = departureDate.dateDistance(targetTrain.departureTimes[from]);
     for (int i = from; i < to; i++)num = min(num, targetTrain.remainSeats[dist][i]);
     int n = p("-n"), price = targetTrain.prices[to] - targetTrain.prices[from];
-    bool queue = num < n, candidate = p["-q"] == "true";
+    bool queue = num < n, candidate = p.haveThisArgument("-q") && p["-q"] == "true";
     if (queue) {
         if (!candidate)return outputFailure();
         order_t order {p["-u"], PENDING, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
