@@ -76,7 +76,7 @@ void UserManager::queryProfile(const Parser &p) {
 }
 
 void UserManager::modifyProfile(const Parser &p) {
-    if (isLogin(p["-c"])) {
+    if (isLogin(p["-c"]) && p("-g") < loginPool[p["-c"]]) {
         if (p["-c"] == p["-u"]) {
             vector<int> temp;
             indexPool.find(p["-u"], temp);
@@ -84,7 +84,7 @@ void UserManager::modifyProfile(const Parser &p) {
             if (p.haveThisArgument("-p"))mUser.password = p["-p"];
             if (p.haveThisArgument("-n"))mUser.name = p["-n"];
             if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
-            if (p.haveThisArgument("-g") && p("-g") < mUser.privilege)mUser.privilege = p("-g");
+            if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
             storagePool.update(mUser, temp[0]);
             return printUser(mUser);
         }
@@ -96,7 +96,7 @@ void UserManager::modifyProfile(const Parser &p) {
                 if (p.haveThisArgument("-p"))mUser.password = p["-p"];
                 if (p.haveThisArgument("-n"))mUser.name = p["-n"];
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
-                if (p.haveThisArgument("-g") && p("-g") < loginPool[p["-c"]])mUser.privilege = p("-g");
+                if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
                 storagePool.update(mUser, temp[0]);
                 return printUser(mUser);
             }
