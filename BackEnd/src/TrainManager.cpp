@@ -46,23 +46,21 @@ void TrainManager::addTrain(const Parser &p) {
     splitTool.resetBuffer(p["-s"]);
     for (int i = 0; i < newTrain.stationNum; i++)newTrain.stations[i] = splitTool.nextToken();
     splitTool.resetBuffer(p["-p"]);
-    //prices is store as prefix sum (from starting station)
     newTrain.prices[0] = 0;
     for (int i = 1; i < newTrain.stationNum; i++)newTrain.prices[i] = splitTool.nextIntToken() + newTrain.prices[i - 1];
     string st {p["-x"]};
-    newTrain.startTime.hour = (st[0] - '0') * 10 + st[1] - '0', newTrain.startTime.minute = (st[3] - '0') * 10 + st[4] - '0';
-    newTrain.endTime.hour = newTrain.startTime.hour, newTrain.endTime.minute = newTrain.startTime.minute;
+    newTrain.startTime.setTime((st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0');
+    newTrain.endTime = newTrain.startTime;
     splitTool.resetBuffer(p["-t"]);
     for (int i = 0; i < newTrain.stationNum - 1; i++)travelTimes[i] = splitTool.nextIntToken();
     splitTool.resetBuffer(p["-o"]);
     for (int i = 0; i < newTrain.stationNum - 2; i++)stopoverTimes[i] = splitTool.nextIntToken();
     splitTool.resetBuffer(p["-d"]);
     st = splitTool.nextToken();
-    newTrain.startTime.month = (st[0] - '0') * 10 + st[1] - '0', newTrain.startTime.day = (st[3] - '0') * 10 + st[4] - '0';
+    newTrain.startTime.setDate((st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0');
     st = splitTool.nextToken();
-    newTrain.endTime.month = (st[0] - '0') * 10 + st[1] - '0', newTrain.endTime.day = (st[3] - '0') * 10 + st[4] - '0';
+    newTrain.endTime.setDate((st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0');
     newTrain.dateGap = newTrain.endTime.dateDistance(newTrain.startTime);
-    //departure time and arrival time store the first train(departure at start time)'s timetable
     train_time_t nowTime {newTrain.startTime};
     newTrain.departureTimes[0] = nowTime;
     for (int i = 1; i < newTrain.stationNum - 1; i++) {
@@ -173,7 +171,7 @@ void TrainManager::queryTransfer(const Parser &p) {
                         bool judge2 = aTime <= lastTime;
                         if (judge1 && judge2) {
                             int sDist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                            //tempTimex: avoid updateDate(int) deals changes in original train_t
+                            //tempTime(i): avoid updateDate(int) deals changes in original train_t
                             train_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
                                     tempTime3 {eTrain.departureTimes[l]}, tempTime4 {eTrain.arrivalTimes[j.second]};
                             ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
