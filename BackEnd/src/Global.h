@@ -18,18 +18,30 @@ using RainyMemory::sortVector;
 
 #define speedup
 
-enum coefficient {
-    SEAT_NUM_INFINITY = 200000000
-};
-
 #ifdef speedup
 const char endl = '\n';
 #else
 using std::endl;
 #endif
 
+enum coefficient {
+    SEAT_NUM_INFINITY = 200000000,
+    USER_MANAGER_MEMORYPOOL_CAPACITY = 100000,
+    TRAIN_MANAGER_MEMORYPOOL_CAPACITY = 300
+};
+
 constexpr int lengthOfChineseCharacters(int length) {
     return length * 4;
 }
+
+template<int len>
+struct hash_string_t {
+    int operator()(const string_t<len> &o) const {
+        int l = o.length();
+        int h = l;
+        for (int i = 0; i < l; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
+        return h;
+    }
+};
 
 #endif //TICKETSYSTEM_AUTOMATA_GLOBAL_H

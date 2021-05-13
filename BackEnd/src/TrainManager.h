@@ -8,159 +8,149 @@
 #include "Global.h"
 
 class TrainManager {
+    /*
+     * class TrainManager
+     * --------------------------------------------------------
+     * A class implements all functions of trains, including six
+     * commands: [add_train], [release_train], [query_train],
+     * [delete_train], [query_ticket], [query_transfer].
+     * This class used BPlusTree to indexing train data by the
+     * unique identifier [trainID], and a memory pool which has
+     * built-in LRU Cache to storage data.
+     * For [query_train] and [query_transfer], this class also
+     * implement a BPlusTree to indexing [trainID] by the station
+     * that train passed. This BPlusTree allows duplicate key value.
+     *
+     */
 private:
     friend class OrderManager;
     
-    enum sizeInfo {
-        MEMORYPOOL_CAPACITY = 300
-    };
-    
     using trainID_t = string_t<20>;
     using station_t = string_t<lengthOfChineseCharacters(10)>;
-    
-    struct hash_station_t {
-        int operator()(const station_t &o) const {
-            int len = o.length();
-            int h = len;
-            for (int i = 0; i < len; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
-            return h;
-        }
-    };
-    
-    struct hash_trainID_t {
-        int operator()(const trainID_t &o) const {
-            int len = o.length();
-            int h = len;
-            for (int i = 0; i < len; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
-            return h;
-        }
-    };
+    using hash_station_t = hash_string_t<lengthOfChineseCharacters(10)>;
+    using hash_trainID_t = hash_string_t<20>;
     
     struct train_time_t {
+    /*
+     * Time Class
+     * Modified By PaperL at 2021.5.13
+     * Modification:
+     *      Store data by 4-byte-long unsigned integer
+     *      Use bit-operation
+     *      Change most variable name in functions
+     *      Support date of full year
+     */
+#ifndef _GLIBCXX_IOSTREAM
+#error "<iostream> is not included. Overloading operator<< is inavailable."
+#endif
+#ifndef _GLIBCXX_CSTDINT
+#error "<cstdint> is not included. uint_fast32_t is inavailable."
+#endif
     private:
-        int month = 6;
-        int day = 1;
-        int hour = 0;
-        int minute = 0;
+        typedef uint_fast32_t value_type;
+        
+        value_type value = 0x00970000;
+        constexpr const static value_type accumulateDay[13] = {0, 31, 59, 90, 120, 151,
+                                                               181, 212, 243, 273, 304, 334,
+                                                               365}; // Accumulate day num of each month
+        constexpr const static char numString[60][3] = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
+                                                        "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+                                                        "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+                                                        "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+                                                        "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+                                                        "50", "51", "52", "53", "54", "55", "56", "57", "58", "59"};
+        constexpr const static value_type MinuteNum = 24 * 60;
+        
+        [[nodiscard]] inline value_type Front4Byte() const { return ((value) & 0xffff0000); }
+        
+        [[nodiscard]] inline value_type Back4Byte() const { return ((value) & 0x0000ffff); }
     
     public:
-        explicit train_time_t(int mo, int da, int ho = 0, int mi = 0) : month(mo), day(da), hour(ho), minute(mi) {}
+        explicit train_time_t(int mon, int day, int hou = 0, int min = 0)
+                : value((value_type(accumulateDay[mon - 1] + (day - 1)) << 16) | (value_type(hou * 60 + min))) {}
+        
+        explicit train_time_t(const value_type val) : value(val) {} // 0x00970000 for 00:00,June 1
         
         train_time_t() = default;
         
-        train_time_t &operator=(const train_time_t &o) = default;
+        train_time_t(const train_time_t &other) = default;
         
-        friend std::ostream &operator<<(std::ostream &os, const train_time_t &t) {
-            os << "0" << t.month << "-";
-            if (t.day >= 10)os << t.day;
-            else os << "0" << t.day;
-            os << " ";
-            if (t.hour >= 10)os << t.hour;
-            else os << "0" << t.hour;
-            os << ":";
-            if (t.minute >= 10)os << t.minute;
-            else os << "0" << t.minute;
+        train_time_t &operator=(const train_time_t &other) = default;
+        
+        
+        friend std::ostream &operator<<(std::ostream &os, const train_time_t &arg) {
+            auto date = arg.Front4Byte() >> 16, time = arg.Back4Byte();
+            value_type mon = 1, day = date, hou, min = time;
+            while (day >= accumulateDay[mon]) mon++;
+            day = day - accumulateDay[mon - 1] + 1;
+            os << numString[mon] << '-' << numString[day] << ' ';
+            hou = min / 60, min %= 60;
+            os << numString[hou] << ':' << numString[min];
             return os;
         }
         
-        train_time_t operator+(int mi) {
-            minute += mi;
-            int ho = minute - minute % 60;
-            minute %= 60;
-            hour += ho / 60;
-            int da = hour - hour % 24;
-            hour %= 24;
-            day += da / 24;
-            if (month == 6 && day > 30)day -= 30, month++;
-            if (month == 7 && day > 31)day -= 31, month++;
-            if (month == 8 && day > 31)day -= 31, month++;
+        
+        bool operator==(const train_time_t &right) const { return value == right.value; }
+        
+        bool operator!=(const train_time_t &right) const { return value != right.value; }
+        
+        bool operator<(const train_time_t &right) const { return value < right.value; }
+        
+        bool operator>(const train_time_t &right) const { return value > right.value; }
+        
+        bool operator<=(const train_time_t &right) const { return value <= right.value; }
+        
+        bool operator>=(const train_time_t &right) const { return value >= right.value; }
+        
+        
+        train_time_t operator+(int minute) const {
+            value_type time = Back4Byte() + minute;
+            return train_time_t((time >= MinuteNum)
+                                ? ((Front4Byte() + ((time / MinuteNum) << 16)) | (time % MinuteNum))
+                                : (Front4Byte() | time));
+        }
+        
+        train_time_t &operator+=(int minute) {
+            value_type time = Back4Byte() + minute;
+            value = (time >= MinuteNum)
+                    ? ((Front4Byte() + ((time / MinuteNum) << 16)) | (time % MinuteNum))
+                    : (Front4Byte() | time);
             return *this;
         }
         
-        train_time_t &operator+=(int mi) {
-            *this = *this + mi;
+        int operator-(const train_time_t &right) const
+        // Return time difference in unit of minute
+        {
+            if (value > right.value)
+                return int(((Front4Byte() - right.Front4Byte()) >> 16) * MinuteNum
+                           + (Back4Byte() - right.Back4Byte()));
+            else if (value < right.value)
+                return int(((right.Front4Byte() - Front4Byte()) >> 16) * MinuteNum
+                           + (right.Back4Byte() - Back4Byte()));
+            else return int(0);
+        }
+        
+        [[nodiscard]] int dateDistance(const train_time_t &right) const
+        // Return num of day from a {FORMER} date to this date, otherwise return 0
+        {
+            return ((value > right.value) ? int((Front4Byte() - right.Front4Byte()) >> 16) : 0);
+        }
+        
+        train_time_t &updateDate(const int dd) {
+            value += value_type(dd) << 16;
             return *this;
         }
         
-        int operator-(const train_time_t &o) const {
-            //return distance in minute
-            if (*this > o)return dateDistance(o) * 24 * 60 + (hour - o.hour) * 60 + minute - o.minute;
-            else return o.dateDistance(*this) * 24 * 60 + (o.hour - hour) * 60 + o.minute - minute;
+        [[nodiscard]] bool lessOrEqualDate(const train_time_t &right) const {
+            return (value <= right.value) || (Front4Byte() == right.Front4Byte());
         }
         
-        int dateDistance(const train_time_t &o) const {
-            if ((*this) <= o)return 0;
-            //assume this is later than o
-            int ret = day - o.day;
-            switch (month - o.month) {
-                case 3:
-                    ret += 92;
-                    break;
-                case 2:
-                    ret += 61;
-                    break;
-                case 1:
-                    if (month == 7)ret += 30;
-                    else ret += 31;
-            }
-            return ret;
+        void setDate(const int mon, const int day) {
+            value = Back4Byte() | (value_type(accumulateDay[mon - 1] + (day - 1)) << 16);
         }
         
-        train_time_t &updateDate(int da) {
-            day += da;
-            if (month == 6 && day > 30)day -= 30, month++;
-            if (month == 7 && day > 31)day -= 31, month++;
-            if (month == 8 && day > 31)day -= 31, month++;
-            return *this;
-        }
-        
-        bool operator<(const train_time_t &o) const {
-            if (month < o.month)return true;
-            else if (month > o.month)return false;
-            if (day < o.day)return true;
-            else if (day > o.day)return false;
-            if (hour < o.hour)return true;
-            else if (hour > o.hour)return false;
-            if (minute < o.minute)return true;
-            else return false;
-        }
-        
-        bool operator==(const train_time_t &o) const {
-            return month == o.month && day == o.day && hour == o.hour && minute == o.minute;
-        }
-        
-        bool operator!=(const train_time_t &o) const {
-            return !(*this == o);
-        }
-        
-        bool operator>(const train_time_t &o) const {
-            if (*this == o)return false;
-            return !(*this < o);
-        }
-        
-        bool operator<=(const train_time_t &o) const {
-            if (*this == o)return true;
-            return *this < o;
-        }
-        
-        bool operator>=(const train_time_t &o) const {
-            if (*this == o)return true;
-            return !(*this < o);
-        }
-        
-        bool lessOrEqualDate(const train_time_t &o) const {
-            if (month < o.month)return true;
-            else if (month > o.month)return false;
-            if (day <= o.day)return true;
-            else return false;
-        }
-        
-        void setDate(int m, int d) {
-            month = m, day = d;
-        }
-        
-        void setTime(int h, int mi) {
-            hour = h, minute = mi;
+        void setTime(const int hou, const int min) {
+            value = Front4Byte() | value_type(hou * 60 + min);
         }
     };
     
@@ -251,7 +241,7 @@ private:
 
 public:
     TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft) :
-            indexPool(indexPath), storagePool(storagePath, 0, MEMORYPOOL_CAPACITY), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_MANAGER_MEMORYPOOL_CAPACITY), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);
     

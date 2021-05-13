@@ -21,6 +21,14 @@ using RainyMemory::LRUCacheMemoryPool;
 namespace RainyMemory {
     template<class key, class data, int M = 200, int L = 200>
     class BPlusTree {
+        /*
+         * class BPlusTree
+         * --------------------------------------------------------
+         * A cdata structure which implements data indexing or storage.
+         * This version support duplicate key value, and require class T
+         * overloaded [operator<] and [operator=].
+         *
+         */
     private:
         struct splitNodeReturn {
             int offset;

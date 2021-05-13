@@ -9,6 +9,17 @@
 #include "TrainManager.h"
 
 class OrderManager {
+    /*
+     * class OrderManager
+     * --------------------------------------------------------
+     * A class implements all functions of orders, including three
+     * commands: [buy_ticket], [query_order], [refund_ticket].
+     * This class used BPlusTree to directly store order data
+     * indexing by the identifier [username], and for each pending
+     * order, store a copy of it indexing by [trainID]. These
+     * BPlusTrees allow duplicate key value.
+     *
+     */
 private:
     enum status_t {
         SUCCESS, PENDING, REFUNDED
@@ -28,8 +39,8 @@ private:
          * [timeStamp]: Order's creation time, to judge whether two
          * order is same, therefore could avoid exactly same orders
          * interfere BPLusTree's delete.
-         * [from] && [to]: from station and to station's station index.
-         * [dist]: order train's departure date distance between start
+         * [from] && [to]: From station and to station's station index.
+         * [dist]: Order train's departure date distance between start
          * time.
          *
          */
@@ -52,7 +63,7 @@ private:
         order_t(const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int n, int fk, int tk, int di) :
                 username(u), status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {
             std::chrono::nanoseconds ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
-            timeStamp = (long long)(ns.count());
+            timeStamp = (long long) (ns.count());
         }
         
         order_t &operator=(const order_t &o) = default;
@@ -63,6 +74,14 @@ private:
         }
     };
     
+    /*
+     * Data Members
+     * --------------------------------------------------------
+     * [userManager]: Manage functions that is relevant to users.
+     * [trainManager]: Manage functions that is relevant to trains.
+     * [pendingPool]: Store every pending order.
+     *
+     */
     UserManager *userManager;
     TrainManager *trainManager;
     BPlusTree<username_t, order_t> indexPool;

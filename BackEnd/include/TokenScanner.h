@@ -11,6 +11,15 @@ using std::string;
 
 namespace RainyMemory {
     class TokenScanner {
+        /*
+         * class TokenScanner
+         * --------------------------------------------------------
+         * A class implements string processing devices like
+         * std::stringstream. This class support custom delimitation
+         * and stream manipulate operator, and built-in string to int
+         * transformation.
+         *
+         */
     private:
         string Buffer;
         char Delim = ' ';

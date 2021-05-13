@@ -10,6 +10,17 @@
 #include "OrderManager.h"
 
 class Administrator {
+    /*
+     * class Administrator
+     * --------------------------------------------------------
+     * A class implements all functions, including two extra
+     * commands: [clean], [exit].
+     * This class used a Parser to parse commands, and three
+     * managers to execute corresponding functions.
+     * The name of parser, managers and Administrator in main.cpp
+     * are credit to [Arknights], no copyright infringement intended.
+     *
+     */
 private:
     Parser       *Ptilopsis = nullptr;
     UserManager  *Saria     = nullptr;

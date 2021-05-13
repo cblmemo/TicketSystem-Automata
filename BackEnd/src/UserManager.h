@@ -8,26 +8,26 @@
 #include "Global.h"
 
 class UserManager {
+    /*
+     * class UserManager
+     * --------------------------------------------------------
+     * A class implements all functions of users, including five
+     * commands: [add_user], [login], [logout], [query_profile],
+     * [modify_profile].
+     * This class used BPlusTree to indexing user data by the
+     * unique identifier [username], and a memory pool which has
+     * built-in LRU Cache to storage data.
+     *
+     */
 private:
     friend class OrderManager;
-    
-    enum sizeInfo {
-        MEMORYPOOL_CAPACITY = 100000
-    };
     
     using username_t = string_t<20>;
     using password_t = string_t<30>;
     using name_t = string_t<lengthOfChineseCharacters(5)>;
     using mailAddr_t = string_t<30>;
     
-    struct hash_username_t {
-        int operator()(const username_t &o) const {
-            int len = o.length();
-            int h = len;
-            for (int i = 0; i < len; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
-            return h;
-        }
-    };
+    using hash_username_t = hash_string_t<20>;
     
     struct user_t {
         username_t username {};
@@ -42,6 +42,14 @@ private:
                 username(_u), password(_p), name(_n), mailAddr(_m), privilege(_g) {}
     };
     
+    /*
+     * Data Members
+     * --------------------------------------------------------
+     * [loginPool]: Store user's login status. In the same time,
+     * implement a simple cache strategy, which is to store every
+     * login user's information and offset.
+     *
+     */
     HashMap<username_t, std::pair<user_t, int>, hash_username_t> loginPool;//store login users' privilege
     BPlusTree<username_t, int> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
@@ -57,7 +65,7 @@ private:
 
 public:
     UserManager(const string &indexPath, const string &storagePath, std::ostream &dft) :
-            loginPool(), indexPool(indexPath), storagePool(storagePath, true, MEMORYPOOL_CAPACITY), defaultOut(dft) {}
+            loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_MANAGER_MEMORYPOOL_CAPACITY), defaultOut(dft) {}
     
     void addUser(const Parser &p);
     

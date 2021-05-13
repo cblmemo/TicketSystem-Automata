@@ -16,6 +16,17 @@ using std::ios;
 namespace RainyMemory {
     template<class T, class extraMessage = int>
     class LRUCacheMemoryPool {
+        /*
+         * class LRUCacheMemoryPool
+         * --------------------------------------------------------
+         * A class implements memory pool which has built-in cache
+         * strategy to storage and quick access data.
+         * This class offer single type data's storage, update and
+         * delete in file, and LRU Cache to accelerate accession.
+         * ALso, this class support deleted data's space reclamation,
+         * and an extra (not same type of stored data) message storage.
+         *
+         */
     private:
         class DoublyLinkedList {
         public:

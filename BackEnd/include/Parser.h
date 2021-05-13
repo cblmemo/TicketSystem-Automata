@@ -9,6 +9,22 @@
 
 namespace RainyMemory {
     class Parser {
+        /*
+         * class Parser
+         * --------------------------------------------------------
+         * A class implements commands processing devices for train
+         * ticket management system, using TokenScanner to manipulate
+         * original command.
+         * This class overloaded operator[] to access command arguments,
+         * and operator() to transform argument into int.
+         *
+         * Usage:
+         * string cmd;
+         * Parser p;
+         * p.resetBuffer(cmd);
+         * p["-a"] will return cmd's -a argument
+         *
+         */
     public:
         enum commandType {
             ADDUSER, LOGIN, LOGOUT, QUERYPROFILE, MODIFYPROFILE, ADDTRAIN,
@@ -17,7 +33,7 @@ namespace RainyMemory {
         };
     
     private:
-        RainyMemory::TokenScanner ts;
+        TokenScanner ts;
         commandType type = NONE;
         string argument[26];
         bool exist[26];

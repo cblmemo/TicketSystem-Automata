@@ -11,6 +11,14 @@
 namespace RainyMemory {
     template<class Key, class Value, class Hash = std::hash<Key>>
     class HashMap {
+        /*
+         * class HashMap
+         * --------------------------------------------------------
+         * A class implements o(1) find, insert and delete map like
+         * std::unordered_map.
+         * This class support dynamic capacity.
+         *
+         */
     private:
         static const int PrimeNum = 25;
         
