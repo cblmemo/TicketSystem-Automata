@@ -21,6 +21,18 @@ private:
     using train_time_t = TrainManager::train_time_t;
     
     struct order_t {
+        /*
+         * order_t
+         * Store order's relevant information
+         * --------------------------------------------------------
+         * [timeStamp]: Order's creation time, to judge whether two
+         * order is same, therefore could avoid exactly same orders
+         * interfere BPLusTree's delete.
+         * [from] && [to]: from station and to station's station index.
+         * [dist]: order train's departure date distance between start
+         * time.
+         *
+         */
         username_t username {};
         long long timeStamp {};
         status_t status = SUCCESS;
@@ -39,7 +51,6 @@ private:
         
         order_t(const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int n, int fk, int tk, int di) :
                 username(u), status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {
-            //use time stamp to judge whether two order is same, avoid exactly same orders interfere BPLusTree's delete
             std::chrono::nanoseconds ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
             timeStamp = (long long)(ns.count());
         }
