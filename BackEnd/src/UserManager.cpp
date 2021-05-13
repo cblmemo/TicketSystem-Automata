@@ -63,16 +63,15 @@ void UserManager::queryProfile(const Parser &p) {
         if (isLogin(p["-u"]) && loginPool[p["-c"]].first.privilege > loginPool[p["-u"]].first.privilege)return printUser(loginPool[p["-u"]].first);
         vector<int> temp;
         indexPool.find(p["-u"], temp);
-        if (temp.size() == 1) {
-            user_t qUser {storagePool.read(temp[0])};
-            if (loginPool[p["-c"]].first.privilege > qUser.privilege)return printUser(qUser);
-        }
+        if (temp.size() != 1)return outputFailure();
+        user_t qUser {storagePool.read(temp[0])};
+        if (loginPool[p["-c"]].first.privilege > qUser.privilege)return printUser(qUser);
     }
     outputFailure();
 }
 
 void UserManager::modifyProfile(const Parser &p) {
-    if (isLogin(p["-c"]) && p("-g") < loginPool[p["-c"]].first.privilege) {
+    if (isLogin(p["-c"]) && (!p.haveThisArgument("-g") || p("-g") < loginPool[p["-c"]].first.privilege)) {
         if (p["-c"] == p["-u"]) {
             user_t mUser {loginPool[p["-u"]].first};
             if (p.haveThisArgument("-p"))mUser.password = p["-p"];
