@@ -19,7 +19,7 @@ using RainyMemory::LRUCacheMemoryPool;
 //#define debug
 
 namespace RainyMemory {
-    template<class key, class data, int M = 300, int L = 300>
+    template<class key, class data, int M = 100, int L = 100>
     class BPlusTree {
         /*
          * class BPlusTree
