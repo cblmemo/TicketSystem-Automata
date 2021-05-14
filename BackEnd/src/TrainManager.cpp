@@ -171,9 +171,9 @@ void TrainManager::queryTransfer(const Parser &p) {
                         train_time_t dDate {sTrain.departureTimes[i.second]};
                         bool judge1 = dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(sTrain.dateGap));//can boarding on sTrain
                         int dist = departureDate.dateDistance(sTrain.departureTimes[i.second]);
-                        train_time_t aTime {sTrain.arrivalTimes[k]}, firstTime {eTrain.departureTimes[l]}, lastTime {eTrain.departureTimes[l]};
+                        train_time_t aTime {sTrain.arrivalTimes[k]}, lastTime {eTrain.departureTimes[l]};
                         aTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
-                        bool judge2 = firstTime <= aTime && aTime <= lastTime;
+                        bool judge2 = aTime <= lastTime;
                         if (judge1 && judge2) {
                             int sDist = dist;
                             //tempTime(i): avoid updateDate(int) deals changes in original train_t
@@ -191,12 +191,8 @@ void TrainManager::queryTransfer(const Parser &p) {
                             for (int si = i.second; si < k; si++)tempSt.seat = min(tempSt.seat, sTrain.remainSeats[sDist][si]);
                             for (int si = l; si < j.second; si++)tempEn.seat = min(tempEn.seat, eTrain.remainSeats[eDist][si]);
                             if (hasResult) {
-                                if (sortByTime) {
-                                    if (tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time)nowTime = tempTime, st = tempSt, en = tempEn;
-                                }
-                                else {
-                                    if (tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price)nowPrice = tempPrice, st = tempSt, en = tempEn;
-                                }
+                                if (sortByTime && (tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time))nowTime = tempTime, st = tempSt, en = tempEn;
+                                if (!sortByTime && (tempPrice < nowPrice || tempPrice == nowPrice && tempSt.time < st.time))nowPrice = tempPrice, st = tempSt, en = tempEn;
                             }
                             else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
                         }
