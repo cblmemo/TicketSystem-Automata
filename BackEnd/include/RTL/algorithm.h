@@ -5,6 +5,14 @@
 #ifndef TICKETSYSTEM_AUTOMATA_ALGORITHM_H
 #define TICKETSYSTEM_AUTOMATA_ALGORITHM_H
 
+/*
+ * algorithm.h
+ * --------------------------------------------------------
+ * A header implements [sort] using heuristic algorithm,
+ * [lower_bound], [upper_bound] and [find] for BPlusTree.
+ *
+ */
+
 #include "vector.h"
 
 namespace RainyMemory {
@@ -211,15 +219,6 @@ namespace RainyMemory {
     void sortVector(RainyMemory::vector<T> &vec, bool (*compare)(const T &, const T &) = [](const T &o1, const T &o2) -> bool { return o1 < o2; }) {
         inner_vector::intro_sort(vec, 0, vec.size() - 1, compare, inner_vector::_lg(vec.size() - 1) * 2);
     }
-    
-    //todo debug
-//    template<class T>
-//    void reverseVector(RainyMemory::vector<T> &vec) {
-//        typename RainyMemory::vector<T>::iterator first {vec.begin()}, last {vec.end()};
-//        while ((first != last) && (first != --last)) {
-//            inner_vector::iter_swap(first++, last);
-//        }
-//    }
     
     template<class ptr, class T>
     ptr lower_bound(ptr first, ptr last, const T &val) {

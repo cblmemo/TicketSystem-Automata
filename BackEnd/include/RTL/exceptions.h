@@ -5,6 +5,13 @@
 #ifndef TICKETSYSTEM_AUTOMATA_EXCEPTIONS_H
 #define TICKETSYSTEM_AUTOMATA_EXCEPTIONS_H
 
+/*
+ * exceptions.h
+ * --------------------------------------------------------
+ * A header implements class exception for [vector.h].
+ *
+ */
+
 #include <cstring>
 #include <iostream>
 

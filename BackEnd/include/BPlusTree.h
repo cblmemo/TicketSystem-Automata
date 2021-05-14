@@ -24,7 +24,7 @@ namespace RainyMemory {
         /*
          * class BPlusTree
          * --------------------------------------------------------
-         * A cdata structure which implements data indexing or storage.
+         * A data structure which implements data indexing or storage.
          * This version support duplicate key value, and require class T
          * overloaded [operator<] and [operator=].
          *

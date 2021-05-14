@@ -10,6 +10,7 @@
 #include "../include/Parser.h"
 #include <chrono>
 
+using RainyMemory::string_t;
 using RainyMemory::BPlusTree;
 using RainyMemory::HashMap;
 using RainyMemory::TokenScanner;

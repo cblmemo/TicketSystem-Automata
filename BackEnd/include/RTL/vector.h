@@ -12,6 +12,12 @@
 namespace RainyMemory {
     template<typename T>
     class vector {
+        /*
+         * class vector
+         * --------------------------------------------------------
+         * A class implements infinity space array like std::vector.
+         *
+         */
     private:
         T **store = nullptr;
         int tail;
