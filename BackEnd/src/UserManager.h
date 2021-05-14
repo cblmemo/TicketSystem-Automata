@@ -50,7 +50,7 @@ private:
      * login user's information and offset.
      *
      */
-    HashMap<username_t, std::pair<user_t, int>, hash_username_t> loginPool;//store login users' privilege
+    HashMap<username_t, std::pair<user_t, int>, hash_username_t> loginPool;
     BPlusTree<username_t, int> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     std::ostream &defaultOut;
