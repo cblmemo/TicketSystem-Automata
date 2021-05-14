@@ -114,9 +114,9 @@ void TrainManager::deleteTrain(const Parser &p) {
 void TrainManager::queryTicket(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
-    static vector<std::pair<trainID_t, int>> sTrains, eTrains;
+    static vector <std::pair<trainID_t, int>> sTrains, eTrains;
     sTrains.clear(), eTrains.clear();
-    static vector<ticket_t> result;
+    static vector <ticket_t> result;
     result.clear();
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
@@ -137,7 +137,7 @@ void TrainManager::queryTicket(const Parser &p) {
                 ticket_t ticket {targetTrain.trainID, targetTrain.stations[i], targetTrain.stations[j.second], tempTime1.updateDate(dist),
                                  tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], SEAT_NUM_INFINITY};
                 for (int k = i; k < j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
-                result.push_back(ticket);
+                if (ticket.seat != 0)result.push_back(ticket);
             }
         }
     }
@@ -150,7 +150,7 @@ void TrainManager::queryTicket(const Parser &p) {
 void TrainManager::queryTransfer(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
-    static vector<std::pair<trainID_t, int>> sTrains, eTrains;
+    static vector <std::pair<trainID_t, int>> sTrains, eTrains;
     sTrains.clear(), eTrains.clear();
     ticket_t st {}, en {};
     int nowTime, nowPrice;
@@ -191,12 +191,14 @@ void TrainManager::queryTransfer(const Parser &p) {
                             for (int si = i.second; si < k; si++)sTempSeat = min(sTempSeat, sTrain.remainSeats[sDist][si]);
                             for (int si = l; si < j.second; si++)eTempSeat = min(eTempSeat, eTrain.remainSeats[eDist][si]);
                             tempSt.seat = sTempSeat, tempEn.seat = eTempSeat;
-                            if (hasResult) {
-                                bool timeJudge = tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time;
-                                bool priceJudge = tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price;
-                                if (sortByTime && timeJudge || !sortByTime && priceJudge)nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
+                            if (tempSt.seat != 0 && tempEn.seat != 0) {
+                                if (hasResult) {
+                                    bool timeJudge = tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time;
+                                    bool priceJudge = tempPrice < nowPrice || tempPrice == nowPrice && tempSt.price < st.price;
+                                    if (sortByTime && timeJudge || !sortByTime && priceJudge)nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
+                                }
+                                else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
                             }
-                            else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
                         }
                     }
                 }
