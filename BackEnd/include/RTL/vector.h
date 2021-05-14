@@ -305,12 +305,10 @@ namespace RainyMemory {
             return tail;
         }
         
+        //todo debug
         void clear() {
             for (int i = 0; i < tail; i++)delete store[i];
-            delete[]store;
             tail = 0;
-            length = INIT_LEN;
-            store == new T *[length];
         }
         
         iterator insert(iterator pos, const T &value) {

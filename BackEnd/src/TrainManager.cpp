@@ -114,12 +114,15 @@ void TrainManager::deleteTrain(const Parser &p) {
 void TrainManager::queryTicket(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
-    vector<std::pair<trainID_t, int>> sTrains, eTrains;
-    vector<ticket_t> result;
+    static vector<std::pair<trainID_t, int>> sTrains, eTrains;
+    sTrains.clear(), eTrains.clear();
+    static vector<ticket_t> result;
+    result.clear();
     stationPool.find(p["-s"], sTrains);
     stationPool.find(p["-t"], eTrains);
     if (sTrains.empty() || eTrains.empty())return outputSuccess();
-    HashMap<trainID_t, int, hash_trainID_t> hashmap;
+    static HashMap<trainID_t, int, hash_trainID_t> hashmap;
+    hashmap.clear();
     for (const std::pair<trainID_t, int> &i : sTrains)hashmap[i.first] = i.second;
     for (const std::pair<trainID_t, int> &j : eTrains) {
         int i;
@@ -147,7 +150,8 @@ void TrainManager::queryTicket(const Parser &p) {
 void TrainManager::queryTransfer(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
-    vector<std::pair<trainID_t, int>> sTrains, eTrains;
+    static vector<std::pair<trainID_t, int>> sTrains, eTrains;
+    sTrains.clear(), eTrains.clear();
     ticket_t st {}, en {};
     int nowTime, nowPrice;
     stationPool.find(p["-s"], sTrains);
@@ -158,7 +162,8 @@ void TrainManager::queryTransfer(const Parser &p) {
                 vector<int> temp1, temp2;
                 indexPool.find(i.first, temp1), indexPool.find(j.first, temp2);
                 train_t sTrain {storagePool.read(temp1[0])}, eTrain {storagePool.read(temp2[0])};
-                HashMap<station_t, int, hash_station_t> hashmap;
+                static HashMap<station_t, int, hash_station_t> hashmap;
+                hashmap.clear();
                 for (int k = i.second + 1; k < sTrain.stationNum; k++)hashmap[sTrain.stations[k]] = k;
                 for (int l = 0; l < j.second; l++) {
                     if (hashmap.containsKey(eTrain.stations[l])) {

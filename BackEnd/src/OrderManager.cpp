@@ -27,7 +27,8 @@ void OrderManager::buyTicket(const Parser &p) {
     if (temp.size() != 1)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp[0])};
     if (!targetTrain.released)return outputFailure();
-    if (targetTrain.seatNum < p("-n"))return outputFailure();
+    int n = p("-n");
+    if (targetTrain.seatNum < n)return outputFailure();
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     int from = -1, to = -1, num = SEAT_NUM_INFINITY;
     for (int i = 0; i < targetTrain.stationNum; i++) {
@@ -39,7 +40,7 @@ void OrderManager::buyTicket(const Parser &p) {
     if (!(dTimes.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dTimes.updateDate(targetTrain.dateGap))))return outputFailure();
     int dist = departureDate.dateDistance(targetTrain.departureTimes[from]);
     for (int i = from; i < to; i++)num = min(num, targetTrain.remainSeats[dist][i]);
-    int n = p("-n"), price = targetTrain.prices[to] - targetTrain.prices[from];
+    int price = targetTrain.prices[to] - targetTrain.prices[from];
     bool queue = num < n, candidate = p.haveThisArgument("-q") && p["-q"] == "true";
     if (queue) {
         if (!candidate)return outputFailure();
@@ -59,7 +60,8 @@ void OrderManager::buyTicket(const Parser &p) {
 
 void OrderManager::queryOrder(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
-    vector<order_t> result;
+    static vector<order_t> result;
+    result.clear();
     indexPool.find(p["-u"], result);
     defaultOut << result.size() << endl;
     for (const order_t &i : result)printOrder(i);
@@ -83,7 +85,8 @@ void OrderManager::refundTicket(const Parser &p) {
     trainManager->indexPool.find(rOrder.trainID, temp);
     train_t rTrain {trainManager->storagePool.read(temp[0])};
     for (int i = rOrder.from; i < rOrder.to; i++)rTrain.remainSeats[rOrder.dist][i] += rOrder.num;
-    vector<order_t> pOrder;
+    static vector<order_t> pOrder;
+    pOrder.clear();
     pendingPool.find(rOrder.trainID, pOrder);
     int num;
     for (int i = pOrder.size() - 1; i >= 0; i--) {
