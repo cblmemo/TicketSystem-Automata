@@ -17,7 +17,7 @@ using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
 using RainyMemory::sortVector;
 
-//#define speedup
+#define speedup
 
 #ifdef speedup
 const char endl = '\n';
