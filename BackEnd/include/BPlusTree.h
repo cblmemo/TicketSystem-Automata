@@ -114,7 +114,6 @@ namespace RainyMemory {
                 return result;
             }
             
-            //todo debug
             bool updateElement(BPlusTree *tree, const key &o1, const data &o2, const data &newData) {
                 int start = lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
                 int end = upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
@@ -801,7 +800,6 @@ namespace RainyMemory {
             }
         }
         
-        //todo debug
         void recursionUpdate(int now, const key &o1, const data &o2, const data &newData) {
             internalNode nowNode = internalPool->read(now);
             if (nowNode.childNodeIsLeaf) {
@@ -966,7 +964,6 @@ namespace RainyMemory {
             }
         }
         
-        //todo debug
         void update(const key &o1, const data &o2, const data &newData) {
             if (info.size == 0 || info.root == -1)return;
             internalNode rootNode = internalPool->read(info.root);
@@ -986,7 +983,6 @@ namespace RainyMemory {
             }
         }
         
-        //todo debug
         std::pair<data, bool> findNth(const key &o, int n) {
             if (info.size == 0 || info.root == -1)return std::pair<data, bool> {data(), false};
             internalNode rootNode = internalPool->read(info.root);
@@ -1014,7 +1010,6 @@ namespace RainyMemory {
             }
         }
         
-        //todo debug
         bool containsKey(const key &k) {
             vector<data> temp;
             find(k, temp);

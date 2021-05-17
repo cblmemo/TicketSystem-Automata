@@ -249,7 +249,6 @@ namespace RainyMemory {
             eraseInFile(offset);
         }
         
-        //todo debug
         void clear(extraMessage ex = extraMessage {}) {
             hashmap.clear();
             cache.clear();

@@ -311,7 +311,6 @@ namespace RainyMemory {
             return tail;
         }
         
-        //todo debug
         void clear() {
             for (int i = 0; i < tail; i++)delete store[i];
             tail = 0;
