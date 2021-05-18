@@ -11,7 +11,7 @@
 //#define debug
 
 namespace RainyMemory {
-    template<class key, class data, int M = 300, int L = 300>
+    template<class key, class data, int M = 50, int L = 50>
     class BPlusTree {
         /*
          * class MultiBPlusTree
