@@ -84,8 +84,8 @@ private:
      */
     UserManager *userManager;
     TrainManager *trainManager;
-    BPlusTree<username_t, order_t> indexPool;
-    BPlusTree<trainID_t, order_t> pendingPool;
+    MultiBPlusTree<username_t, order_t> indexPool;
+    MultiBPlusTree<trainID_t, order_t> pendingPool;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     std::ostream &defaultOut;
     

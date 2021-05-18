@@ -80,34 +80,31 @@ void TrainManager::addTrain(const Parser &p) {
 }
 
 void TrainManager::releaseTrain(const Parser &p) {
-    vector<int> temp;
-    indexPool.find(p["-i"], temp);
-    if (temp.size() != 1)return outputFailure();
-    train_t rTrain {storagePool.read(temp[0])};
+    std::pair<int, bool> temp {indexPool.find(p["-i"])};
+    if (!temp.second)return outputFailure();
+    train_t rTrain {storagePool.read(temp.first)};
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
     for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(rTrain.stations[i], std::pair<trainID_t, int> {rTrain.trainID, i});
-    storagePool.update(rTrain, temp[0]), outputSuccess();
+    storagePool.update(rTrain, temp.first), outputSuccess();
 }
 
 void TrainManager::queryTrain(const Parser &p) {
-    vector<int> temp;
-    indexPool.find(p["-i"], temp);
-    if (temp.size() != 1)return outputFailure();
-    train_t qTrain {storagePool.read(temp[0])};
+    std::pair<int, bool> temp {indexPool.find(p["-i"])};
+    if (!temp.second)return outputFailure();
+    train_t qTrain {storagePool.read(temp.first)};
     train_time_t ti {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
     if (!(qTrain.startTime.lessOrEqualDate(ti) && ti.lessOrEqualDate(qTrain.endTime)))return outputFailure();
     printTrain(qTrain, ti.dateDistance(qTrain.startTime));
 }
 
 void TrainManager::deleteTrain(const Parser &p) {
-    vector<int> temp;
-    indexPool.find(p["-i"], temp);
-    if (temp.size() != 1)return outputFailure();
-    train_t dTrain {storagePool.read(temp[0])};
+    std::pair<int, bool> temp {indexPool.find(p["-i"])};
+    if (!temp.second)return outputFailure();
+    train_t dTrain {storagePool.read(temp.first)};
     if (dTrain.released)return outputFailure();
-    indexPool.erase(p["-i"], temp[0]);
-    storagePool.erase(temp[0]);
+    indexPool.erase(p["-i"]);
+    storagePool.erase(temp.first);
     outputSuccess();
 }
 
@@ -127,9 +124,8 @@ void TrainManager::queryTicket(const Parser &p) {
     for (const std::pair<trainID_t, int> &j : eTrains) {
         int i;
         if (hashmap.containsKey(j.first) && (i = hashmap[j.first]) < j.second) {
-            vector<int> temp;
-            indexPool.find(j.first, temp);
-            train_t targetTrain {storagePool.read(temp[0])};
+            std::pair<int, bool> temp {indexPool.find(j.first)};
+            train_t targetTrain {storagePool.read(temp.first)};
             train_time_t dDate {targetTrain.departureTimes[i]};
             if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                 int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
@@ -159,9 +155,8 @@ void TrainManager::queryTransfer(const Parser &p) {
     for (const std::pair<trainID_t, int> &i : sTrains) {
         for (const std::pair<trainID_t, int> &j : eTrains) {
             if (i.first != j.first) {
-                vector<int> temp1, temp2;
-                indexPool.find(i.first, temp1), indexPool.find(j.first, temp2);
-                train_t sTrain {storagePool.read(temp1[0])}, eTrain {storagePool.read(temp2[0])};
+                std::pair<int, bool> temp1 {indexPool.find(i.first)}, temp2 {indexPool.find(j.first)};
+                train_t sTrain {storagePool.read(temp1.first)}, eTrain {storagePool.read(temp2.first)};
                 static HashMap<station_t, int, hash_station_t> hashmap;
                 hashmap.clear();
                 for (int k = i.second + 1; k < sTrain.stationNum; k++)hashmap[sTrain.stations[k]] = k;

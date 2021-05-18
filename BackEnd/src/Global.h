@@ -7,11 +7,13 @@
 
 #include "../include/RTL/string_t.h"
 #include "../include/BPlusTree.h"
+#include "../include/MultiBPlusTree.h"
 #include "../include/Parser.h"
 #include <chrono>
 
 using RainyMemory::string_t;
 using RainyMemory::BPlusTree;
+using RainyMemory::MultiBPlusTree;
 using RainyMemory::HashMap;
 using RainyMemory::TokenScanner;
 using RainyMemory::Parser;

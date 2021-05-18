@@ -22,10 +22,9 @@ void OrderManager::printOrder(const OrderManager::order_t &o) {
 
 void OrderManager::buyTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
-    vector<int> temp;
-    trainManager->indexPool.find(p["-i"], temp);
-    if (temp.size() != 1)return outputFailure();
-    train_t targetTrain {trainManager->storagePool.read(temp[0])};
+    std::pair<int, bool> temp {trainManager->indexPool.find(p["-i"])};
+    if (!temp.second)return outputFailure();
+    train_t targetTrain {trainManager->storagePool.read(temp.first)};
     if (!targetTrain.released)return outputFailure();
     int n = p("-n");
     if (targetTrain.seatNum < n)return outputFailure();
@@ -51,7 +50,7 @@ void OrderManager::buyTicket(const Parser &p) {
         return outputQueue();
     }
     for (int i = from; i < to; i++)targetTrain.remainSeats[dist][i] -= n;
-    trainManager->storagePool.update(targetTrain, temp[0]);
+    trainManager->storagePool.update(targetTrain, temp.first);
     order_t order {p["-u"], SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                    targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
     indexPool.insert(p["-u"], order);
@@ -81,9 +80,8 @@ void OrderManager::refundTicket(const Parser &p) {
         pendingPool.erase(o.first.trainID, o.first);
         return outputSuccess();
     }
-    vector<int> temp;
-    trainManager->indexPool.find(rOrder.trainID, temp);
-    train_t rTrain {trainManager->storagePool.read(temp[0])};
+    std::pair<int, bool> temp {trainManager->indexPool.find(rOrder.trainID)};
+    train_t rTrain {trainManager->storagePool.read(temp.first)};
     for (int i = rOrder.from; i < rOrder.to; i++)rTrain.remainSeats[rOrder.dist][i] += rOrder.num;
     static vector<order_t> pOrder;
     pOrder.clear();
@@ -102,7 +100,7 @@ void OrderManager::refundTicket(const Parser &p) {
         indexPool.update(k.username, k, mOrder);
         pendingPool.erase(k.trainID, k);
     }
-    trainManager->storagePool.update(rTrain, temp[0]);
+    trainManager->storagePool.update(rTrain, temp.first);
     outputSuccess();
 }
 

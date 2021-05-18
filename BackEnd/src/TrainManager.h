@@ -227,7 +227,7 @@ private:
      */
     BPlusTree<trainID_t, int> indexPool;
     LRUCacheMemoryPool<train_t> storagePool;
-    BPlusTree<station_t, std::pair<trainID_t, int>> stationPool;
+    MultiBPlusTree<station_t, std::pair<trainID_t, int>> stationPool;
     TokenScanner splitTool;
     std::ostream &defaultOut;
     

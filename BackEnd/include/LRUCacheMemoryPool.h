@@ -6,12 +6,9 @@
 #define TICKETSYSTEM_AUTOMATA_LRUCACHEMEMORYPOOL_H
 
 #include <iostream>
-#include <fstream>
 #include "HashMap.h"
 
 using std::string;
-using std::fstream;
-using std::ios;
 
 namespace RainyMemory {
     template<class T, class extraMessage = int>
