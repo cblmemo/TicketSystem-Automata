@@ -51,7 +51,7 @@ private:
      *
      */
     HashMap<username_t, std::pair<user_t, int>, hash_username_t> loginPool;
-    BPlusTree<username_t, int> indexPool;
+    BPlusTree<username_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     std::ostream &defaultOut;
     

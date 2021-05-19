@@ -31,15 +31,15 @@ private:
     using hash_trainID_t = hash_string_t<20>;
     
     struct train_time_t {
-    /*
-     * Time Class
-     * Modified By PaperL at 2021.5.13
-     * Modification:
-     *      Store data by 4-byte-long unsigned integer
-     *      Use bit-operation
-     *      Change most variable name in functions
-     *      Support date of full year
-     */
+        /*
+         * Time Class
+         * Modified By PaperL at 2021.5.13
+         * Modification:
+         *      Store data by 4-byte-long unsigned integer
+         *      Use bit-operation
+         *      Change most variable name in functions
+         *      Support date of full year
+         */
 #ifndef _GLIBCXX_IOSTREAM
 #error "<iostream> is not included. Overloading operator<< is inavailable."
 #endif
@@ -225,9 +225,9 @@ private:
      * [splitTool]: split string divided by '|'.
      *
      */
-    BPlusTree<trainID_t, int> indexPool;
+    BPlusTree<trainID_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
     LRUCacheMemoryPool<train_t> storagePool;
-    MultiBPlusTree<station_t, std::pair<trainID_t, int>> stationPool;
+    MultiBPlusTree<station_t, std::pair<trainID_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;
     TokenScanner splitTool;
     std::ostream &defaultOut;
     
