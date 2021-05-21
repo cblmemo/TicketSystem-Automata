@@ -215,6 +215,8 @@ private:
         train_t(const string &_i, int _n, int _m, char _y) : trainID(_i), stationNum(_n), seatNum(_m), type(_y) {}
         
         train_t(const train_t &o) = default;
+        
+        train_t &operator=(const train_t &o) = delete;
     };
     
     /*
@@ -226,7 +228,7 @@ private:
      *
      */
     BPlusTree<trainID_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
-    LRUCacheMemoryPool<train_t> storagePool;
+    MemoryPool<train_t> storagePool;
     MultiBPlusTree<station_t, std::pair<trainID_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;
     TokenScanner splitTool;
     std::ostream &defaultOut;
@@ -241,7 +243,7 @@ private:
 
 public:
     TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft) :
-            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_MANAGER_MEMORYPOOL_CAPACITY), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+            indexPool(indexPath), storagePool(storagePath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);
     

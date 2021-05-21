@@ -9,9 +9,11 @@
 #include "../include/BPlusTree.h"
 #include "../include/MultiBPlusTree.h"
 #include "../include/Parser.h"
+#include "../include/MemoryPool.h"
 #include <chrono>
 
 using RainyMemory::string_t;
+using RainyMemory::MemoryPool;
 using RainyMemory::BPlusTree;
 using RainyMemory::MultiBPlusTree;
 using RainyMemory::HashMap;
@@ -30,7 +32,6 @@ using std::endl;
 enum coefficient {
     SEAT_NUM_INFINITY = 2000000000,
     USER_MANAGER_MEMORYPOOL_CAPACITY = 20000,
-    TRAIN_MANAGER_MEMORYPOOL_CAPACITY = 500,
     BPLUSTREE_L = 50,
     BPLUSTREE_M = 50,
     MULTI_BPLUSTREE_L = 100,
