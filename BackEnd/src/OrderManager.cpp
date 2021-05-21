@@ -22,7 +22,7 @@ void OrderManager::printOrder(const OrderManager::order_t &o) {
 
 void OrderManager::buyTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
-    std::pair<int, bool> temp {trainManager->indexPool.find(p["-i"])};
+    std::pair<int, bool> temp {trainManager->indexPool.find(trainManager->hashTrainID(p["-i"]))};
     if (!temp.second)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp.first)};
     if (!targetTrain.released)return outputFailure();
@@ -45,15 +45,15 @@ void OrderManager::buyTicket(const Parser &p) {
         if (!candidate)return outputFailure();
         order_t order {p["-u"], PENDING, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                        targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
-        indexPool.insert(p["-u"], order);
-        pendingPool.insert(targetTrain.trainID, order);
+        indexPool.insert(userManager->hashUsername(p["-u"]), order);
+        pendingPool.insert(trainManager->hashTrainID(targetTrain.trainID), order);
         return outputQueue();
     }
     for (int i = from; i < to; i++)targetTrain.remainSeats[dist][i] -= n;
     trainManager->storagePool.update(targetTrain, temp.first);
     order_t order {p["-u"], SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                    targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
-    indexPool.insert(p["-u"], order);
+    indexPool.insert(userManager->hashUsername(p["-u"]), order);
     outputSuccess((long long) price * (long long) n);
 }
 
@@ -61,7 +61,7 @@ void OrderManager::queryOrder(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     static vector<order_t> result;
     result.clear();
-    indexPool.find(p["-u"], result);
+    indexPool.find(userManager->hashUsername(p["-u"]), result);
     defaultOut << result.size() << endl;
     for (const order_t &i : result)printOrder(i);
 }
@@ -69,23 +69,23 @@ void OrderManager::queryOrder(const Parser &p) {
 void OrderManager::refundTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     int n = p.haveThisArgument("-n") ? p("-n") : 1;
-    std::pair<order_t, bool> o = indexPool.findNth(p["-u"], n);
+    std::pair<order_t, bool> o = indexPool.findNth(userManager->hashUsername(p["-u"]), n);
     if (!o.second)return outputFailure();
     order_t rOrder {o.first};
     if (rOrder.status == REFUNDED)return outputFailure();
     bool newTicket = rOrder.status == SUCCESS;
     rOrder.status = REFUNDED;
-    indexPool.update(p["-u"], o.first, rOrder);
+    indexPool.update(userManager->hashUsername(p["-u"]), o.first, rOrder);
     if (!newTicket) {
-        pendingPool.erase(o.first.trainID, o.first);
+        pendingPool.erase(trainManager->hashTrainID(o.first.trainID), o.first);
         return outputSuccess();
     }
-    std::pair<int, bool> temp {trainManager->indexPool.find(rOrder.trainID)};
+    std::pair<int, bool> temp {trainManager->indexPool.find(trainManager->hashTrainID(rOrder.trainID))};
     train_t rTrain {trainManager->storagePool.read(temp.first)};
     for (int i = rOrder.from; i < rOrder.to; i++)rTrain.remainSeats[rOrder.dist][i] += rOrder.num;
     static vector<order_t> pOrder;
     pOrder.clear();
-    pendingPool.find(rOrder.trainID, pOrder);
+    pendingPool.find(trainManager->hashTrainID(rOrder.trainID), pOrder);
     int num;
     for (int i = pOrder.size() - 1; i >= 0; i--) {
         const order_t &k = pOrder[i];
@@ -97,8 +97,8 @@ void OrderManager::refundTicket(const Parser &p) {
         for (int j = k.from; j < k.to; j++)rTrain.remainSeats[k.dist][j] -= k.num;
         order_t mOrder {k};
         mOrder.status = SUCCESS;
-        indexPool.update(k.username, k, mOrder);
-        pendingPool.erase(k.trainID, k);
+        indexPool.update(userManager->hashUsername(k.username), k, mOrder);
+        pendingPool.erase(trainManager->hashTrainID(k.trainID), k);
     }
     trainManager->storagePool.update(rTrain, temp.first);
     outputSuccess();

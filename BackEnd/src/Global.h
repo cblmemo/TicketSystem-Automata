@@ -44,11 +44,11 @@ constexpr int lengthOfChineseCharacters(int length) {
 
 template<int len>
 struct hash_string_t {
-    int operator()(const string_t<len> &o) const {
+    long long operator()(const string_t<len> &o) const {
         int l = o.length();
-        int h = l;
-        for (int i = 0; i < l; i++)h = (h << 7) ^ (h >> 25) ^ o[i];
-        return h;
+        int h1 = l, h2 = l;
+        for (int i = 0; i < l; i++)h1 = (h1 << 7) ^ (h1 >> 25) ^ o[i], h2 = (h2 << 11) ^ (h2 >> 21) ^ o[i];
+        return ((long long)h1 << 32) | (long long)h2;
     }
 };
 

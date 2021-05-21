@@ -26,13 +26,13 @@ void UserManager::addUser(const Parser &p) {
         storagePool.updateExtraMessage(false);
         user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], 10};
         int offset = storagePool.write(newUser);
-        indexPool.insert(newUser.username, offset);
+        indexPool.insert(hashUsername(newUser.username), offset);
         return outputSuccess();
     }
-    if (isLogin(p["-c"]) && !indexPool.containsKey(p["-u"]) && loginPool[p["-c"]].first > p("-g")) {
+    if (isLogin(p["-c"]) && !indexPool.containsKey(hashUsername(p["-u"])) && loginPool[p["-c"]].first > p("-g")) {
         user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], p("-g")};
         int offset = storagePool.write(newUser);
-        indexPool.insert(newUser.username, offset);
+        indexPool.insert(hashUsername(newUser.username), offset);
         return outputSuccess();
     }
     outputFailure();
@@ -40,7 +40,7 @@ void UserManager::addUser(const Parser &p) {
 
 void UserManager::login(const Parser &p) {
     if (!isLogin(p["-u"])) {
-        std::pair<int, bool> temp {indexPool.find(p["-u"])};
+        std::pair<int, bool> temp {indexPool.find(hashUsername(p["-u"]))};
         if (!temp.second)return outputFailure();
         user_t tempUser {storagePool.read(temp.first)};
         if (tempUser.password == p["-p"]) {
@@ -60,7 +60,7 @@ void UserManager::queryProfile(const Parser &p) {
     if (isLogin(p["-c"])) {
         if (p["-c"] == p["-u"])return printUser(storagePool.read(loginPool[p["-u"]].second));
         if (isLogin(p["-u"]) && loginPool[p["-c"]].first > loginPool[p["-u"]].first)return printUser(storagePool.read(loginPool[p["-u"]].second));
-        std::pair<int, bool> temp {indexPool.find(p["-u"])};
+        std::pair<int, bool> temp {indexPool.find(hashUsername(p["-u"]))};
         if (!temp.second)return outputFailure();
         user_t qUser {storagePool.read(temp.first)};
         if (loginPool[p["-c"]].first > qUser.privilege)return printUser(qUser);
@@ -93,7 +93,7 @@ void UserManager::modifyProfile(const Parser &p) {
             }
         }
         else {
-            std::pair<int, bool> temp {indexPool.find(p["-u"])};
+            std::pair<int, bool> temp {indexPool.find(hashUsername(p["-u"]))};
             if (!temp.second)return outputFailure();
             user_t mUser {storagePool.read(temp.first)};
             if (loginPool[p["-c"]].first > mUser.privilege) {

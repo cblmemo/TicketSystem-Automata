@@ -227,9 +227,11 @@ private:
      * [splitTool]: split string divided by '|'.
      *
      */
-    BPlusTree<trainID_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
+    BPlusTree<long long, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
     MemoryPool<train_t> storagePool;
-    MultiBPlusTree<station_t, std::pair<trainID_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;
+    MultiBPlusTree<long long, std::pair<long long, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;
+    hash_trainID_t hashTrainID;
+    hash_station_t hashStation;
     TokenScanner splitTool;
     std::ostream &defaultOut;
     

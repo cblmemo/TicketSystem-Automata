@@ -20,20 +20,23 @@ namespace RainyMemory {
          *
          */
     private:
-        static const int PrimeNum = 25;
+        using ll = long long;
         
-        const int PrimeList[PrimeNum] = {
+        static const int PrimeNum = 28;
+        
+        const ll PrimeList[PrimeNum] = {
                 53, 97, 193, 389, 769,
                 1543, 3079, 6151, 12289, 24593,
                 49157, 98317, 196613, 393241, 786433,
                 1572869, 3145739, 6291469, 12582917, 25165843,
-                50331653, 100663319, 201326611, 402653189, 805306457
+                50331653ll, 100663319ll, 201326611ll, 402653189ll, 805306457ll,
+                1610612741ll, 3221225473ll, 4294967291ll
         };
         
-        inline int nextPrime(int n) {
-            const int *first = PrimeList;
-            const int *last = PrimeList + PrimeNum;
-            const int *pos = RainyMemory::lower_bound(first, last, n);
+        inline ll nextPrime(ll n) {
+            const ll *first = PrimeList;
+            const ll *last = PrimeList + PrimeNum;
+            const ll *pos = RainyMemory::lower_bound(first, last, n);
             return pos == last ? *(last - 1) : *pos;
         }
         
@@ -54,7 +57,7 @@ namespace RainyMemory {
             };
             
             Node *head = nullptr;
-            int listSize = 0;
+            ll listSize = 0;
             
             LinkedList() = default;
             
@@ -114,25 +117,25 @@ namespace RainyMemory {
         
         using node_t = typename LinkedList::Node;
         
-        int capacity = 0;
-        int number = 0;
+        ll capacity = 0;
+        ll number = 0;
         LinkedList *buckets;
         Hash hash;
         
-        inline int calculateIndex(const Key &k) const {
-            int index = hash(k) % capacity;
+        inline ll calculateIndex(const Key &k) const {
+            ll index = hash(k) % capacity;
             if (index < 0)index += capacity;
             return index;
         }
         
         void resize() {
-            int n = nextPrime(capacity);
+            ll n = nextPrime(capacity);
             if (n <= capacity)return;
             LinkedList *temp = new LinkedList[n];
-            for (int i = 0; i < capacity; i++) {
+            for (ll i = 0; i < capacity; i++) {
                 node_t *p = buckets[i].head;
                 while (p != nullptr) {
-                    int index = (hash(*p->key) % n + n) % n;
+                    ll index = (hash(*p->key) % n + n) % n;
                     buckets[i].head = p->next;
                     temp[index].addNode(p);
                     p = buckets[i].head;
@@ -144,7 +147,7 @@ namespace RainyMemory {
         }
     
     public:
-        HashMap() : capacity(PrimeList[0]) {
+        HashMap() : capacity(PrimeList[2]) {
             buckets = new LinkedList[capacity];
         }
         
@@ -159,12 +162,12 @@ namespace RainyMemory {
         }
         
         bool containsKey(const Key &k) const {
-            int index = calculateIndex(k);
+            ll index = calculateIndex(k);
             return !(buckets[index].empty() || buckets[index].find(k) == nullptr);
         }
         
         Value &operator[](const Key &k) {
-            int index = calculateIndex(k);
+            ll index = calculateIndex(k);
             if (containsKey(k))return *buckets[index].find(k)->value;
             else {
                 if (number + 1 > capacity)resize();
@@ -175,7 +178,7 @@ namespace RainyMemory {
         }
         
         void erase(const Key &k) {
-            int index = calculateIndex(k);
+            ll index = calculateIndex(k);
             buckets[index].erase(k);
             number--;
         }
