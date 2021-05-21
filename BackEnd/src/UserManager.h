@@ -47,10 +47,10 @@ private:
      * --------------------------------------------------------
      * [loginPool]: Store user's login status. In the same time,
      * implement a simple cache strategy, which is to store every
-     * login user's information and offset.
+     * login user's privilege(first) and offset(second).
      *
      */
-    HashMap<username_t, std::pair<user_t, int>, hash_username_t> loginPool;
+    HashMap<username_t, std::pair<int, int>, hash_username_t> loginPool;
     BPlusTree<username_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     std::ostream &defaultOut;
