@@ -5,6 +5,7 @@
 #ifndef TICKETSYSTEM_AUTOMATA_STRING_T_H
 #define TICKETSYSTEM_AUTOMATA_STRING_T_H
 
+#include "rmstream.h"
 #include <iostream>
 #include <cstring>
 
@@ -93,7 +94,7 @@ namespace RainyMemory {
             return strcmp(store, o.store) >= 0;
         }
         
-        friend std::ostream &operator<<(std::ostream &os, const string_t &o) {
+        friend rmstream &operator<<(rmstream &os, const string_t &o) {
             os << o.store;
             return os;
         }

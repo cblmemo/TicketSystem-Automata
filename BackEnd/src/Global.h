@@ -6,6 +6,7 @@
 #define TICKETSYSTEM_AUTOMATA_GLOBAL_H
 
 #include "../include/RTL/string_t.h"
+#include "../include/RTL/rmstream.h"
 #include "../include/BPlusTree.h"
 #include "../include/MultiBPlusTree.h"
 #include "../include/Parser.h"
@@ -13,6 +14,7 @@
 #include <chrono>
 
 using RainyMemory::string_t;
+using RainyMemory::rmstream;
 using RainyMemory::MemoryPool;
 using RainyMemory::BPlusTree;
 using RainyMemory::MultiBPlusTree;
@@ -21,13 +23,7 @@ using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
 using RainyMemory::sortVector;
 
-#define speedup
-
-#ifdef speedup
 const char endl = '\n';
-#else
-using std::endl;
-#endif
 
 enum coefficient {
     SEAT_NUM_INFINITY = 2000000000,

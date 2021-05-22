@@ -1,7 +1,7 @@
 #include "Administrator.h"
 
 int main() {
-    Administrator RhineLab {std::cin, std::cout};
-    RhineLab.runProgramme();
+    rmstream RhodesIsland;
+    Administrator RhineLab {std::cin, RhodesIsland};
     return 0;
 }

@@ -78,7 +78,7 @@ private:
         train_time_t &operator=(const train_time_t &other) = default;
         
         
-        friend std::ostream &operator<<(std::ostream &os, const train_time_t &arg) {
+        friend rmstream &operator<<(rmstream &os, const train_time_t &arg) {
             auto date = arg.Front4Byte() >> 16, time = arg.Back4Byte();
             value_type mon = 1, day = date, hou, min = time;
             while (day >= accumulateDay[mon]) mon++;
@@ -171,7 +171,7 @@ private:
             time = arrivalTime - departureTime;
         }
         
-        friend std::ostream &operator<<(std::ostream &os, const ticket_t &t) {
+        friend rmstream &operator<<(rmstream &os, const ticket_t &t) {
             os << t.trainID << " " << t.from << " " << t.departureTime << " -> " << t.to << " " << t.arrivalTime << " " << t.price << " " << t.seat;
             return os;
         }
@@ -233,7 +233,7 @@ private:
     hash_trainID_t hashTrainID;
     hash_station_t hashStation;
     TokenScanner splitTool;
-    std::ostream &defaultOut;
+    rmstream &defaultOut;
     
     inline void outputSuccess();
     
@@ -244,7 +244,7 @@ private:
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft) :
+    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, rmstream &dft) :
             indexPool(indexPath), storagePool(storagePath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);

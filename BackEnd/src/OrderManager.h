@@ -87,7 +87,7 @@ private:
     MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;
     MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
-    std::ostream &defaultOut;
+    rmstream &defaultOut;
     
     inline void outputSuccess(long long message = 0);
     
@@ -100,7 +100,7 @@ private:
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    OrderManager(UserManager *um, TrainManager *tm, const string &indexPath, const string &pendingPath, std::ostream &dft) :
+    OrderManager(UserManager *um, TrainManager *tm, const string &indexPath, const string &pendingPath, rmstream &dft) :
             userManager(um), trainManager(tm), indexPool(indexPath), pendingPool(pendingPath), defaultOut(dft) {}
     
     void buyTicket(const Parser &p);

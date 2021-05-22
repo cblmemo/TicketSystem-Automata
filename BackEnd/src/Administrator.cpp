@@ -17,7 +17,9 @@ void Administrator::clean() {
     Ifrit   -> clear();
 }
 
-Administrator::Administrator(std::istream &is, std::ostream &os) : defaultIn(is), defaultOut(os) {}
+Administrator::Administrator(std::istream &is, rmstream &os) : defaultIn(is), defaultOut(os) {
+    runProgramme();
+}
 
 Administrator::~Administrator() {
     delete Ptilopsis;
@@ -27,9 +29,6 @@ Administrator::~Administrator() {
 }
 
 void Administrator::runProgramme() {
-#ifdef speedup
-    std::ios::sync_with_stdio(false);
-#endif
     initialize();
     string cmd;
     bool flag = true;

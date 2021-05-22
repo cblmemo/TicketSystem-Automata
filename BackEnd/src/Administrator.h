@@ -27,7 +27,7 @@ private:
     TrainManager *Silence   = nullptr;
     OrderManager *Ifrit     = nullptr;
     std::istream &defaultIn;
-    std::ostream &defaultOut;
+    rmstream &defaultOut;
     
     using path_t = const std::string;
     
@@ -42,13 +42,13 @@ private:
     void initialize();
     
     void clean();
-
-public:
-    Administrator(std::istream &is, std::ostream &os);
-    
-    ~Administrator();
     
     void runProgramme();
+
+public:
+    Administrator(std::istream &is, rmstream &os);
+    
+    ~Administrator();
 };
 
 #endif //TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H

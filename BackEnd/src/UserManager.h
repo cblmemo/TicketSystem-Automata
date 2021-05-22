@@ -54,7 +54,7 @@ private:
     BPlusTree<long long, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     hash_username_t hashUsername;
-    std::ostream &defaultOut;
+    rmstream &defaultOut;
     
     inline void outputSuccess();
     
@@ -65,7 +65,7 @@ private:
     bool isLogin(const username_t &u);
 
 public:
-    UserManager(const string &indexPath, const string &storagePath, std::ostream &dft) :
+    UserManager(const string &indexPath, const string &storagePath, rmstream &dft) :
             loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_MANAGER_MEMORYPOOL_CAPACITY), defaultOut(dft) {}
     
     void addUser(const Parser &p);
