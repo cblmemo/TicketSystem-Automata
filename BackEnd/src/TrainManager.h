@@ -166,7 +166,7 @@ private:
         
         ticket_t() = default;
         
-        ticket_t(const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int s = 0) :
+        ticket_t(const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int s) :
                 trainID(i), from(f), to(t), departureTime(d), arrivalTime(a), price(p), seat(s) {
             time = arrivalTime - departureTime;
         }
@@ -174,6 +174,38 @@ private:
         friend rmstream &operator<<(rmstream &os, const ticket_t &t) {
             os << t.trainID << " " << t.from << " " << t.departureTime << " -> " << t.to << " " << t.arrivalTime << " " << t.price << " " << t.seat;
             return os;
+        }
+    };
+    
+    struct date_ticket_t {
+        /*
+         * date_ticket_t
+         * Store train's remain seats, indexing by date distance between
+         * start time.
+         * --------------------------------------------------------
+         * [remainSeats]: store a specific day's remain seats.
+         *
+         */
+        int remainSeats[100] {};
+        
+        date_ticket_t() = default;
+        
+        date_ticket_t(int seatNum, int stationNum) {
+            for (int i = 0; i < stationNum; i++)remainSeats[i] = seatNum;
+        }
+        
+        int ticketNum(int l, int r) {
+            int ret = SEAT_NUM_INFINITY;
+            for (int i = l; i < r; i++)ret = min(ret, remainSeats[i]);
+            return ret;
+        }
+        
+        void modifyRemain(int l, int r, int delta) {
+            for (int i = l; i < r; i++)remainSeats[i] += delta;
+        }
+        
+        int operator[](int index) const {
+            return remainSeats[index];
         }
     };
     
@@ -188,11 +220,6 @@ private:
          * first day of sales date).
          * [startTime] && [endTime]: Records departure time (date
          * and time) of the first train and the last train.
-         * [remainSeats]: Records each train's remain ticket,
-         * the first index represent date distance between
-         * start time, the second represent station index. For
-         * example, remainSeats[0][0] represent the first train's
-         * ticket number, from the first station to the second station.
          * [dateGap]: Date gap between end time and start time.
          *
          */
@@ -207,7 +234,6 @@ private:
         train_time_t endTime {};
         char type = '0';
         bool released = false;
-        int remainSeats[100][100] = {0};
         int dateGap = 0;
         
         train_t() = default;
@@ -215,21 +241,22 @@ private:
         train_t(const string &_i, int _n, int _m, char _y) : trainID(_i), stationNum(_n), seatNum(_m), type(_y) {}
         
         train_t(const train_t &o) = default;
-        
-        train_t &operator=(const train_t &o) = delete;
     };
     
     /*
      * Data Members
      * --------------------------------------------------------
+     * [ticketPool]: Store every train's ticket for every available
+     * day, indexing by trainID and date between
      * [stationPool]: Store every train pass through a specific
      * station, and the station's index in the train's route.
      * [splitTool]: split string divided by '|'.
      *
      */
-    BPlusTree<long long, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
-    MemoryPool<train_t> storagePool;
-    MultiBPlusTree<long long, std::pair<long long, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;
+    BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
+    LRUCacheMemoryPool<train_t> storagePool;
+    BPlusTree<std::pair<hash_t, int>, date_ticket_t> ticketPool;
+    MultiBPlusTree<hash_t, std::pair<hash_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;
     hash_trainID_t hashTrainID;
     hash_station_t hashStation;
     TokenScanner splitTool;
@@ -244,8 +271,8 @@ private:
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, rmstream &dft) :
-            indexPool(indexPath), storagePool(storagePath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+    TrainManager(const string &indexPath, const string &storagePath, const string &ticketPath, const string &stationPath, rmstream &dft) :
+            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);
     

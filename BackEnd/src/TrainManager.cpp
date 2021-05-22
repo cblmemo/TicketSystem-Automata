@@ -16,25 +16,51 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
     //int date: the distance between query train argument -d and startTime sate
     defaultOut << t.trainID << " " << t.type << endl;
     train_time_t temp {};
-    for (int i = 0; i < t.stationNum; i++) {
-        defaultOut << t.stations[i] << " ";
-        if (i == 0)defaultOut << "xx-xx xx:xx";
-        else {
-            temp = t.arrivalTimes[i];
-            temp.updateDate(date);
-            defaultOut << temp;
+    if (t.released) {
+        std::pair<hash_t, int> key {hashTrainID(t.trainID), date};
+        std::pair<date_ticket_t, bool> seats {ticketPool.find(key)};
+        for (int i = 0; i < t.stationNum; i++) {
+            defaultOut << t.stations[i] << " ";
+            if (i == 0)defaultOut << "xx-xx xx:xx";
+            else {
+                temp = t.arrivalTimes[i];
+                temp.updateDate(date);
+                defaultOut << temp;
+            }
+            defaultOut << " -> ";
+            if (i == t.stationNum - 1)defaultOut << "xx-xx xx:xx";
+            else {
+                temp = t.departureTimes[i];
+                temp.updateDate(date);
+                defaultOut << temp;
+            }
+            defaultOut << " " << t.prices[i] << " ";
+            if (i == t.stationNum - 1)defaultOut << 'x';
+            else defaultOut << seats.first[i];
+            defaultOut << endl;
         }
-        defaultOut << " -> ";
-        if (i == t.stationNum - 1)defaultOut << "xx-xx xx:xx";
-        else {
-            temp = t.departureTimes[i];
-            temp.updateDate(date);
-            defaultOut << temp;
+    }
+    else {
+        for (int i = 0; i < t.stationNum; i++) {
+            defaultOut << t.stations[i] << " ";
+            if (i == 0)defaultOut << "xx-xx xx:xx";
+            else {
+                temp = t.arrivalTimes[i];
+                temp.updateDate(date);
+                defaultOut << temp;
+            }
+            defaultOut << " -> ";
+            if (i == t.stationNum - 1)defaultOut << "xx-xx xx:xx";
+            else {
+                temp = t.departureTimes[i];
+                temp.updateDate(date);
+                defaultOut << temp;
+            }
+            defaultOut << " " << t.prices[i] << " ";
+            if (i == t.stationNum - 1)defaultOut << 'x';
+            else defaultOut << t.seatNum;
+            defaultOut << endl;
         }
-        defaultOut << " " << t.prices[i] << " ";
-        if (i == t.stationNum - 1)defaultOut << 'x';
-        else defaultOut << t.remainSeats[date][i];
-        defaultOut << endl;
     }
 }
 
@@ -71,21 +97,20 @@ void TrainManager::addTrain(const Parser &p) {
     }
     nowTime += travelTimes[newTrain.stationNum - 2];
     newTrain.arrivalTimes[newTrain.stationNum - 1] = nowTime;
-    for (auto &remainSeat : newTrain.remainSeats)
-        for (int &j : remainSeat)
-            j = newTrain.seatNum;
     int offset = storagePool.write(newTrain);
     indexPool.insert(hashTrainID(newTrain.trainID), offset);
     outputSuccess();
 }
 
 void TrainManager::releaseTrain(const Parser &p) {
-    std::pair<int, bool> temp {indexPool.find(hashTrainID(p["-i"]))};
+    hash_t hash = hashTrainID(p["-i"]);
+    std::pair<int, bool> temp {indexPool.find(hash)};
     if (!temp.second)return outputFailure();
     train_t rTrain {storagePool.read(temp.first)};
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
-    for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), std::pair<long long, int> {hashTrainID(rTrain.trainID), i});
+    for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, date_ticket_t(rTrain.seatNum, rTrain.stationNum));
+    for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), std::pair<hash_t, int> {hashTrainID(rTrain.trainID), i});
     storagePool.update(rTrain, temp.first), outputSuccess();
 }
 
@@ -111,17 +136,17 @@ void TrainManager::deleteTrain(const Parser &p) {
 void TrainManager::queryTicket(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
-    static vector<std::pair<long long, int>> sTrains, eTrains;
+    static vector<std::pair<hash_t, int>> sTrains, eTrains;
     sTrains.clear(), eTrains.clear();
     static vector<ticket_t> result;
     result.clear();
     stationPool.find(hashStation(p["-s"]), sTrains);
     stationPool.find(hashStation(p["-t"]), eTrains);
     if (sTrains.empty() || eTrains.empty())return outputSuccess();
-    static HashMap<long long, int> hashmap;
+    static HashMap<hash_t, int> hashmap;
     hashmap.clear();
-    for (const std::pair<long long, int> &i : sTrains)hashmap[i.first] = i.second;
-    for (const std::pair<long long, int> &j : eTrains) {
+    for (const std::pair<hash_t, int> &i : sTrains)hashmap[i.first] = i.second;
+    for (const std::pair<hash_t, int> &j : eTrains) {
         int i;
         if (hashmap.containsKey(j.first) && (i = hashmap[j.first]) < j.second) {
             std::pair<int, bool> temp {indexPool.find(j.first)};
@@ -129,10 +154,11 @@ void TrainManager::queryTicket(const Parser &p) {
             train_time_t dDate {targetTrain.departureTimes[i]};
             if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                 int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
+                std::pair<hash_t, int> key {hashTrainID(targetTrain.trainID), dist};
+                std::pair<date_ticket_t, bool> seats {ticketPool.find(key)};
                 train_time_t tempTime1 {targetTrain.departureTimes[i]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
                 ticket_t ticket {targetTrain.trainID, targetTrain.stations[i], targetTrain.stations[j.second], tempTime1.updateDate(dist),
-                                 tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], SEAT_NUM_INFINITY};
-                for (int k = i; k < j.second; k++)ticket.seat = min(ticket.seat, targetTrain.remainSeats[dist][k]);
+                                 tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], seats.first.ticketNum(i, j.second)};
                 result.push_back(ticket);
             }
         }
@@ -146,14 +172,14 @@ void TrainManager::queryTicket(const Parser &p) {
 void TrainManager::queryTransfer(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
-    static vector<std::pair<long long, int>> sTrains, eTrains;
+    static vector<std::pair<hash_t, int>> sTrains, eTrains;
     sTrains.clear(), eTrains.clear();
     ticket_t st {}, en {};
     int nowTime, nowPrice;
     stationPool.find(hashStation(p["-s"]), sTrains);
     stationPool.find(hashStation(p["-t"]), eTrains);
-    for (const std::pair<long long, int> &i : sTrains) {
-        for (const std::pair<long long, int> &j : eTrains) {
+    for (const std::pair<hash_t, int> &i : sTrains) {
+        for (const std::pair<hash_t, int> &j : eTrains) {
             if (i.first != j.first) {
                 std::pair<int, bool> temp1 {indexPool.find(i.first)}, temp2 {indexPool.find(j.first)};
                 train_t sTrain {storagePool.read(temp1.first)}, eTrain {storagePool.read(temp2.first)};
@@ -170,21 +196,19 @@ void TrainManager::queryTransfer(const Parser &p) {
                         aTime.updateDate(dist), lastTime.updateDate(eTrain.dateGap);//can boarding on eTrain
                         bool judge2 = aTime <= lastTime;
                         if (judge1 && judge2) {
-                            int sDist = dist;
                             //tempTime(i): avoid updateDate(int) deals changes in original train_t
-                            train_time_t tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
+                            train_time_t tempTime0 {eTrain.departureTimes[l]},
+                                    tempTime1 {sTrain.departureTimes[i.second]}, tempTime2 {sTrain.arrivalTimes[k]},
                                     tempTime3 {eTrain.departureTimes[l]}, tempTime4 {eTrain.arrivalTimes[j.second]};
-                            ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
-                                             tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second]};
-                            train_time_t tempTime0 {eTrain.departureTimes[l]};
-                            int eDist = aTime.dateDistance(tempTime0);
+                            int sDist = dist, eDist = aTime.dateDistance(tempTime0);
                             if (aTime > tempTime0.updateDate(eDist))eDist++;
+                            std::pair<hash_t, int> keySt {hashTrainID(sTrain.trainID), sDist}, keyEn {hashTrainID(eTrain.trainID), eDist};
+                            std::pair<date_ticket_t, bool> seatsSt {ticketPool.find(keySt)}, seatsEn {ticketPool.find(keyEn)};
+                            ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
+                                             tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second], seatsSt.first.ticketNum(i.second, k)};
                             ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),
-                                             tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l]};
-                            tempSt.seat = tempEn.seat = SEAT_NUM_INFINITY;
+                                             tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l], seatsEn.first.ticketNum(l, j.second)};
                             int tempPrice = tempSt.price + tempEn.price, tempTime = tempTime4 - tempTime1;
-                            for (int si = i.second; si < k; si++)tempSt.seat = min(tempSt.seat, sTrain.remainSeats[sDist][si]);
-                            for (int si = l; si < j.second; si++)tempEn.seat = min(tempEn.seat, eTrain.remainSeats[eDist][si]);
                             if (hasResult) {
                                 if (sortByTime && (tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time))nowTime = tempTime, st = tempSt, en = tempEn;
                                 if (!sortByTime && (tempPrice < nowPrice || tempPrice == nowPrice && tempSt.time < st.time))nowPrice = tempPrice, st = tempSt, en = tempEn;

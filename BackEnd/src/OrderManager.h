@@ -30,6 +30,7 @@ private:
     using trainID_t = TrainManager::trainID_t;
     using station_t = TrainManager::station_t;
     using train_time_t = TrainManager::train_time_t;
+    using date_ticket_t = TrainManager::date_ticket_t;
     
     struct order_t {
         /*
@@ -79,13 +80,15 @@ private:
      * --------------------------------------------------------
      * [userManager]: Manage functions that is relevant to users.
      * [trainManager]: Manage functions that is relevant to trains.
-     * [pendingPool]: Store every pending order.
+     * [indexPool]: Store every order, mapping username to order.
+     * [pendingPool]: Store every pending order, mapping trainID
+     * to order.
      *
      */
     UserManager *userManager;
     TrainManager *trainManager;
-    MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;
-    MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;
+    MultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;
+    MultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     rmstream &defaultOut;
     

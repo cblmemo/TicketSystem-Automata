@@ -20,11 +20,11 @@ namespace RainyMemory {
          *
          */
     private:
-        using ll = long long;
+        using ull = unsigned long long;
         
         static const int PrimeNum = 28;
         
-        const ll PrimeList[PrimeNum] = {
+        const ull PrimeList[PrimeNum] = {
                 53, 97, 193, 389, 769,
                 1543, 3079, 6151, 12289, 24593,
                 49157, 98317, 196613, 393241, 786433,
@@ -33,10 +33,10 @@ namespace RainyMemory {
                 1610612741ll, 3221225473ll, 4294967291ll
         };
         
-        inline ll nextPrime(ll n) {
-            const ll *first = PrimeList;
-            const ll *last = PrimeList + PrimeNum;
-            const ll *pos = RainyMemory::lower_bound(first, last, n);
+        inline ull nextPrime(ull n) {
+            const ull *first = PrimeList;
+            const ull *last = PrimeList + PrimeNum;
+            const ull *pos = RainyMemory::lower_bound(first, last, n);
             return pos == last ? *(last - 1) : *pos;
         }
         
@@ -57,7 +57,7 @@ namespace RainyMemory {
             };
             
             Node *head = nullptr;
-            ll listSize = 0;
+            ull listSize = 0;
             
             LinkedList() = default;
             
@@ -117,25 +117,24 @@ namespace RainyMemory {
         
         using node_t = typename LinkedList::Node;
         
-        ll capacity = 0;
-        ll number = 0;
+        ull capacity = 0;
+        ull number = 0;
         LinkedList *buckets;
         Hash hash;
         
-        inline ll calculateIndex(const Key &k) const {
-            ll index = hash(k) % capacity;
-            if (index < 0)index += capacity;
+        inline ull calculateIndex(const Key &k) const {
+            ull index = hash(k) % capacity;
             return index;
         }
         
         void resize() {
-            ll n = nextPrime(capacity);
+            ull n = nextPrime(capacity);
             if (n <= capacity)return;
             LinkedList *temp = new LinkedList[n];
-            for (ll i = 0; i < capacity; i++) {
+            for (ull i = 0; i < capacity; i++) {
                 node_t *p = buckets[i].head;
                 while (p != nullptr) {
-                    ll index = (hash(*p->key) % n + n) % n;
+                    ull index = hash(*p->key) % n;
                     buckets[i].head = p->next;
                     temp[index].addNode(p);
                     p = buckets[i].head;
@@ -162,12 +161,12 @@ namespace RainyMemory {
         }
         
         bool containsKey(const Key &k) const {
-            ll index = calculateIndex(k);
+            ull index = calculateIndex(k);
             return !(buckets[index].empty() || buckets[index].find(k) == nullptr);
         }
         
         Value &operator[](const Key &k) {
-            ll index = calculateIndex(k);
+            ull index = calculateIndex(k);
             if (containsKey(k))return *buckets[index].find(k)->value;
             else {
                 if (number + 1 > capacity)resize();
@@ -178,7 +177,7 @@ namespace RainyMemory {
         }
         
         void erase(const Key &k) {
-            ll index = calculateIndex(k);
+            ull index = calculateIndex(k);
             buckets[index].erase(k);
             number--;
         }

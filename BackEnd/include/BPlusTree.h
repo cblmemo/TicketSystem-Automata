@@ -101,6 +101,21 @@ namespace RainyMemory {
                     }
                 }
             }
+    
+            bool updateElement(BPlusTree *tree, const key &o1, const data &newData) {
+                int start = RainyMemory::lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+                int end = RainyMemory::upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+                bool result = false;
+                for (int i = start; i < end; i++) {
+                    if (o1 == leafKey[i]) {
+                        leafData[i] = newData;
+                        result = true;
+                        break;
+                    }
+                }
+                if (result)tree->leafPool->update(*this, offset);
+                return result;
+            }
             
             splitNodeReturn splitNode(BPlusTree *tree) {
                 leafNode tempNode;
@@ -646,6 +661,24 @@ namespace RainyMemory {
             }
         }
     
+        void recursionUpdate(int now, const key &o1, const data &newData) {
+            internalNode nowNode = internalPool->read(now);
+            if (nowNode.childNodeIsLeaf) {
+                int index = RainyMemory::upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                leafNode targetNode = leafPool->read(nowNode.childNode[index]);
+                if (!targetNode.updateElement(this, o1, newData)) {
+                    while (targetNode.leftBrother >= 0) {
+                        targetNode = leafPool->read(targetNode.leftBrother);
+                        if (targetNode.updateElement(this, o1, newData))break;
+                    }
+                }
+            }
+            else {
+                int index = RainyMemory::upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                recursionUpdate(nowNode.childNode[index], o1, newData);
+            }
+        }
+    
     public:
         explicit BPlusTree(const string &name) :
                 leafPool(new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 300)),
@@ -734,6 +767,24 @@ namespace RainyMemory {
             else {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 return recursionFind(rootNode.childNode[index], o);
+            }
+        }
+    
+        void update(const key &o1, const data &newData) {
+            if (info.size == 0 || info.root == -1)return;
+            if (rootNode.childNodeIsLeaf) {
+                int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                leafNode targetNode = leafPool->read(rootNode.childNode[index]);
+                if (!targetNode.updateElement(this, o1, newData)) {
+                    while (targetNode.leftBrother >= 0) {
+                        targetNode = leafPool->read(targetNode.leftBrother);
+                        if (targetNode.updateElement(this, o1, newData))break;
+                    }
+                }
+            }
+            else {
+                int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                recursionUpdate(rootNode.childNode[index], o1, newData);
             }
         }
         
