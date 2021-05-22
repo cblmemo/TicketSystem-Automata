@@ -18,7 +18,7 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
     train_time_t temp {};
     if (t.released) {
         std::pair<hash_t, int> key {hashTrainID(t.trainID), date};
-        std::pair<date_ticket_t, bool> seats {ticketPool.find(key)};
+        date_ticket_t seats {ticketPool.find(key).first};
         for (int i = 0; i < t.stationNum; i++) {
             defaultOut << t.stations[i] << " ";
             if (i == 0)defaultOut << "xx-xx xx:xx";
@@ -36,7 +36,7 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
             }
             defaultOut << " " << t.prices[i] << " ";
             if (i == t.stationNum - 1)defaultOut << 'x';
-            else defaultOut << seats.first[i];
+            else defaultOut << seats[i];
             defaultOut << endl;
         }
     }
@@ -155,10 +155,10 @@ void TrainManager::queryTicket(const Parser &p) {
             if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                 int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
                 std::pair<hash_t, int> key {hashTrainID(targetTrain.trainID), dist};
-                std::pair<date_ticket_t, bool> seats {ticketPool.find(key)};
+                date_ticket_t seats {ticketPool.find(key).first};
                 train_time_t tempTime1 {targetTrain.departureTimes[i]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
                 ticket_t ticket {targetTrain.trainID, targetTrain.stations[i], targetTrain.stations[j.second], tempTime1.updateDate(dist),
-                                 tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], seats.first.ticketNum(i, j.second)};
+                                 tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], seats.ticketNum(i, j.second)};
                 result.push_back(ticket);
             }
         }
@@ -203,11 +203,11 @@ void TrainManager::queryTransfer(const Parser &p) {
                             int sDist = dist, eDist = aTime.dateDistance(tempTime0);
                             if (aTime > tempTime0.updateDate(eDist))eDist++;
                             std::pair<hash_t, int> keySt {hashTrainID(sTrain.trainID), sDist}, keyEn {hashTrainID(eTrain.trainID), eDist};
-                            std::pair<date_ticket_t, bool> seatsSt {ticketPool.find(keySt)}, seatsEn {ticketPool.find(keyEn)};
+                            date_ticket_t seatsSt {ticketPool.find(keySt).first}, seatsEn {ticketPool.find(keyEn).first};
                             ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
-                                             tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second], seatsSt.first.ticketNum(i.second, k)};
+                                             tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second], seatsSt.ticketNum(i.second, k)};
                             ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),
-                                             tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l], seatsEn.first.ticketNum(l, j.second)};
+                                             tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l], seatsEn.ticketNum(l, j.second)};
                             int tempPrice = tempSt.price + tempEn.price, tempTime = tempTime4 - tempTime1;
                             if (hasResult) {
                                 if (sortByTime && (tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time))nowTime = tempTime, st = tempSt, en = tempEn;

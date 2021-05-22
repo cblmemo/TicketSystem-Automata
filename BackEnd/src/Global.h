@@ -30,7 +30,7 @@ const char endl = '\n';
 enum coefficient {
     SEAT_NUM_INFINITY = 2000000000,
     USER_CACHE_SIZE = 10000000,
-    TRAIN_CACHE_SIZE = 2000,
+    TRAIN_CACHE_SIZE = 500,
     BPLUSTREE_L = 50,
     BPLUSTREE_M = 50,
     MULTI_BPLUSTREE_L = 100,
