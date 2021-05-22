@@ -60,6 +60,7 @@ namespace RainyMemory {
         LRUCacheMemoryPool<leafNode, basicInfo> *leafPool;
         LRUCacheMemoryPool<internalNode, basicInfo> *internalPool;
         basicInfo info;
+        internalNode rootNode;
     
     private:
         class leafNode {
@@ -333,6 +334,7 @@ namespace RainyMemory {
                 tree->internalPool->update(newRoot, newRoot.offset);
                 tree->internalPool->update(*this, offset);
                 tree->info.root = newRoot.offset;
+                tree->rootNode = newRoot;
             }
             
             splitNodeReturn splitNode(BPlusTree *tree) {
@@ -561,7 +563,6 @@ namespace RainyMemory {
     
     private:
         void initialize(const key &o1, const data &o2) {
-            internalNode rootNode;
             rootNode.offset = internalPool->tellWritePoint();
             rootNode.childNodeIsLeaf = true;
             rootNode.childNode[0] = leafPool->tellWritePoint();
@@ -646,15 +647,16 @@ namespace RainyMemory {
         }
     
     public:
-        explicit BPlusTree(const string &name) {
-            leafPool = new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 200);
-            internalPool = new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, 200);
-            info = leafPool->readExtraMessage();
-        }
+        explicit BPlusTree(const string &name) :
+                leafPool(new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 300)),
+                internalPool(new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, 300)),
+                info(leafPool->readExtraMessage()),
+                rootNode(info.root == -1 ? internalNode {} : internalPool->read(info.root)) {}
         
         ~BPlusTree() {
             leafPool->updateExtraMessage(info);
             internalPool->updateExtraMessage(info);
+            internalPool->update(rootNode, info.root);
             delete leafPool;
             delete internalPool;
         }
@@ -676,7 +678,6 @@ namespace RainyMemory {
         void insert(const key &o1, const data &o2) {
             info.size++;
             if (info.root == -1)return initialize(o1, o2);
-            internalNode rootNode {internalPool->read(info.root)};
             if (rootNode.childNodeIsLeaf) {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 leafNode targetNode {leafPool->read(rootNode.childNode[index])};
@@ -697,7 +698,6 @@ namespace RainyMemory {
         //return whether erase is successful
         bool erase(const key &o) {
             if (info.size == 0 || info.root == -1)return false;
-            internalNode rootNode {internalPool->read(info.root)};
             bool deleted;
             if (rootNode.childNodeIsLeaf) {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
@@ -723,7 +723,6 @@ namespace RainyMemory {
         
         std::pair<data, bool> find(const key &o) const {
             if (info.size == 0 || info.root == -1)return std::pair<data, bool> {data(), false};
-            internalNode rootNode {internalPool->read(info.root)};
             if (rootNode.childNodeIsLeaf) {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 leafNode targetNode {leafPool->read(rootNode.childNode[index])};

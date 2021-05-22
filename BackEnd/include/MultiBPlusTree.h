@@ -68,6 +68,7 @@ namespace RainyMemory {
         LRUCacheMemoryPool<leafNode, basicInfo> *leafPool;
         LRUCacheMemoryPool<internalNode, basicInfo> *internalPool;
         basicInfo info;
+        internalNode rootNode;
     
     private:
         class leafNode {
@@ -379,6 +380,7 @@ namespace RainyMemory {
                 tree->internalPool->update(newRoot, newRoot.offset);
                 tree->internalPool->update(*this, offset);
                 tree->info.root = newRoot.offset;
+                tree->rootNode = newRoot;
             }
             
             splitNodeReturn splitNode(MultiBPlusTree *tree) {
@@ -681,7 +683,6 @@ namespace RainyMemory {
     
     private:
         void initialize(const key &o1, const data &o2) {
-            internalNode rootNode;
             rootNode.offset = internalPool->tellWritePoint();
             rootNode.childNodeIsLeaf = true;
             rootNode.childNode[0] = leafPool->tellWritePoint();
@@ -843,15 +844,16 @@ namespace RainyMemory {
         }
     
     public:
-        explicit MultiBPlusTree(const string &name) {
-            leafPool = new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 200);
-            internalPool = new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, 200);
-            info = leafPool->readExtraMessage();
-        }
+        explicit MultiBPlusTree(const string &name) :
+                leafPool(new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 300)),
+                internalPool(new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, 300)),
+                info(leafPool->readExtraMessage()),
+                rootNode(info.root == -1 ? internalNode {} : internalPool->read(info.root)) {}
         
         ~MultiBPlusTree() {
             leafPool->updateExtraMessage(info);
             internalPool->updateExtraMessage(info);
+            internalPool->update(rootNode, info.root);
             delete leafPool;
             delete internalPool;
         }
@@ -871,32 +873,28 @@ namespace RainyMemory {
         }
         
         void insert(const key &o1, const data &o2) {
-            if (info.root == -1)initialize(o1, o2);
+            info.size++;
+            if (info.root == -1)return initialize(o1, o2);
+            if (rootNode.childNodeIsLeaf) {
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                leafNode targetNode = leafPool->read(rootNode.childNode[index]);
+                targetNode.addElement(this, o1, o2);
+                if (targetNode.dataNumber == MAX_RECORD_NUM)rootNode.addElement(this, targetNode.splitNode(this), index);
+                if (rootNode.keyNumber == MAX_KEY_NUM)rootNode.splitRoot(this);
+            }
             else {
-                internalNode rootNode = internalPool->read(info.root);
-                if (rootNode.childNodeIsLeaf) {
-                    int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
-                    leafNode targetNode = leafPool->read(rootNode.childNode[index]);
-                    targetNode.addElement(this, o1, o2);
-                    if (targetNode.dataNumber == MAX_RECORD_NUM)rootNode.addElement(this, targetNode.splitNode(this), index);
+                int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                insertReturn temp = recursionInsert(rootNode.childNode[index], o1, o2);
+                if (temp.childNodeNumberIncreased) {
+                    rootNode.addElement(this, temp.node, index);
                     if (rootNode.keyNumber == MAX_KEY_NUM)rootNode.splitRoot(this);
                 }
-                else {
-                    int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
-                    insertReturn temp = recursionInsert(rootNode.childNode[index], o1, o2);
-                    if (temp.childNodeNumberIncreased) {
-                        rootNode.addElement(this, temp.node, index);
-                        if (rootNode.keyNumber == MAX_KEY_NUM)rootNode.splitRoot(this);
-                    }
-                }
             }
-            info.size++;
         }
         
         //return whether erase is successful
         bool erase(const key &o1, const data &o2) {
             if (info.size == 0 || info.root == -1)return false;
-            internalNode rootNode = internalPool->read(info.root);
             bool deleted = false;
             if (rootNode.childNodeIsLeaf) {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
@@ -938,7 +936,6 @@ namespace RainyMemory {
         
         void find(const key &o, vector<data> &result) const {
             if (info.size == 0 || info.root == -1)return;
-            internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 int cur = rootNode.childNode[index];
@@ -964,7 +961,6 @@ namespace RainyMemory {
         
         void update(const key &o1, const data &o2, const data &newData) {
             if (info.size == 0 || info.root == -1)return;
-            internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 leafNode targetNode = leafPool->read(rootNode.childNode[index]);
@@ -983,7 +979,6 @@ namespace RainyMemory {
         
         std::pair<data, bool> findNth(const key &o, int n) {
             if (info.size == 0 || info.root == -1)return std::pair<data, bool> {data(), false};
-            internalNode rootNode = internalPool->read(info.root);
             if (rootNode.childNodeIsLeaf) {
                 int index = upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 int cur = rootNode.childNode[index];
