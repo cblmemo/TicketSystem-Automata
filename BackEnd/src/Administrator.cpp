@@ -29,6 +29,7 @@ Administrator::~Administrator() {
 }
 
 void Administrator::runProgramme() {
+    std::ios::sync_with_stdio(false);
     initialize();
     string cmd;
     bool flag = true;
