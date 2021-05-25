@@ -16,6 +16,7 @@
 using RainyMemory::string_t;
 using RainyMemory::rmstream;
 using RainyMemory::MemoryPool;
+using RainyMemory::LRUCacheMemoryPool;
 using RainyMemory::BPlusTree;
 using RainyMemory::MultiBPlusTree;
 using RainyMemory::HashMap;
@@ -29,8 +30,8 @@ const char endl = '\n';
 
 enum coefficient {
     SEAT_NUM_INFINITY = 2000000000,
-    USER_CACHE_SIZE = 10000000,
-    TRAIN_CACHE_SIZE = 500,
+    USER_CACHE_SIZE = 100000,
+    TRAIN_CACHE_SIZE = 1000,
     BPLUSTREE_L = 50,
     BPLUSTREE_M = 50,
     MULTI_BPLUSTREE_L = 100,

@@ -146,7 +146,7 @@ namespace RainyMemory {
         }
     
     public:
-        HashMap() : capacity(PrimeList[2]) {
+        HashMap() : capacity(PrimeList[4]) {
             buckets = new LinkedList[capacity];
         }
         

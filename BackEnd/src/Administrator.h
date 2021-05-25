@@ -26,8 +26,7 @@ private:
     UserManager  *Saria     = nullptr;
     TrainManager *Silence   = nullptr;
     OrderManager *Ifrit     = nullptr;
-    std::istream &defaultIn;
-    rmstream &defaultOut;
+    rmstream defaultOut;
     
     using path_t = const std::string;
     
@@ -47,7 +46,7 @@ private:
     void runProgramme();
 
 public:
-    Administrator(std::istream &is, rmstream &os);
+    Administrator();
     
     ~Administrator();
 };

@@ -30,20 +30,25 @@ namespace RainyMemory {
             for (char i:o)res = (res << 3) + (res << 1) + i - '0';
             return res;
         }
+        
+        inline bool delimJudge(char c) {
+            return c == Delim || c == '\n' || c == '\r';
+        }
     
     public:
         TokenScanner() = default;
         
         explicit TokenScanner(const string &buffer, char delim = ' ') : Buffer(buffer), Delim(delim), pos(0) {
-            while (Buffer[pos] == Delim)pos++;
+            while (delimJudge(Buffer[pos]))pos++;
         }
         
         string nextToken() {
             if (hasMoreTokens()) {
                 int next = pos, _pos = pos;
-                while (Buffer[next] != Delim && next < Buffer.length())next++;
+                while (!delimJudge(Buffer[next]) && next < Buffer.length())next++;
                 pos = next + 1;
-                if (pos < Buffer.length())while (Buffer[pos] == Delim)pos++;
+                if (pos < Buffer.length())
+                    while (delimJudge(Buffer[pos]))pos++;
                 return Buffer.substr(_pos, next - _pos);
             }
             else return "";
@@ -61,10 +66,10 @@ namespace RainyMemory {
             return pos < Buffer.length();
         }
         
-        void resetBuffer(const string &buffer) {
+        void resetBuffer(const char *buffer) {
             Buffer = buffer;
             pos = 0;
-            while (Buffer[pos] == Delim)pos++;
+            while (delimJudge(Buffer[pos]))pos++;
         }
         
         void resetDelim(char delim) {

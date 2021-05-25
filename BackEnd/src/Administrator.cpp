@@ -17,7 +17,7 @@ void Administrator::clean() {
     Ifrit   -> clear();
 }
 
-Administrator::Administrator(std::istream &is, rmstream &os) : defaultIn(is), defaultOut(os) {
+Administrator::Administrator() {
     runProgramme();
 }
 
@@ -31,9 +31,11 @@ Administrator::~Administrator() {
 void Administrator::runProgramme() {
     std::ios::sync_with_stdio(false);
     initialize();
-    string cmd;
+    char cmd[10000];
     bool flag = true;
-    while (flag && getline(defaultIn, cmd)) {
+    while (flag) {
+        memset(cmd, 0, sizeof(cmd));
+        fgets(cmd, 9999, stdin);
         Ptilopsis -> resetBuffer(cmd);
         switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:

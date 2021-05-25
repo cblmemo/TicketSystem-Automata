@@ -69,19 +69,19 @@ void TrainManager::addTrain(const Parser &p) {
     int travelTimes[100] = {0};
     int stopoverTimes[100] = {0};
     train_t newTrain {p["-i"], p("-n"), p("-m"), p["-y"][0]};
-    splitTool.resetBuffer(p["-s"]);
+    splitTool.resetBuffer(p["-s"].c_str());
     for (int i = 0; i < newTrain.stationNum; i++)newTrain.stations[i] = splitTool.nextToken();
-    splitTool.resetBuffer(p["-p"]);
+    splitTool.resetBuffer(p["-p"].c_str());
     newTrain.prices[0] = 0;
     for (int i = 1; i < newTrain.stationNum; i++)newTrain.prices[i] = splitTool.nextIntToken() + newTrain.prices[i - 1];
     string st {p["-x"]};
     newTrain.startTime.setTime((st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0');
     newTrain.endTime = newTrain.startTime;
-    splitTool.resetBuffer(p["-t"]);
+    splitTool.resetBuffer(p["-t"].c_str());
     for (int i = 0; i < newTrain.stationNum - 1; i++)travelTimes[i] = splitTool.nextIntToken();
-    splitTool.resetBuffer(p["-o"]);
+    splitTool.resetBuffer(p["-o"].c_str());
     for (int i = 0; i < newTrain.stationNum - 2; i++)stopoverTimes[i] = splitTool.nextIntToken();
-    splitTool.resetBuffer(p["-d"]);
+    splitTool.resetBuffer(p["-d"].c_str());
     st = splitTool.nextToken();
     newTrain.startTime.setDate((st[0] - '0') * 10 + st[1] - '0', (st[3] - '0') * 10 + st[4] - '0');
     st = splitTool.nextToken();
@@ -134,6 +134,7 @@ void TrainManager::deleteTrain(const Parser &p) {
 }
 
 void TrainManager::queryTicket(const Parser &p) {
+    if (p["-s"] == p["-t"])return outputSuccess();
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
     static vector<std::pair<hash_t, int>> sTrains, eTrains;

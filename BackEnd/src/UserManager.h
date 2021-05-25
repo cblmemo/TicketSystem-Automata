@@ -6,6 +6,7 @@
 #define TICKETSYSTEM_AUTOMATA_USERMANAGER_H
 
 #include "Global.h"
+#include <map>
 
 class UserManager {
     /*

@@ -77,7 +77,7 @@ namespace RainyMemory {
             reset();
         }
         
-        void resetBuffer(const string &buffer) {
+        void resetBuffer(const char *buffer) {
             ts.resetBuffer(buffer);
             reset();
         }

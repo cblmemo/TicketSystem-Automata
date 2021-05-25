@@ -1,7 +1,6 @@
 #include "Administrator.h"
 
 int main() {
-    rmstream RhodesIsland;
-    Administrator RhineLab {std::cin, RhodesIsland};
+    Administrator RhineLab;
     return 0;
 }
