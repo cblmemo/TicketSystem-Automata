@@ -99,8 +99,6 @@ private:
     inline void outputQueue();
     
     inline void printOrder(const order_t &o);
-    
-    static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
     OrderManager(UserManager *um, TrainManager *tm, const string &indexPath, const string &pendingPath, rmstream &dft) :
