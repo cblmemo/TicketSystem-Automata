@@ -7,7 +7,7 @@
 
 #include "exceptions.h"
 
-#define INIT_LEN 10000
+#define INIT_LEN 5
 
 namespace RainyMemory {
     template<typename T>
