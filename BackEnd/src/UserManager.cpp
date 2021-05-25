@@ -81,8 +81,8 @@ void UserManager::modifyProfile(const Parser &p) {
             return printUser(mUser);
         }
         if (isLogin(p["-u"])) {
-            user_t mUser {storagePool.read(loginPool[p["-u"]].second)};
-            if (loginPool[p["-c"]].first > mUser.privilege) {
+            if (loginPool[p["-c"]].first > loginPool[p["-u"]].first) {
+                user_t mUser {storagePool.read(loginPool[p["-u"]].second)};
                 if (p.haveThisArgument("-p"))mUser.password = p["-p"];
                 if (p.haveThisArgument("-n"))mUser.name = p["-n"];
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
