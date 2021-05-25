@@ -88,7 +88,7 @@ private:
     UserManager *userManager;
     TrainManager *trainManager;
     MultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;//[username] -> [order]
-    MultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;//[trainID] -> [order]
+    MultiBPlusTree<std::pair<hash_t, int>, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;//[[trainID], [dist]] -> [order]
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     rmstream &defaultOut;
     

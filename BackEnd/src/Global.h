@@ -19,6 +19,7 @@ using RainyMemory::MemoryPool;
 using RainyMemory::LRUCacheMemoryPool;
 using RainyMemory::BPlusTree;
 using RainyMemory::MultiBPlusTree;
+using RainyMemory::vector;
 using RainyMemory::HashMap;
 using RainyMemory::TokenScanner;
 using RainyMemory::Parser;
