@@ -48,12 +48,11 @@ private:
      * --------------------------------------------------------
      * [loginPool]: Store user's login status. In the same time,
      * implement a simple cache strategy, which is to store every
-     * login user's privilege(first) and offset(second).
+     * login user's privilege.
      *
      */
-    HashMap<username_t, std::pair<int, int>, hash_username_t> loginPool;
-    BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[username] -> [offset]
-    LRUCacheMemoryPool<user_t, bool> storagePool;
+    HashMap<username_t, int, hash_username_t> loginPool;
+    BPlusTree<hash_t, user_t, BPLUSTREE_L, BPLUSTREE_M, USER_CACHE_SIZE> indexPool;//[username] -> [user]
     hash_username_t hashUsername;
     rmstream &defaultOut;
     
@@ -67,7 +66,7 @@ private:
 
 public:
     UserManager(const string &indexPath, const string &storagePath, rmstream &dft) :
-            loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_CACHE_SIZE), defaultOut(dft) {}
+            loginPool(), indexPool(indexPath), defaultOut(dft) {}
     
     void addUser(const Parser &p);
     

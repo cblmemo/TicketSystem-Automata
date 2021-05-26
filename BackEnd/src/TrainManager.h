@@ -255,7 +255,7 @@ private:
      */
     BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[username] -> [offset]
     LRUCacheMemoryPool<train_t> storagePool;
-    BPlusTree<std::pair<hash_t, int>, date_ticket_t> ticketPool;//[[trainID], [stationIndex]] -> [date_ticket]
+    BPlusTree<std::pair<hash_t, int>, date_ticket_t> ticketPool;//[[trainID], [dateIndex]] -> [date_ticket]
     MultiBPlusTree<hash_t, std::pair<hash_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;//[station] -> [[trainID], [stationIndex]]
     hash_trainID_t hashTrainID;
     hash_station_t hashStation;

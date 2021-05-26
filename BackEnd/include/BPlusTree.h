@@ -11,7 +11,7 @@
 //#define debug
 
 namespace RainyMemory {
-    template<class key, class data, int M = 50, int L = 50>
+    template<class key, class data, int M = 50, int L = 50, int CACHE_SIZE = 300>
     class BPlusTree {
         /*
          * class MultiBPlusTree
@@ -681,8 +681,8 @@ namespace RainyMemory {
     
     public:
         explicit BPlusTree(const string &name) :
-                leafPool(new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, 300)),
-                internalPool(new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, 300)),
+                leafPool(new LRUCacheMemoryPool<leafNode, basicInfo>("Leaf" + name, basicInfo {}, CACHE_SIZE)),
+                internalPool(new LRUCacheMemoryPool<internalNode, basicInfo>("Internal" + name, basicInfo {}, CACHE_SIZE)),
                 info(leafPool->readExtraMessage()),
                 rootNode(info.root == -1 ? internalNode {} : internalPool->read(info.root)) {}
         
