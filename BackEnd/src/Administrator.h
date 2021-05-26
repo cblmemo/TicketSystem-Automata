@@ -34,6 +34,7 @@ private:
     path_t UserStoragePath  {"UserStorage.dat"};
     path_t TrainIndexPath   {"TrainIndex.dat"};
     path_t TrainStoragePath {"TrainStorage.dat"};
+    path_t TrainInfoPath    {"TrainInfo.dat"};
     path_t TrainTicketPath  {"TrainTicket.dat"};
     path_t TrainStationPath {"TrainStation.dat"};
     path_t OrderIndexPath   {"OrderIndex.dat"};
