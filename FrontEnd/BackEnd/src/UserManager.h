@@ -62,6 +62,8 @@ private:
     
     inline void printUser(const user_t &u);
     
+    int queryPrivilege(const username_t &u);
+    
     bool isLogin(const username_t &u);
 
 public:

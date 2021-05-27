@@ -16,6 +16,15 @@ inline void UserManager::printUser(const UserManager::user_t &u) {
     defaultOut << u.username << " " << u.name << " " << u.mailAddr << " " << u.privilege << endl;
 }
 
+int UserManager::queryPrivilege(const UserManager::username_t &u) {
+    if (isLogin(u))return loginPool[u];
+    else {
+        auto res = indexPool.find(hashUsername(u));
+        if (!res.second)return -1;
+        return res.first.privilege;
+    }
+}
+
 bool UserManager::isLogin(const UserManager::username_t &u) {
     //if a user is login, the it must haveThisArgument.
     return loginPool.containsKey(u);
