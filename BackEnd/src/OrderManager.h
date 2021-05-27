@@ -37,17 +37,14 @@ private:
          * order_t
          * Store order's relevant information
          * --------------------------------------------------------
-         * [timeStamp]: Order's creation time, to judge whether two
-         * order is same, therefore could avoid exactly same orders
-         * interfere BPLusTree's delete.
          * [from] && [to]: From station and to station's station index.
          * [dist]: Order train's departure date distance between start
          * time.
          *
          */
+        status_t status = SUCCESS;
         int orderID = -1;
         username_t username {};
-        status_t status = SUCCESS;
         trainID_t trainID {};
         station_t fromStation {};
         station_t toStation {};
@@ -67,6 +64,20 @@ private:
         order_t &operator=(const order_t &o) = default;
     };
     
+    struct pending_order_t {
+        hash_t hashedUsername;
+        hash_t hashedTrainID;
+        int orderID;
+        int from;
+        int to;
+        int num;
+        
+        pending_order_t() = default;
+        
+        pending_order_t(hash_t u, hash_t ti, int oi, int f, int t, int n) :
+                hashedUsername(u), hashedTrainID(ti), orderID(oi), from(f), to(t), num(n) {}
+    };
+    
     /*
      * Data Members
      * --------------------------------------------------------
@@ -79,8 +90,8 @@ private:
      */
     UserManager *userManager;
     TrainManager *trainManager;
-    AlternativeMultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;//[username] -> [order]
-    AlternativeMultiBPlusTree<std::pair<hash_t, int>, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;//[[trainID], [dist]] -> [order]
+    AlternativeMultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M, 300, status_t> indexPool;//[username] -> [order]
+    AlternativeMultiBPlusTree<std::pair<hash_t, int>, pending_order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;//[[trainID], [dist]] -> [order]
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     rmstream &defaultOut;
     

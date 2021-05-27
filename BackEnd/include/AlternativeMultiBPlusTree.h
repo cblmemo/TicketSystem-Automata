@@ -12,7 +12,7 @@
 //#define debug
 
 namespace RainyMemory {
-    template<class mainKey, class data, int M = 50, int L = 50, int CACHE_SIZE = 300>
+    template<class mainKey, class data, int M = 50, int L = 50, int CACHE_SIZE = 300, class firstMember_t = char>
     class AlternativeMultiBPlusTree {
         /*
          * class AlternativeMultiBPlusTree
@@ -134,6 +134,21 @@ namespace RainyMemory {
                 for (int i = start; i < end; i++) {
                     if (o1 == leafKey[i]) {
                         leafData[i] = newData;
+                        result = true;
+                        break;
+                    }
+                }
+                if (result)tree->leafPool->update(*this, offset);
+                return result;
+            }
+            
+            bool updateFirstElement(AlternativeMultiBPlusTree *tree, const key &o1, const firstMember_t &newData) {
+                int start = RainyMemory::lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+                int end = RainyMemory::upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
+                bool result = false;
+                for (int i = start; i < end; i++) {
+                    if (o1 == leafKey[i]) {
+                        memcpy(&leafData[i], &newData, sizeof(firstMember_t));
                         result = true;
                         break;
                     }
@@ -738,6 +753,24 @@ namespace RainyMemory {
                 return recursionFindNth(nowNode.childNode[index], o, n);
             }
         }
+        
+        void recursionUpdateFirstMember(int now, const key &o1, const firstMember_t &newData) {
+            internalNode nowNode = internalPool->read(now);
+            if (nowNode.childNodeIsLeaf) {
+                int index = RainyMemory::upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                leafNode targetNode = leafPool->read(nowNode.childNode[index]);
+                if (!targetNode.updateFirstElement(this, o1, newData)) {
+                    while (targetNode.leftBrother >= 0) {
+                        targetNode = leafPool->read(targetNode.leftBrother);
+                        if (targetNode.updateFirstElement(this, o1, newData))break;
+                    }
+                }
+            }
+            else {
+                int index = RainyMemory::upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
+                recursionUpdateFirstMember(nowNode.childNode[index], o1, newData);
+            }
+        }
     
     public:
         explicit AlternativeMultiBPlusTree(const string &name) :
@@ -885,6 +918,25 @@ namespace RainyMemory {
             else {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o) - rootNode.nodeKey;
                 return recursionFindNth(rootNode.childNode[index], o, n);
+            }
+        }
+        
+        void updateFirstMember(const mainKey &k1, const assistantKey &k2, const firstMember_t &newData) {
+            if (info.size == 0 || info.root == -1)return;
+            key o1 {k1, k2};
+            if (rootNode.childNodeIsLeaf) {
+                int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                leafNode targetNode = leafPool->read(rootNode.childNode[index]);
+                if (!targetNode.updateFirstElement(this, o1, newData)) {
+                    while (targetNode.leftBrother >= 0) {
+                        targetNode = leafPool->read(targetNode.leftBrother);
+                        if (targetNode.updateFirstElement(this, o1, newData))break;
+                    }
+                }
+            }
+            else {
+                int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
+                recursionUpdateFirstMember(rootNode.childNode[index], o1, newData);
             }
         }
         
