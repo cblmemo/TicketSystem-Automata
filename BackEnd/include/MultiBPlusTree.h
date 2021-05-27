@@ -18,7 +18,7 @@ namespace RainyMemory {
          * class MultiBPlusTree
          * --------------------------------------------------------
          * A data structure which implements data indexing or storage.
-         * This version support duplicate key value, and require class T
+         * This version support duplicate key value, and require class key
          * overloaded [operator<] and [operator=].
          *
          */

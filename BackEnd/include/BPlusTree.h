@@ -14,7 +14,7 @@ namespace RainyMemory {
     template<class key, class data, int M = 50, int L = 50, int CACHE_SIZE = 300>
     class BPlusTree {
         /*
-         * class MultiBPlusTree
+         * class BPlusTree
          * --------------------------------------------------------
          * A data structure which implements data indexing or storage.
          * This version [DOES NOT] support duplicate key value, and
