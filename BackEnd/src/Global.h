@@ -9,6 +9,7 @@
 #include "../include/RTL/rmstream.h"
 #include "../include/BPlusTree.h"
 #include "../include/MultiBPlusTree.h"
+#include "../include/AlternativeMultiBPlusTree.h"
 #include "../include/Parser.h"
 #include "../include/MemoryPool.h"
 #include <chrono>
@@ -19,6 +20,7 @@ using RainyMemory::MemoryPool;
 using RainyMemory::LRUCacheMemoryPool;
 using RainyMemory::BPlusTree;
 using RainyMemory::MultiBPlusTree;
+using RainyMemory::AlternativeMultiBPlusTree;
 using RainyMemory::vector;
 using RainyMemory::HashMap;
 using RainyMemory::TokenScanner;

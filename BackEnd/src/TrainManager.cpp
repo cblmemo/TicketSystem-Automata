@@ -110,7 +110,7 @@ void TrainManager::releaseTrain(const Parser &p) {
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
     for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, date_ticket_t(rTrain.seatNum, rTrain.stationNum));
-    for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), std::pair<hash_t, int> {hashTrainID(rTrain.trainID), i});
+    for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), stationPool.size(), std::pair<hash_t, int> {hashTrainID(rTrain.trainID), i});
     storagePool.update(rTrain, temp.first), outputSuccess();
 }
 

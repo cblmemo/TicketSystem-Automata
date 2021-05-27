@@ -45,8 +45,8 @@ private:
          * time.
          *
          */
+        int orderID = -1;
         username_t username {};
-        long long timeStamp {};
         status_t status = SUCCESS;
         trainID_t trainID {};
         station_t fromStation {};
@@ -61,18 +61,10 @@ private:
         
         order_t() = default;
         
-        order_t(const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int n, int fk, int tk, int di) :
-                username(u), status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {
-            std::chrono::nanoseconds ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
-            timeStamp = (long long) (ns.count());
-        }
+        order_t(int id, const username_t &u, status_t s, const trainID_t &i, const station_t &f, const station_t &t, const train_time_t &d, const train_time_t &a, int p, int n, int fk, int tk, int di) :
+                orderID(id), username(u), status(s), trainID(i), fromStation(f), toStation(t), departureTime(d), arrivalTime(a), price(p), num(n), from(fk), to(tk), dist(di) {}
         
         order_t &operator=(const order_t &o) = default;
-        
-        bool operator==(const order_t &o) const {
-            return timeStamp == o.timeStamp && status == o.status && trainID == o.trainID && fromStation == o.fromStation && toStation == o.toStation
-                   && departureTime == o.departureTime && arrivalTime == o.arrivalTime && price == o.price && num == o.num && from == o.from && to == o.to && dist == o.dist;
-        }
     };
     
     /*
@@ -87,8 +79,8 @@ private:
      */
     UserManager *userManager;
     TrainManager *trainManager;
-    MultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;//[username] -> [order]
-    MultiBPlusTree<std::pair<hash_t, int>, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;//[[trainID], [dist]] -> [order]
+    AlternativeMultiBPlusTree<hash_t, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;//[username] -> [order]
+    AlternativeMultiBPlusTree<std::pair<hash_t, int>, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;//[[trainID], [dist]] -> [order]
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     rmstream &defaultOut;
     
