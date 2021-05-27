@@ -243,20 +243,6 @@ private:
         train_t(const train_t &o) = default;
     };
     
-    struct station_info_t {
-        trainID_t trainID {};
-        int dateGap = 0;
-        train_time_t departureTime {};
-        train_time_t arrivalTime {};
-        station_t station {};
-        int price = 0;
-        
-        station_info_t(const trainID_t &i, int d, train_time_t dt, train_time_t at, const station_t &s, int p) :
-                trainID(i), dateGap(d), departureTime(dt), arrivalTime(at), station(s), price(p) {}
-        
-        station_info_t() = default;
-    };
-    
     /*
      * Data Members
      * --------------------------------------------------------
@@ -269,7 +255,6 @@ private:
      */
     BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[trainID] -> [offset]
     LRUCacheMemoryPool<train_t> storagePool;
-    BPlusTree<std::pair<hash_t, int>, station_info_t> infoPool;//[[trainID], [stationIndex]] -> [stationInfo]
     BPlusTree<std::pair<hash_t, int>, date_ticket_t> ticketPool;//[[trainID], [dateIndex]] -> [date_ticket]
     MultiBPlusTree<hash_t, std::pair<hash_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;//[station] -> [[trainID], [stationIndex]]
     hash_trainID_t hashTrainID;
@@ -286,8 +271,8 @@ private:
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    TrainManager(const string &indexPath, const string &storagePath, const string &infoPath, const string &ticketPath, const string &stationPath, rmstream &dft) :
-            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), infoPool(infoPath), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+    TrainManager(const string &indexPath, const string &storagePath, const string &ticketPath, const string &stationPath, rmstream &dft) :
+            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);
     

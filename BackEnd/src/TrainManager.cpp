@@ -110,11 +110,7 @@ void TrainManager::releaseTrain(const Parser &p) {
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
     for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, date_ticket_t(rTrain.seatNum, rTrain.stationNum));
-    for (int i = 0; i < rTrain.stationNum; i++) {
-        stationPool.insert(hashStation(rTrain.stations[i]), std::pair<hash_t, int> {hashTrainID(rTrain.trainID), i});
-        station_info_t info {rTrain.trainID, rTrain.dateGap, rTrain.departureTimes[i], rTrain.arrivalTimes[i], rTrain.stations[i], rTrain.prices[i]};
-        infoPool.insert(std::pair<hash_t, int> {hash, i}, info);
-    }
+    for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), std::pair<hash_t, int> {hashTrainID(rTrain.trainID), i});
     storagePool.update(rTrain, temp.first), outputSuccess();
 }
 
@@ -154,15 +150,16 @@ void TrainManager::queryTicket(const Parser &p) {
     for (const std::pair<hash_t, int> &j : eTrains) {
         int i;
         if (hashmap.containsKey(j.first) && (i = hashmap[j.first]) < j.second) {
-            station_info_t iInfo {infoPool.find(std::pair<hash_t, int> {j.first, i}).first}, jInfo {infoPool.find(std::pair<hash_t, int> {j.first, j.second}).first};
-            train_time_t dDate {iInfo.departureTime};
-            if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(iInfo.dateGap))) {
-                int dist = departureDate.dateDistance(iInfo.departureTime);
-                std::pair<hash_t, int> key {j.first, dist};
+            std::pair<int, bool> temp {indexPool.find(j.first)};
+            train_t targetTrain {storagePool.read(temp.first)};
+            train_time_t dDate {targetTrain.departureTimes[i]};
+            if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
+                int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
+                std::pair<hash_t, int> key {hashTrainID(targetTrain.trainID), dist};
                 date_ticket_t seats {ticketPool.find(key).first};
-                train_time_t tempTime1 {iInfo.departureTime}, tempTime2 {jInfo.arrivalTime};
-                ticket_t ticket {iInfo.trainID, iInfo.station, jInfo.station, tempTime1.updateDate(dist),
-                                 tempTime2.updateDate(dist), jInfo.price - iInfo.price, seats.ticketNum(i, j.second)};
+                train_time_t tempTime1 {targetTrain.departureTimes[i]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
+                ticket_t ticket {targetTrain.trainID, targetTrain.stations[i], targetTrain.stations[j.second], tempTime1.updateDate(dist),
+                                 tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], seats.ticketNum(i, j.second)};
                 result.push_back(ticket);
             }
         }
