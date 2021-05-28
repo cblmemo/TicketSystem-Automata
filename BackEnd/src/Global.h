@@ -35,10 +35,10 @@ enum coefficient {
     SEAT_NUM_INFINITY = 2000000000,
     USER_CACHE_SIZE = 500,
     TRAIN_CACHE_SIZE = 1000,
-    BPLUSTREE_L = 100,
-    BPLUSTREE_M = 100,
-    MULTI_BPLUSTREE_L = 100,
-    MULTI_BPLUSTREE_M = 100
+    BPLUSTREE_L = 1000,
+    BPLUSTREE_M = 1000,
+    MULTI_BPLUSTREE_L = 1000,
+    MULTI_BPLUSTREE_M = 1000
 };
 
 constexpr int lengthOfChineseCharacters(int length) {
