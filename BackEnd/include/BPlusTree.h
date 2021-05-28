@@ -11,7 +11,7 @@
 //#define debug
 
 namespace RainyMemory {
-    template<class key, class data, int M = 50, int L = 50, int CACHE_SIZE = 300>
+    template<class key, class data, int MM = 50, int LL = 50, int CACHE_SIZE = 300>
     class BPlusTree {
         /*
          * class BPlusTree
@@ -49,6 +49,9 @@ namespace RainyMemory {
         };
         
         enum sizeInfo {
+            PAGE_SIZE = 8192,
+            L = (PAGE_SIZE - 4 * sizeof(int)) / (sizeof(key) + sizeof(data)),
+            M = (PAGE_SIZE - 4 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)),
             MAX_RECORD_NUM = L + 1,
             MIN_RECORD_NUM = (L - 1) / 2,
             MAX_KEY_NUM = M + 1,
@@ -101,7 +104,7 @@ namespace RainyMemory {
                     }
                 }
             }
-    
+            
             bool updateElement(BPlusTree *tree, const key &o1, const data &newData) {
                 int start = RainyMemory::lower_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
                 int end = RainyMemory::upper_bound(leafKey, leafKey + dataNumber, o1) - leafKey;
@@ -660,7 +663,7 @@ namespace RainyMemory {
                 return recursionFind(nowNode.childNode[index], o);
             }
         }
-    
+        
         void recursionUpdate(int now, const key &o1, const data &newData) {
             internalNode nowNode = internalPool->read(now);
             if (nowNode.childNodeIsLeaf) {
@@ -769,7 +772,7 @@ namespace RainyMemory {
                 return recursionFind(rootNode.childNode[index], o);
             }
         }
-    
+        
         void update(const key &o1, const data &newData) {
             if (info.size == 0 || info.root == -1)return;
             if (rootNode.childNodeIsLeaf) {
