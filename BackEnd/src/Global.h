@@ -36,9 +36,9 @@ enum coefficient {
     USER_CACHE_SIZE = 500,
     TRAIN_CACHE_SIZE = 1000,
     BPLUSTREE_L = 1000,
-    BPLUSTREE_M = 1000,
+    BPLUSTREE_M = 50,
     MULTI_BPLUSTREE_L = 1000,
-    MULTI_BPLUSTREE_M = 1000
+    MULTI_BPLUSTREE_M = 50
 };
 
 constexpr int lengthOfChineseCharacters(int length) {
