@@ -255,7 +255,8 @@ private:
      */
     BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[trainID] -> [offset]
     LRUCacheMemoryPool<train_t> storagePool;
-    BPlusTree<std::pair<hash_t, int>, date_ticket_t> ticketPool;//[[trainID], [dateIndex]] -> [date_ticket]
+    BPlusTree<std::pair<hash_t, int>, int, BPLUSTREE_L, BPLUSTREE_M> ticketPool;//[[trainID], [dateIndex]] -> [offset]
+    LRUCacheMemoryPool<date_ticket_t> ticketStoragePool;
     AlternativeMultiBPlusTree<hash_t, std::pair<hash_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;//[station] -> [[trainID], [stationIndex]]
     hash_trainID_t hashTrainID;
     hash_station_t hashStation;
@@ -271,8 +272,8 @@ private:
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    TrainManager(const string &indexPath, const string &storagePath, const string &ticketPath, const string &stationPath, rmstream &dft) :
-            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+    TrainManager(const string &indexPath, const string &storagePath, const string &ticketPath, const string &ticketStoragePath, const string &stationPath, rmstream &dft) :
+            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), ticketStoragePool(ticketStoragePath, 0, TICKET_CACHE_SIZE), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
     
     void addTrain(const Parser &p);
     

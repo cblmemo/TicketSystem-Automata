@@ -6,7 +6,6 @@
 #define TICKETSYSTEM_AUTOMATA_USERMANAGER_H
 
 #include "Global.h"
-#include <map>
 
 class UserManager {
     /*
@@ -52,7 +51,8 @@ private:
      *
      */
     HashMap<username_t, int, hash_username_t> loginPool;
-    BPlusTree<hash_t, user_t, BPLUSTREE_L, BPLUSTREE_M, USER_CACHE_SIZE> indexPool;//[username] -> [user]
+    BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[username] -> [offset]
+    LRUCacheMemoryPool<user_t, bool> storagePool;
     hash_username_t hashUsername;
     rmstream &defaultOut;
     
@@ -66,7 +66,7 @@ private:
 
 public:
     UserManager(const string &indexPath, const string &storagePath, rmstream &dft) :
-            loginPool(), indexPool(indexPath), defaultOut(dft) {}
+            loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_CACHE_SIZE), defaultOut(dft) {}
     
     void addUser(const Parser &p);
     
