@@ -12,7 +12,7 @@
 //#define debug
 
 namespace RainyMemory {
-    template<class mainKey, class data, int M = 50, int L = 50, int CACHE_SIZE = 300, class firstMember_t = char>
+    template<class mainKey, class data, int MM = 50, int LL = 50, int CACHE_SIZE = 300, class firstMember_t = char>
     class AlternativeMultiBPlusTree {
         /*
          * class AlternativeMultiBPlusTree
@@ -73,9 +73,9 @@ namespace RainyMemory {
         };
         
         enum sizeInfo {
-//            PAGE_SIZE = 4096,
-//            L = (PAGE_SIZE - 4 * sizeof(int)) / (sizeof(key) + sizeof(data)),
-//            M = (PAGE_SIZE - 4 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)),
+            PAGE_SIZE = 8192,
+            L = (PAGE_SIZE - 4 * sizeof(int)) / (sizeof(key) + sizeof(data)),
+            M = (PAGE_SIZE - 4 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)),
             MAX_RECORD_NUM = L + 1,
             MIN_RECORD_NUM = (L - 1) / 2,
             MAX_KEY_NUM = M + 1,
