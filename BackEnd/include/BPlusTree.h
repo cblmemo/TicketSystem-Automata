@@ -617,12 +617,7 @@ namespace RainyMemory {
             if (nowNode.childNodeIsLeaf) {
                 int index = RainyMemory::upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
                 leafNode targetNode = leafPool->read(nowNode.childNode[index]);
-                if (!targetNode.updateElement(this, o1, newData)) {
-                    while (targetNode.leftBrother >= 0) {
-                        targetNode = leafPool->read(targetNode.leftBrother);
-                        if (targetNode.updateElement(this, o1, newData))break;
-                    }
-                }
+                targetNode.updateElement(this, o1, newData);
             }
             else {
                 int index = RainyMemory::upper_bound(nowNode.nodeKey, nowNode.nodeKey + nowNode.keyNumber, o1) - nowNode.nodeKey;
@@ -728,12 +723,7 @@ namespace RainyMemory {
             if (rootNode.childNodeIsLeaf) {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
                 leafNode targetNode = leafPool->read(rootNode.childNode[index]);
-                if (!targetNode.updateElement(this, o1, newData)) {
-                    while (targetNode.leftBrother >= 0) {
-                        targetNode = leafPool->read(targetNode.leftBrother);
-                        if (targetNode.updateElement(this, o1, newData))break;
-                    }
-                }
+                targetNode.updateElement(this, o1, newData);
             }
             else {
                 int index = RainyMemory::upper_bound(rootNode.nodeKey, rootNode.nodeKey + rootNode.keyNumber, o1) - rootNode.nodeKey;
