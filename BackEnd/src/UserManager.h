@@ -7,7 +7,7 @@
 
 #include "Global.h"
 
-#define storageUserData
+//#define storageUserData
 
 class UserManager {
     /*
