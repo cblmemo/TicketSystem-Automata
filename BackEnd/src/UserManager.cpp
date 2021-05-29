@@ -24,7 +24,7 @@ bool UserManager::isLogin(const UserManager::username_t &u) {
 void UserManager::addUser(const Parser &p) {
     if (indexPool.empty()) {
         user_t newUser {p["-p"], p["-n"], p["-m"], 10};
-#ifdef storageData
+#ifdef storageUserData
         indexPool.insert(hashUsername(p["-u"]), newUser);
 #else
         indexPool.insert(hashUsername(p["-u"]), storagePool.write(newUser));
@@ -33,7 +33,7 @@ void UserManager::addUser(const Parser &p) {
     }
     if (isLogin(p["-c"]) && !indexPool.containsKey(hashUsername(p["-u"])) && loginPool[p["-c"]] > p("-g")) {
         user_t newUser {p["-p"], p["-n"], p["-m"], p("-g")};
-#ifdef storageData
+#ifdef storageUserData
         indexPool.insert(hashUsername(p["-u"]), newUser);
 #else
         indexPool.insert(hashUsername(p["-u"]), storagePool.write(newUser));
@@ -45,7 +45,7 @@ void UserManager::addUser(const Parser &p) {
 
 void UserManager::login(const Parser &p) {
     if (!isLogin(p["-u"])) {
-#ifdef storageData
+#ifdef storageUserData
         std::pair<user_t, bool> temp {indexPool.find(hashUsername(p["-u"]))};
         if (!temp.second)return outputFailure();
         user_t &lUser {temp.first};
@@ -69,7 +69,7 @@ void UserManager::logout(const Parser &p) {
 
 void UserManager::queryProfile(const Parser &p) {
     if (isLogin(p["-c"])) {
-#ifdef storageData
+#ifdef storageUserData
         if (p["-c"] == p["-u"])return printUser(p["-u"], indexPool.find(hashUsername(p["-u"])).first);
         if (isLogin(p["-u"]) && loginPool[p["-c"]] > loginPool[p["-u"]])return printUser(p["-u"], indexPool.find(hashUsername(p["-u"])).first);
         std::pair<user_t, bool> temp {indexPool.find(hashUsername(p["-u"]))};
@@ -91,7 +91,7 @@ void UserManager::queryProfile(const Parser &p) {
 void UserManager::modifyProfile(const Parser &p) {
     if (isLogin(p["-c"]) && (!p.haveThisArgument("-g") || p("-g") < loginPool[p["-c"]])) {
         if (p["-c"] == p["-u"]) {
-#ifdef storageData
+#ifdef storageUserData
             std::pair<user_t, bool> temp {indexPool.find(hashUsername(p["-u"]))};
             user_t &mUser {temp.first};
 #else
@@ -102,7 +102,7 @@ void UserManager::modifyProfile(const Parser &p) {
             if (p.haveThisArgument("-n"))mUser.name = p["-n"];
             if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
             if (p.haveThisArgument("-g"))mUser.privilege = loginPool[p["-u"]] = p("-g");
-#ifdef storageData
+#ifdef storageUserData
             indexPool.update(hashUsername(p["-u"]), mUser);
 #else
             storagePool.update(mUser, temp.first);
@@ -111,7 +111,7 @@ void UserManager::modifyProfile(const Parser &p) {
         }
         if (isLogin(p["-u"])) {
             if (loginPool[p["-c"]] > loginPool[p["-u"]]) {
-#ifdef storageData
+#ifdef storageUserData
                 std::pair<user_t, bool> temp {indexPool.find(hashUsername(p["-u"]))};
                 user_t &mUser {temp.first};
 #else
@@ -122,7 +122,7 @@ void UserManager::modifyProfile(const Parser &p) {
                 if (p.haveThisArgument("-n"))mUser.name = p["-n"];
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
                 if (p.haveThisArgument("-g"))mUser.privilege = loginPool[p["-u"]] = p("-g");
-#ifdef storageData
+#ifdef storageUserData
                 indexPool.update(hashUsername(p["-u"]), mUser);
 #else
                 storagePool.update(mUser, temp.first);
@@ -131,7 +131,7 @@ void UserManager::modifyProfile(const Parser &p) {
             }
         }
         else {
-#ifdef storageData
+#ifdef storageUserData
             std::pair<user_t, bool> temp {indexPool.find(hashUsername(p["-u"]))};
             if (!temp.second)return outputFailure();
             user_t &mUser {temp.first};
@@ -145,7 +145,7 @@ void UserManager::modifyProfile(const Parser &p) {
                 if (p.haveThisArgument("-n"))mUser.name = p["-n"];
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
                 if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
-#ifdef storageData
+#ifdef storageUserData
                 indexPool.update(hashUsername(p["-u"]), mUser);
 #else
                 storagePool.update(mUser, temp.first);
@@ -160,7 +160,7 @@ void UserManager::modifyProfile(const Parser &p) {
 void UserManager::clear() {
     loginPool.clear();
     indexPool.clear();
-#ifndef storageData
+#ifndef storageUserData
     storagePool.clear();
 #endif
 }

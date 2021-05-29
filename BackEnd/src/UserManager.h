@@ -7,7 +7,7 @@
 
 #include "Global.h"
 
-#define storageData
+#define storageUserData
 
 class UserManager {
     /*
@@ -52,12 +52,12 @@ private:
      *
      */
     HashMap<username_t, int, hash_username_t> loginPool;//[username] -> [privilege]
-#ifdef storageData
+#ifdef storageUserData
     BPlusTree<hash_t, user_t, BPLUSTREE_L, BPLUSTREE_M, USER_CACHE_SIZE> indexPool;//[username] -> [user]
 #else
     BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[username] -> [offset]
 #endif
-#ifndef storageData
+#ifndef storageUserData
     LRUCacheMemoryPool<user_t, bool> storagePool;
 #endif
     hash_username_t hashUsername;
@@ -73,7 +73,7 @@ private:
 
 public:
     UserManager(const string &indexPath, const string &storagePath, rmstream &dft) :
-#ifdef storageData
+#ifdef storageUserData
             loginPool(), indexPool(indexPath), defaultOut(dft) {}
 #else
             loginPool(), storagePool(storagePath, false, USER_CACHE_SIZE), indexPool(indexPath), defaultOut(dft) {}

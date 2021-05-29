@@ -18,7 +18,7 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
     train_time_t temp {};
     if (t.released) {
         std::pair<hash_t, int> key {hashTrainID(t.trainID), date};
-#ifndef storageData
+#ifndef storageTicketData
         date_ticket_t seats {ticketStoragePool.read(ticketPool.find(key).first)};
 #else
         date_ticket_t seats {ticketPool.find(key).first};
@@ -113,7 +113,7 @@ void TrainManager::releaseTrain(const Parser &p) {
     train_t rTrain {storagePool.read(temp.first)};
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
-#ifndef storageData
+#ifndef storageTicketData
     for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, ticketStoragePool.write(date_ticket_t(rTrain.seatNum, rTrain.stationNum)));
 #else
     for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, date_ticket_t(rTrain.seatNum, rTrain.stationNum));
@@ -164,7 +164,7 @@ void TrainManager::queryTicket(const Parser &p) {
             if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                 int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
                 std::pair<hash_t, int> key {hashTrainID(targetTrain.trainID), dist};
-#ifndef storageData
+#ifndef storageTicketData
                 date_ticket_t seats {ticketStoragePool.read(ticketPool.find(key).first)};
 #else
                 date_ticket_t seats {ticketPool.find(key).first};
@@ -217,7 +217,7 @@ void TrainManager::queryTransfer(const Parser &p) {
                             int sDist = dist, eDist = aTime.dateDistance(tempTime0);
                             if (aTime > tempTime0.updateDate(eDist))eDist++;
                             std::pair<hash_t, int> keySt {hashTrainID(sTrain.trainID), sDist}, keyEn {hashTrainID(eTrain.trainID), eDist};
-#ifndef storageData
+#ifndef storageTicketData
                             date_ticket_t seatsSt {ticketStoragePool.read(ticketPool.find(keySt).first)}, seatsEn {ticketStoragePool.read(ticketPool.find(keyEn).first)};
 #else
                             date_ticket_t seatsSt {ticketPool.find(keySt).first}, seatsEn {ticketPool.find(keyEn).first};
@@ -246,7 +246,7 @@ void TrainManager::clear() {
     indexPool.clear();
     storagePool.clear();
     ticketPool.clear();
-#ifndef storageData
+#ifndef storageTicketData
     ticketStoragePool.clear();
 #endif
     stationPool.clear();
