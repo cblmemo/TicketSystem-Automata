@@ -75,7 +75,7 @@ namespace RainyMemory {
         enum sizeInfo {
             PAGE_SIZE = 4096,
             L = (PAGE_SIZE - 4 * sizeof(int)) / (sizeof(key) + sizeof(data)) - 1,
-            M = (PAGE_SIZE - 5 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)) - 1,
+            M = (PAGE_SIZE - 3 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)) - 1,
             MAX_RECORD_NUM = L + 1,
             MIN_RECORD_NUM = (L + 1) / 2,
             MAX_KEY_NUM = M + 1,
@@ -350,8 +350,6 @@ namespace RainyMemory {
         class internalNode {
         public:
             int offset = -1;
-            int leftBrother = -1;
-            int rightBrother = -1;
             bool childNodeIsLeaf = false;
             int keyNumber = 0;
             key nodeKey[MAX_KEY_NUM];
@@ -373,9 +371,7 @@ namespace RainyMemory {
                 //oldRoot(*this) -> oldRoot + tempNode
                 internalNode newRoot, tempNode;
                 newRoot.offset = tree->internalPool->write(newRoot);
-                rightBrother = tree->internalPool->tellWritePoint();
-                tempNode.offset = rightBrother;
-                tempNode.leftBrother = offset;
+                tempNode.offset = tree->internalPool->tellWritePoint();
                 tempNode.childNodeIsLeaf = childNodeIsLeaf;
                 for (int i = MIN_KEY_NUM + 1; i < keyNumber; i++) {
                     tempNode.nodeKey[i - MIN_KEY_NUM - 1] = nodeKey[i];
@@ -397,15 +393,7 @@ namespace RainyMemory {
             
             splitNodeReturn splitNode(AlternativeMultiBPlusTree *tree) {
                 internalNode tempNode;
-                tempNode.leftBrother = offset;
-                tempNode.rightBrother = rightBrother;
                 tempNode.offset = tree->internalPool->tellWritePoint();
-                if (rightBrother >= 0) {
-                    internalNode tempRightNode = tree->internalPool->read(rightBrother);
-                    tempRightNode.leftBrother = tempNode.offset;
-                    tree->internalPool->update(tempRightNode, tempRightNode.offset);
-                }
-                rightBrother = tempNode.offset;
                 tempNode.childNodeIsLeaf = childNodeIsLeaf;
                 //delete No.MIN_KEY_NUM key, and return it to upper layer
                 //in the following example, key 4 will be returned
@@ -469,14 +457,6 @@ namespace RainyMemory {
             //keep left node and delete right node anyway
             //only right-most point can merge left
             void mergeLeft(AlternativeMultiBPlusTree *tree, internalNode &leftNode, internalNode &fatherNode) {
-                //update left/right brother
-                leftNode.rightBrother = rightBrother;
-                if (rightBrother >= 0) {
-                    internalNode tempRightNode = tree->internalPool->read(rightBrother);
-                    tempRightNode.leftBrother = leftBrother;
-                    tree->internalPool->update(tempRightNode, tempRightNode.offset);
-                }
-                
                 //transfer data
                 //in the following example, key 4 is fatherNode.nodeKey[keyNumber - 1]
                 //key:    1 2 3   4   5 6 7 8
@@ -502,14 +482,6 @@ namespace RainyMemory {
             }
             
             void mergeRight(AlternativeMultiBPlusTree *tree, internalNode &rightNode, internalNode &fatherNode, int index) {
-                //update left/right brother
-                rightBrother = rightNode.rightBrother;
-                if (rightNode.rightBrother >= 0) {
-                    internalNode tempRightRightNode = tree->internalPool->read(rightNode.rightBrother);
-                    tempRightRightNode.leftBrother = offset;
-                    tree->internalPool->update(tempRightRightNode, tempRightRightNode.offset);
-                }
-                
                 //transfer data
                 //in the following example, key 4 is fatherNode.nodeKey[index]
                 //key:    1 2 3   4   5 6 7 8
@@ -548,7 +520,7 @@ namespace RainyMemory {
             }
             
             //return father node need resize
-            bool resize(AlternativeMultiBPlusTree *tree, internalNode &fatherNode, int index) {
+            bool resize(AlternativeMultiBPlusTree *tree, internalNode &fatherNode, int index, int leftBrother, int rightBrother) {
                 if (keyNumber < MIN_KEY_NUM) {
                     if (index == 0 && rightBrother >= 0) {
                         //try borrow/merge right
@@ -682,7 +654,8 @@ namespace RainyMemory {
                 if (!temp.sonNodeNeedResize || !temp.eraseSucceed)return temp;
                 else {
                     internalNode sonNode {internalPool->read(nowNode.childNode[index])};
-                    temp.sonNodeNeedResize = sonNode.resize(this, nowNode, index);
+                    int leftBrother = index <= 0 ? -1 : nowNode.childNode[index - 1], rightBrother = index >= nowNode.keyNumber ? -1 : nowNode.childNode[index + 1];
+                    temp.sonNodeNeedResize = sonNode.resize(this, nowNode, index, leftBrother, rightBrother);
                     return temp;
                 }
             }
@@ -844,7 +817,8 @@ namespace RainyMemory {
                     deleted = true;
                     if (temp.sonNodeNeedResize) {
                         internalNode sonNode {internalPool->read(rootNode.childNode[index])};
-                        if (sonNode.resize(this, rootNode, index))rootNode.resizeRoot(this);
+                        int leftBrother = index <= 0 ? -1 : rootNode.childNode[index - 1], rightBrother = index >= rootNode.keyNumber ? -1 : rootNode.childNode[index + 1];
+                        if (sonNode.resize(this, rootNode, index, leftBrother, rightBrother))rootNode.resizeRoot(this);
                     }
                 }
             }
