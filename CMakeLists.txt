@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(code)
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-std=c++2a -O2)
+add_compile_options(-std=c++2a -O3)
 
 add_executable(code
         BackEnd/src/main.cpp
