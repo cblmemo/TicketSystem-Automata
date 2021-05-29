@@ -179,6 +179,7 @@ void TrainManager::queryTransfer(const Parser &p) {
     int nowTime, nowPrice;
     stationPool.find(hashStation(p["-s"]), sTrains);
     stationPool.find(hashStation(p["-t"]), eTrains);
+    if (sTrains.empty() || eTrains.empty())return outputSuccess();
     for (const std::pair<hash_t, int> &i : sTrains) {
         for (const std::pair<hash_t, int> &j : eTrains) {
             if (i.first != j.first) {
@@ -221,8 +222,8 @@ void TrainManager::queryTransfer(const Parser &p) {
             }
         }
     }
-    if (hasResult)defaultOut << st << endl << en << endl;
-    else defaultOut << "0" << endl;
+    if (!hasResult)return outputSuccess();
+    defaultOut << st << endl << en << endl;
 }
 
 void TrainManager::clear() {
