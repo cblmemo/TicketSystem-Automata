@@ -18,7 +18,11 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
     train_time_t temp {};
     if (t.released) {
         std::pair<hash_t, int> key {hashTrainID(t.trainID), date};
+#ifdef storageData
         date_ticket_t seats {ticketStoragePool.read(ticketPool.find(key).first)};
+#else
+        date_ticket_t seats {ticketPool.find(key).first};
+#endif
         for (int i = 0; i < t.stationNum; i++) {
             defaultOut << t.stations[i] << " ";
             if (i == 0)defaultOut << "xx-xx xx:xx";
@@ -109,7 +113,11 @@ void TrainManager::releaseTrain(const Parser &p) {
     train_t rTrain {storagePool.read(temp.first)};
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
+#ifdef storageData
     for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, ticketStoragePool.write(date_ticket_t(rTrain.seatNum, rTrain.stationNum)));
+#else
+    for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, date_ticket_t(rTrain.seatNum, rTrain.stationNum));
+#endif
     for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), stationPool.size(), std::pair<hash_t, int> {hashTrainID(rTrain.trainID), i});
     storagePool.update(rTrain, temp.first), outputSuccess();
 }
@@ -156,7 +164,11 @@ void TrainManager::queryTicket(const Parser &p) {
             if (dDate.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dDate.updateDate(targetTrain.dateGap))) {
                 int dist = departureDate.dateDistance(targetTrain.departureTimes[i]);
                 std::pair<hash_t, int> key {hashTrainID(targetTrain.trainID), dist};
+#ifdef storageData
                 date_ticket_t seats {ticketStoragePool.read(ticketPool.find(key).first)};
+#else
+                date_ticket_t seats {ticketPool.find(key).first};
+#endif
                 train_time_t tempTime1 {targetTrain.departureTimes[i]}, tempTime2 {targetTrain.arrivalTimes[j.second]};
                 ticket_t ticket {targetTrain.trainID, targetTrain.stations[i], targetTrain.stations[j.second], tempTime1.updateDate(dist),
                                  tempTime2.updateDate(dist), targetTrain.prices[j.second] - targetTrain.prices[i], seats.ticketNum(i, j.second)};
@@ -205,7 +217,11 @@ void TrainManager::queryTransfer(const Parser &p) {
                             int sDist = dist, eDist = aTime.dateDistance(tempTime0);
                             if (aTime > tempTime0.updateDate(eDist))eDist++;
                             std::pair<hash_t, int> keySt {hashTrainID(sTrain.trainID), sDist}, keyEn {hashTrainID(eTrain.trainID), eDist};
+#ifdef storageData
                             date_ticket_t seatsSt {ticketStoragePool.read(ticketPool.find(keySt).first)}, seatsEn {ticketStoragePool.read(ticketPool.find(keyEn).first)};
+#else
+                            date_ticket_t seatsSt {ticketPool.find(keySt).first}, seatsEn {ticketPool.find(keyEn).first};
+#endif
                             ticket_t tempSt {sTrain.trainID, sTrain.stations[i.second], sTrain.stations[k], tempTime1.updateDate(sDist),
                                              tempTime2.updateDate(sDist), sTrain.prices[k] - sTrain.prices[i.second], seatsSt.ticketNum(i.second, k)};
                             ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),
@@ -230,6 +246,8 @@ void TrainManager::clear() {
     indexPool.clear();
     storagePool.clear();
     ticketPool.clear();
+#ifdef storageData
     ticketStoragePool.clear();
+#endif
     stationPool.clear();
 }

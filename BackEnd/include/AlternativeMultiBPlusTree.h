@@ -10,9 +10,14 @@
 #include "RTL/vector.h"
 
 //#define debug
+//#define usingPageSize
 
 namespace RainyMemory {
+#ifdef usingPageSize
     template<class mainKey, class data, int MM = 50, int LL = 50, int CACHE_SIZE = 300, class firstMember_t = char>
+#else
+    template<class mainKey, class data, int M = 50, int L = 50, int CACHE_SIZE = 300, class firstMember_t = char>
+#endif
     class AlternativeMultiBPlusTree {
         /*
          * class AlternativeMultiBPlusTree
@@ -73,9 +78,11 @@ namespace RainyMemory {
         };
         
         enum sizeInfo {
+#ifdef usingPageSize
             PAGE_SIZE = 4096,
             L = (PAGE_SIZE - 4 * sizeof(int)) / (sizeof(key) + sizeof(data)) - 1,
             M = (PAGE_SIZE - 3 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)) - 1,
+#endif
             MAX_RECORD_NUM = L + 1,
             MIN_RECORD_NUM = (L + 1) / 2,
             MAX_KEY_NUM = M + 1,

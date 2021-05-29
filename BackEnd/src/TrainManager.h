@@ -7,6 +7,8 @@
 
 #include "Global.h"
 
+#define storageData
+
 class TrainManager {
     /*
      * class TrainManager
@@ -255,8 +257,12 @@ private:
      */
     BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[trainID] -> [offset]
     LRUCacheMemoryPool<train_t> storagePool;
+#ifdef storageData
     BPlusTree<std::pair<hash_t, int>, int, BPLUSTREE_L, BPLUSTREE_M> ticketPool;//[[trainID], [dateIndex]] -> [offset]
     LRUCacheMemoryPool<date_ticket_t> ticketStoragePool;
+#else
+    BPlusTree<std::pair<hash_t, int>, date_ticket_t, BPLUSTREE_L, BPLUSTREE_M> ticketPool;//[[trainID], [dateIndex]] -> [date_ticket]
+#endif
     AlternativeMultiBPlusTree<hash_t, std::pair<hash_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;//[station] -> [[trainID], [stationIndex]]
     hash_trainID_t hashTrainID;
     hash_station_t hashStation;
@@ -273,7 +279,11 @@ private:
 
 public:
     TrainManager(const string &indexPath, const string &storagePath, const string &ticketPath, const string &ticketStoragePath, const string &stationPath, rmstream &dft) :
+#ifdef storageData
             indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), ticketStoragePool(ticketStoragePath, 0, TICKET_CACHE_SIZE), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+#else
+            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+#endif
     
     void addTrain(const Parser &p);
     
