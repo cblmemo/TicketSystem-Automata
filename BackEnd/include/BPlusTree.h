@@ -9,7 +9,7 @@
 #include "RTL/algorithm.h"
 
 //#define debug
-#define usingPageSize
+//#define usingPageSize
 
 namespace RainyMemory {
 #ifdef usingPageSize
