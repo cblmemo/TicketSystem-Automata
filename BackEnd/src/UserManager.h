@@ -30,7 +30,6 @@ private:
     using hash_username_t = hash_string_t<20>;
     
     struct user_t {
-        username_t username {};
         password_t password {};
         name_t name {};
         mailAddr_t mailAddr {};
@@ -38,8 +37,8 @@ private:
         
         user_t() = default;
         
-        user_t(const string &_u, const string &_p, const string &_n, const string &_m, int _g) :
-                username(_u), password(_p), name(_n), mailAddr(_m), privilege(_g) {}
+        user_t(const string &_p, const string &_n, const string &_m, int _g) :
+                password(_p), name(_n), mailAddr(_m), privilege(_g) {}
     };
     
     /*
@@ -50,7 +49,7 @@ private:
      * login user's privilege.
      *
      */
-    HashMap<username_t, int, hash_username_t> loginPool;
+    HashMap<username_t, int, hash_username_t> loginPool;//[username] -> [privilege]
     BPlusTree<hash_t, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;//[username] -> [offset]
     LRUCacheMemoryPool<user_t, bool> storagePool;
     hash_username_t hashUsername;
@@ -60,7 +59,7 @@ private:
     
     inline void outputFailure();
     
-    inline void printUser(const user_t &u);
+    inline void printUser(const username_t &un, const user_t &u);
     
     bool isLogin(const username_t &u);
 

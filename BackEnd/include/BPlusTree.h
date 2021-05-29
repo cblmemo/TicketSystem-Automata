@@ -49,7 +49,7 @@ namespace RainyMemory {
         };
         
         enum sizeInfo {
-            PAGE_SIZE = 8192,
+            PAGE_SIZE = 4096,
             L = (PAGE_SIZE - 2 * sizeof(int)) / (sizeof(key) + sizeof(data)) - 1,
             M = (PAGE_SIZE - 3 * sizeof(int) - sizeof(bool)) / (sizeof(key) + sizeof(int)) - 1,
             MAX_RECORD_NUM = L + 1,

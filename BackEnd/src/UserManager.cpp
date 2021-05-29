@@ -12,8 +12,8 @@ inline void UserManager::outputFailure() {
     defaultOut << "-1" << endl;
 }
 
-inline void UserManager::printUser(const UserManager::user_t &u) {
-    defaultOut << u.username << " " << u.name << " " << u.mailAddr << " " << u.privilege << endl;
+inline void UserManager::printUser(const username_t &un, const UserManager::user_t &u) {
+    defaultOut << un << " " << u.name << " " << u.mailAddr << " " << u.privilege << endl;
 }
 
 bool UserManager::isLogin(const UserManager::username_t &u) {
@@ -23,13 +23,13 @@ bool UserManager::isLogin(const UserManager::username_t &u) {
 
 void UserManager::addUser(const Parser &p) {
     if (indexPool.empty()) {
-        user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], 10};
-        indexPool.insert(hashUsername(newUser.username), storagePool.write(newUser));
+        user_t newUser {p["-p"], p["-n"], p["-m"], 10};
+        indexPool.insert(hashUsername(p["-u"]), storagePool.write(newUser));
         return outputSuccess();
     }
     if (isLogin(p["-c"]) && !indexPool.containsKey(hashUsername(p["-u"])) && loginPool[p["-c"]] > p("-g")) {
-        user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], p("-g")};
-        indexPool.insert(hashUsername(newUser.username), storagePool.write(newUser));
+        user_t newUser {p["-p"], p["-n"], p["-m"], p("-g")};
+        indexPool.insert(hashUsername(p["-u"]), storagePool.write(newUser));
         return outputSuccess();
     }
     outputFailure();
@@ -55,12 +55,12 @@ void UserManager::logout(const Parser &p) {
 
 void UserManager::queryProfile(const Parser &p) {
     if (isLogin(p["-c"])) {
-        if (p["-c"] == p["-u"])return printUser(storagePool.read(indexPool.find(hashUsername(p["-u"])).first));
-        if (isLogin(p["-u"]) && loginPool[p["-c"]] > loginPool[p["-u"]])return printUser(storagePool.read(indexPool.find(hashUsername(p["-u"])).first));
+        if (p["-c"] == p["-u"])return printUser(p["-u"], storagePool.read(indexPool.find(hashUsername(p["-u"])).first));
+        if (isLogin(p["-u"]) && loginPool[p["-c"]] > loginPool[p["-u"]])return printUser(p["-u"], storagePool.read(indexPool.find(hashUsername(p["-u"])).first));
         std::pair<int, bool> temp {indexPool.find(hashUsername(p["-u"]))};
         if (!temp.second)return outputFailure();
         user_t qUser {storagePool.read(temp.first)};
-        if (loginPool[p["-c"]] > qUser.privilege)return printUser(qUser);
+        if (loginPool[p["-c"]] > qUser.privilege)return printUser(p["-u"], qUser);
     }
     outputFailure();
 }
@@ -75,7 +75,7 @@ void UserManager::modifyProfile(const Parser &p) {
             if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
             if (p.haveThisArgument("-g"))mUser.privilege = loginPool[p["-u"]] = p("-g");
             storagePool.update(mUser, temp.first);
-            return printUser(mUser);
+            return printUser(p["-u"], mUser);
         }
         if (isLogin(p["-u"])) {
             if (loginPool[p["-c"]] > loginPool[p["-u"]]) {
@@ -86,7 +86,7 @@ void UserManager::modifyProfile(const Parser &p) {
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
                 if (p.haveThisArgument("-g"))mUser.privilege = loginPool[p["-u"]] = p("-g");
                 storagePool.update(mUser, temp.first);
-                return printUser(mUser);
+                return printUser(p["-u"], mUser);
             }
         }
         else {
@@ -99,7 +99,7 @@ void UserManager::modifyProfile(const Parser &p) {
                 if (p.haveThisArgument("-m"))mUser.mailAddr = p["-m"];
                 if (p.haveThisArgument("-g"))mUser.privilege = p("-g");
                 storagePool.update(mUser, temp.first);
-                return printUser(mUser);
+                return printUser(p["-u"], mUser);
             }
         }
     }
