@@ -7,7 +7,7 @@
 
 #include "Global.h"
 
-//#define storageTicketData
+#define storageTicketData
 
 class TrainManager {
     /*
@@ -261,7 +261,7 @@ private:
     BPlusTree<std::pair<hash_t, int>, int, BPLUSTREE_L, BPLUSTREE_M> ticketPool;//[[trainID], [dateIndex]] -> [offset]
     LRUCacheMemoryPool<date_ticket_t> ticketStoragePool;
 #else
-    BPlusTree<std::pair<hash_t, int>, date_ticket_t, BPLUSTREE_L, BPLUSTREE_M> ticketPool;//[[trainID], [dateIndex]] -> [date_ticket]
+    BPlusTree<std::pair<hash_t, int>, date_ticket_t, 30, 30> ticketPool;//[[trainID], [dateIndex]] -> [date_ticket]
 #endif
     AlternativeMultiBPlusTree<hash_t, std::pair<hash_t, int>, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> stationPool;//[station] -> [[trainID], [stationIndex]]
     hash_trainID_t hashTrainID;
