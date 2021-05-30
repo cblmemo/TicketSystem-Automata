@@ -50,7 +50,7 @@ struct hash_string_t {
     hash_t operator()(const string_t<len> &o) const {
         int l = o.length();
         hash_t res = 0;
-        for (int i = 0; i < l; i++)res = res * 9973 + o[i];
+        for (int i = 0; i < l; i++)res = (res << 16) + res + o[i];
         return res;
     }
 };
