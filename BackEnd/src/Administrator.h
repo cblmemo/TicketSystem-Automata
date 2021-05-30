@@ -19,6 +19,7 @@ class Administrator {
      * managers to execute corresponding functions.
      * The name of parser, managers and Administrator in main.cpp
      * are credit to [Arknights], no copyright infringement intended.
+     * This class passed OnlineJudge at 2021-05-30, 15:36:30.
      *
      */
 private:
