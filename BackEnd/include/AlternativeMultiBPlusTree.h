@@ -10,7 +10,7 @@
 #include "RTL/vector.h"
 
 //#define debug
-//#define usingPageSize
+#define usingPageSize
 
 namespace RainyMemory {
 #ifdef usingPageSize
