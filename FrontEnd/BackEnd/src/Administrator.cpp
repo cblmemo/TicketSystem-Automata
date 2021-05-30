@@ -4,7 +4,7 @@
 
 #include "Administrator.h"
 
-void Administrator::initialize() {
+void Administrator::initialize(std::ostream &defaultOut) {
     Ptilopsis = new Parser;
     Saria     = new UserManager(UserIndexPath, UserStoragePath, defaultOut);
     Silence   = new TrainManager(TrainIndexPath, TrainStoragePath, TrainStationPath, defaultOut);
@@ -17,7 +17,9 @@ void Administrator::clean() {
     Ifrit   -> clear();
 }
 
-Administrator::Administrator(std::istream &is, std::ostream &os) : defaultIn(is), defaultOut(os) {}
+Administrator::Administrator() {
+    runProgramme();
+}
 
 Administrator::~Administrator() {
     delete Ptilopsis;
@@ -27,13 +29,19 @@ Administrator::~Administrator() {
 }
 
 void Administrator::runProgramme() {
-#ifdef speedup
-    std::ios::sync_with_stdio(false);
-#endif
-    initialize();
     string cmd;
     bool flag = true;
-    while (flag && getline(defaultIn, cmd)) {
+    std::stringstream defaultOut;
+    initialize(defaultOut);
+    while (flag) {
+        //todo: input command into defaultIn.
+        //replace this --\/--
+        string s;
+        getline(std::cin, s);
+        defaultOut.str("");
+        std::stringstream defaultIn(s);
+        //replace this --/\--
+        getline(defaultIn, cmd);
         Ptilopsis -> resetBuffer(cmd);
         switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:
@@ -90,5 +98,10 @@ void Administrator::runProgramme() {
                 defaultOut << "[Error]Invalid command." << endl;
                 break;
         }
+        //todo: now defaultOut has results of command.
+        //replace this --\/--
+        std::cout << defaultOut.str();
+        std::cout.flush();
+        //replace this --/\--
     }
 }

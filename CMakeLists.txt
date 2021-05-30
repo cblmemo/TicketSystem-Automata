@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-std=c++2a -Ofast)
 
 add_executable(code
-        BackEnd/src/main.cpp
-        BackEnd/src/Administrator.cpp
-        BackEnd/src/UserManager.cpp
-        BackEnd/src/TrainManager.cpp
-        BackEnd/src/OrderManager.cpp)
+        FrontEnd/BackEnd/src/main.cpp
+        FrontEnd/BackEnd/src/Administrator.cpp
+        FrontEnd/BackEnd/src/UserManager.cpp
+        FrontEnd/BackEnd/src/TrainManager.cpp
+        FrontEnd/BackEnd/src/OrderManager.cpp)

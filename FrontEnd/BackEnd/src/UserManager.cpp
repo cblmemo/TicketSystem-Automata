@@ -16,13 +16,12 @@ inline void UserManager::printUser(const UserManager::user_t &u) {
     defaultOut << u.username << " " << u.name << " " << u.mailAddr << " " << u.privilege << endl;
 }
 
-int UserManager::queryPrivilege(const UserManager::username_t &u) {
-    if (isLogin(u))return loginPool[u];
-    else {
-        auto res = indexPool.find(hashUsername(u));
-        if (!res.second)return -1;
-        return res.first.privilege;
-    }
+int UserManager::queryPrivilege(const username_t &u) {
+    if (isLogin(u))return loginPool[u].first;
+    auto res = indexPool.find(hashUsername(u));
+    if (!res.second)return -1;
+    user_t qUser {storagePool.read(res.first)};
+    return qUser.privilege;
 }
 
 bool UserManager::isLogin(const UserManager::username_t &u) {

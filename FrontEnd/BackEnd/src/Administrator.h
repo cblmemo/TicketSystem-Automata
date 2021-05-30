@@ -26,8 +26,6 @@ private:
     UserManager  *Saria     = nullptr;
     TrainManager *Silence   = nullptr;
     OrderManager *Ifrit     = nullptr;
-    std::istream &defaultIn;
-    std::ostream &defaultOut;
     
     using path_t = const std::string;
     
@@ -39,16 +37,16 @@ private:
     path_t OrderIndexPath   {"OrderIndex.dat"};
     path_t OrderPendingPath {"OrderPending.dat"};
     
-    void initialize();
+    void initialize(std::ostream &defaultOut);
     
     void clean();
-
-public:
-    Administrator(std::istream &is, std::ostream &os);
-    
-    ~Administrator();
     
     void runProgramme();
+
+public:
+    Administrator();
+    
+    ~Administrator();
 };
 
 #endif //TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H

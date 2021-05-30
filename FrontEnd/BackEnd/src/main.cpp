@@ -1,7 +1,6 @@
 #include "Administrator.h"
 
 int main() {
-    Administrator RhineLab {std::cin, std::cout};
-    RhineLab.runProgramme();
+    Administrator RhineLab;
     return 0;
 }
