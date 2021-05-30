@@ -31,11 +31,12 @@ Administrator::~Administrator() {
 void Administrator::runProgramme() {
     std::ios::sync_with_stdio(false);
     initialize();
-    char cmd[6000];
+    const int CMD_SIZE = 5000;
+    char cmd[CMD_SIZE];
     bool flag = true;
     while (flag) {
         memset(cmd, 0, sizeof(cmd));
-        fgets(cmd, 6000, stdin);
+        fgets(cmd, CMD_SIZE, stdin);
         Ptilopsis -> resetBuffer(cmd);
         switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:

@@ -107,14 +107,14 @@ void TrainManager::addTrain(const Parser &p) {
 }
 
 void TrainManager::releaseTrain(const Parser &p) {
-    hash_t hash = hashTrainID(p["-i"]);
-    std::pair<int, bool> temp {indexPool.find(hash)};
+    hash_t hashedTrainID {hashTrainID(p["-i"])};
+    std::pair<int, bool> temp {indexPool.find(hashedTrainID)};
     if (!temp.second)return outputFailure();
     train_t rTrain {storagePool.read(temp.first)};
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
 #ifndef storageTicketData
-    for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, ticketStoragePool.write(date_ticket_t(rTrain.seatNum, rTrain.stationNum)));
+    for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hashedTrainID, i}, ticketStoragePool.write(date_ticket_t(rTrain.seatNum, rTrain.stationNum)));
 #else
     for (int i = 0; i <= rTrain.dateGap; i++)ticketPool.insert(std::pair<hash_t, int> {hash, i}, date_ticket_t(rTrain.seatNum, rTrain.stationNum));
 #endif

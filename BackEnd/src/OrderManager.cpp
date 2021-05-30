@@ -22,7 +22,8 @@ void OrderManager::printOrder(const OrderManager::order_t &o) {
 
 void OrderManager::buyTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
-    std::pair<int, bool> temp {trainManager->indexPool.find(trainManager->hashTrainID(p["-i"]))};
+    hash_t hashedTrainID {trainManager->hashTrainID(p["-i"])};
+    std::pair<int, bool> temp {trainManager->indexPool.find(hashedTrainID)};
     if (!temp.second)return outputFailure();
     train_t targetTrain {trainManager->storagePool.read(temp.first)};
     if (!targetTrain.released)return outputFailure();
@@ -38,7 +39,7 @@ void OrderManager::buyTicket(const Parser &p) {
     train_time_t dTimes {targetTrain.departureTimes[from]};
     if (!(dTimes.lessOrEqualDate(departureDate) && departureDate.lessOrEqualDate(dTimes.updateDate(targetTrain.dateGap))))return outputFailure();
     int dist = departureDate.dateDistance(targetTrain.departureTimes[from]);
-    hash_t hashedTrainID {trainManager->hashTrainID(targetTrain.trainID)}, hashedUsername {userManager->hashUsername(p["-u"])};
+    hash_t hashedUsername {userManager->hashUsername(p["-u"])};
     std::pair<hash_t, int> key {hashedTrainID, dist};
 #ifndef storageTicketData
     std::pair<int, bool> ticketTemp {trainManager->ticketPool.find(key)};
@@ -55,7 +56,7 @@ void OrderManager::buyTicket(const Parser &p) {
         order_t order {indexPool.size(), p["-u"], PENDING, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                        targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
         indexPool.insert(hashedUsername, order.orderID, order);
-        pending_order_t pOrder {hashedUsername, hashedTrainID, order.orderID, order.from, order.to, order.num};
+        pending_order_t pOrder {hashedUsername, order.orderID, order.from, order.to, order.num};
         pendingPool.insert(std::pair<hash_t, int> {hashedTrainID, dist}, order.orderID, pOrder);
         return outputQueue();
     }
@@ -84,18 +85,20 @@ void OrderManager::queryOrder(const Parser &p) {
 void OrderManager::refundTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     int n = p.haveThisArgument("-n") ? p("-n") : 1;
-    std::pair<order_t, bool> o = indexPool.findNth(userManager->hashUsername(p["-u"]), n);
+    hash_t hashedUsername {userManager->hashUsername(p["-u"])};
+    std::pair<order_t, bool> o = indexPool.findNth(hashedUsername, n);
     if (!o.second)return outputFailure();
     order_t &rOrder {o.first};
     if (rOrder.status == REFUNDED)return outputFailure();
+    hash_t hashedTrainID {trainManager->hashTrainID(rOrder.trainID)};
     bool newTicket = rOrder.status == SUCCESS;
     rOrder.status = REFUNDED;
-    indexPool.update(userManager->hashUsername(p["-u"]), rOrder.orderID, rOrder);
+    indexPool.update(hashedUsername, rOrder.orderID, rOrder);
     if (!newTicket) {
-        pendingPool.erase(std::pair<hash_t, int> {trainManager->hashTrainID(o.first.trainID), o.first.dist}, o.first.orderID);
+        pendingPool.erase(std::pair<hash_t, int> {hashedTrainID, rOrder.dist}, rOrder.orderID);
         return outputSuccess();
     }
-    std::pair<hash_t, int> key {trainManager->hashTrainID(rOrder.trainID), rOrder.dist};
+    std::pair<hash_t, int> key {hashedTrainID, rOrder.dist};
 #ifndef storageTicketData
     std::pair<int, bool> ticketTemp {trainManager->ticketPool.find(key)};
     date_ticket_t seats {trainManager->ticketStoragePool.read(ticketTemp.first)};
@@ -106,7 +109,7 @@ void OrderManager::refundTicket(const Parser &p) {
     seats.modifyRemain(rOrder.from, rOrder.to, rOrder.num);
     static vector<pending_order_t> pOrder;
     pOrder.clear();
-    pendingPool.find(std::pair<hash_t, int> {trainManager->hashTrainID(rOrder.trainID), rOrder.dist}, pOrder);
+    pendingPool.find(std::pair<hash_t, int> {hashedTrainID, rOrder.dist}, pOrder);
     int num;
     for (int i = pOrder.size() - 1; i >= 0; i--) {
         pending_order_t &k = pOrder[i];
@@ -115,7 +118,7 @@ void OrderManager::refundTicket(const Parser &p) {
         if (num < k.num)continue;
         seats.modifyRemain(k.from, k.to, -k.num);
         indexPool.updateFirstMember(k.hashedUsername, k.orderID, SUCCESS);
-        pendingPool.erase(std::pair<hash_t, int> {k.hashedTrainID, rOrder.dist}, k.orderID);
+        pendingPool.erase(std::pair<hash_t, int> {hashedTrainID, rOrder.dist}, k.orderID);
     }
 #ifndef storageTicketData
     trainManager->ticketStoragePool.update(seats, ticketTemp.first);

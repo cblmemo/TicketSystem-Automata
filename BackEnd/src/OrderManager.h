@@ -66,7 +66,6 @@ private:
     
     struct pending_order_t {
         hash_t hashedUsername;
-        hash_t hashedTrainID;
         int orderID;
         int from;
         int to;
@@ -74,8 +73,8 @@ private:
         
         pending_order_t() = default;
         
-        pending_order_t(hash_t u, hash_t ti, int oi, int f, int t, int n) :
-                hashedUsername(u), hashedTrainID(ti), orderID(oi), from(f), to(t), num(n) {}
+        pending_order_t(hash_t u, int oi, int f, int t, int n) :
+                hashedUsername(u), orderID(oi), from(f), to(t), num(n) {}
     };
     
     /*
