@@ -11,7 +11,6 @@
 #include "../include/Parser.h"
 #include "../include/MemoryPool.h"
 #include <chrono>
-#include <sstream>
 
 using RainyMemory::string_t;
 using RainyMemory::MemoryPool;

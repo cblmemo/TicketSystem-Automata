@@ -89,6 +89,18 @@ private:
             return os;
         }
         
+        operator std::string() const {
+            std::string ret;
+            auto date = Front4Byte() >> 16, time = Back4Byte();
+            value_type mon = 1, day = date, hou, min = time;
+            while (day >= accumulateDay[mon]) mon++;
+            day = day - accumulateDay[mon - 1] + 1;
+            ret += std::string(numString[mon]) + "-" + std::string(numString[day]) + " ";
+            hou = min / 60, min %= 60;
+            ret += std::string(numString[hou]) + ":" + std::string(numString[min]);
+            return ret;
+        }
+        
         
         bool operator==(const train_time_t &right) const { return value == right.value; }
         
@@ -175,6 +187,12 @@ private:
             os << t.trainID << " " << t.from << " " << t.departureTime << " -> " << t.to << " " << t.arrivalTime << " " << t.price << " " << t.seat;
             return os;
         }
+        
+        operator std::string() const {
+            std::string ret;
+            ret += std::string(trainID) + " " + std::string(from) + " " + std::string(departureTime) + " -> " + std::string(to) + " " + std::string(arrivalTime) + " " + std::to_string(price) + " " + std::to_string(seat);
+            return ret;
+        }
     };
     
     struct train_t {
@@ -233,31 +251,30 @@ private:
     hash_trainID_t hashTrainID;
     hash_station_t hashStation;
     TokenScanner splitTool;
-    std::ostream &defaultOut;
     
-    inline void outputSuccess();
+    inline std::string outputSuccess();
     
-    inline void outputFailure();
+    inline std::string outputFailure();
     
-    inline void printTrain(const train_t &t, int date);
+    inline std::string printTrain(const train_t &t, int date);
     
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath, std::ostream &dft) :
-            indexPool(indexPath), storagePool(storagePath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+    TrainManager(const string &indexPath, const string &storagePath, const string &stationPath) :
+            indexPool(indexPath), storagePool(storagePath), stationPool(stationPath) { splitTool.resetDelim('|'); }
     
-    void addTrain(const Parser &p);
+    std::string addTrain(const Parser &p);
     
-    void releaseTrain(const Parser &p);
+    std::string releaseTrain(const Parser &p);
     
-    void queryTrain(const Parser &p);
+    std::string queryTrain(const Parser &p);
     
-    void deleteTrain(const Parser &p);
+    std::string deleteTrain(const Parser &p);
     
-    void queryTicket(const Parser &p);
+    std::string queryTicket(const Parser &p);
     
-    void queryTransfer(const Parser &p);
+    std::string queryTransfer(const Parser &p);
     
     void clear();
 };

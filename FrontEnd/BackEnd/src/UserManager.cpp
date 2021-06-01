@@ -4,24 +4,16 @@
 
 #include "UserManager.h"
 
-inline void UserManager::outputSuccess() {
-    defaultOut << "0" << endl;
+inline std::string UserManager::outputSuccess() {
+    return "0\n";
 }
 
-inline void UserManager::outputFailure() {
-    defaultOut << "-1" << endl;
+inline std::string UserManager::outputFailure() {
+    return "-1\n";
 }
 
-inline void UserManager::printUser(const UserManager::user_t &u) {
-    defaultOut << u.username << " " << u.name << " " << u.mailAddr << " " << u.privilege << endl;
-}
-
-int UserManager::queryPrivilege(const username_t &u) {
-    if (isLogin(u))return loginPool[u].first;
-    auto res = indexPool.find(hashUsername(u));
-    if (!res.second)return -1;
-    user_t qUser {storagePool.read(res.first)};
-    return qUser.privilege;
+inline std::string UserManager::printUser(const UserManager::user_t &u) {
+    return std::string(u.username) + " " + std::string(u.name) + " " + std::string(u.mailAddr) + " " + std::to_string(u.privilege) + "\n";
 }
 
 bool UserManager::isLogin(const UserManager::username_t &u) {
@@ -29,7 +21,7 @@ bool UserManager::isLogin(const UserManager::username_t &u) {
     return loginPool.containsKey(u);
 }
 
-void UserManager::addUser(const Parser &p) {
+std::string UserManager::addUser(const Parser &p) {
     if (storagePool.readExtraMessage()) {
         storagePool.updateExtraMessage(false);
         user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], 10};
@@ -43,10 +35,10 @@ void UserManager::addUser(const Parser &p) {
         indexPool.insert(hashUsername(newUser.username), offset);
         return outputSuccess();
     }
-    outputFailure();
+    return outputFailure();
 }
 
-void UserManager::login(const Parser &p) {
+std::string UserManager::login(const Parser &p) {
     if (!isLogin(p["-u"])) {
         std::pair<int, bool> temp {indexPool.find(hashUsername(p["-u"]))};
         if (!temp.second)return outputFailure();
@@ -56,15 +48,18 @@ void UserManager::login(const Parser &p) {
             return outputSuccess();
         }
     }
-    outputFailure();
+    return outputFailure();
 }
 
-void UserManager::logout(const Parser &p) {
-    if (isLogin(p["-u"]))loginPool.erase(p["-u"]), outputSuccess();
-    else outputFailure();
+std::string UserManager::logout(const Parser &p) {
+    if (isLogin(p["-u"])) {
+        loginPool.erase(p["-u"]);
+        return outputSuccess();
+    }
+    else return outputFailure();
 }
 
-void UserManager::queryProfile(const Parser &p) {
+std::string UserManager::queryProfile(const Parser &p) {
     if (isLogin(p["-c"])) {
         if (p["-c"] == p["-u"])return printUser(storagePool.read(loginPool[p["-u"]].second));
         if (isLogin(p["-u"]) && loginPool[p["-c"]].first > loginPool[p["-u"]].first)return printUser(storagePool.read(loginPool[p["-u"]].second));
@@ -73,10 +68,10 @@ void UserManager::queryProfile(const Parser &p) {
         user_t qUser {storagePool.read(temp.first)};
         if (loginPool[p["-c"]].first > qUser.privilege)return printUser(qUser);
     }
-    outputFailure();
+    return outputFailure();
 }
 
-void UserManager::modifyProfile(const Parser &p) {
+std::string UserManager::modifyProfile(const Parser &p) {
     if (isLogin(p["-c"]) && (!p.haveThisArgument("-g") || p("-g") < loginPool[p["-c"]].first)) {
         if (p["-c"] == p["-u"]) {
             user_t mUser {storagePool.read(loginPool[p["-u"]].second)};
@@ -114,7 +109,7 @@ void UserManager::modifyProfile(const Parser &p) {
             }
         }
     }
-    outputFailure();
+    return outputFailure();
 }
 
 void UserManager::clear() {

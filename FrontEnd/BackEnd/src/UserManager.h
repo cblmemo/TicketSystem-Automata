@@ -54,31 +54,28 @@ private:
     BPlusTree<long long, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
     LRUCacheMemoryPool<user_t, bool> storagePool;
     hash_username_t hashUsername;
-    std::ostream &defaultOut;
     
-    inline void outputSuccess();
+    inline std::string outputSuccess();
     
-    inline void outputFailure();
+    inline std::string outputFailure();
     
-    inline void printUser(const user_t &u);
-    
-    int queryPrivilege(const username_t &u);
+    inline std::string printUser(const user_t &u);
     
     bool isLogin(const username_t &u);
 
 public:
-    UserManager(const string &indexPath, const string &storagePath, std::ostream &dft) :
-            loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_MANAGER_MEMORYPOOL_CAPACITY), defaultOut(dft) {}
+    UserManager(const string &indexPath, const string &storagePath) :
+            loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_MANAGER_MEMORYPOOL_CAPACITY) {}
     
-    void addUser(const Parser &p);
+    std::string addUser(const Parser &p);
     
-    void login(const Parser &p);
+    std::string login(const Parser &p);
     
-    void logout(const Parser &p);
+    std::string logout(const Parser &p);
     
-    void queryProfile(const Parser &p);
+    std::string queryProfile(const Parser &p);
     
-    void modifyProfile(const Parser &p);
+    std::string modifyProfile(const Parser &p);
     
     void clear();
 };

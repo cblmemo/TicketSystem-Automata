@@ -53,7 +53,7 @@ namespace RainyMemory {
             return *this;
         }
         
-        operator std::string() {
+        operator std::string() const {
             return std::string(store);
         }
         

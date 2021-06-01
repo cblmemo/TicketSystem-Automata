@@ -37,16 +37,18 @@ private:
     path_t OrderIndexPath   {"OrderIndex.dat"};
     path_t OrderPendingPath {"OrderPending.dat"};
     
-    void initialize(std::ostream &defaultOut);
+    void initialize();
     
     void clean();
     
-    void runProgramme();
+    std::string process(const std::string &cmd);
 
 public:
     Administrator();
     
     ~Administrator();
+    
+    int runProgramme();
 };
 
 #endif //TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H

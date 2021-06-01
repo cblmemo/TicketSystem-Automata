@@ -4,41 +4,45 @@
 
 #include "TrainManager.h"
 
-void TrainManager::outputSuccess() {
-    defaultOut << "0" << endl;
+std::string TrainManager::outputSuccess() {
+    return std::string("0\n");
 }
 
-void TrainManager::outputFailure() {
-    defaultOut << "-1" << endl;
+std::string TrainManager::outputFailure() {
+    return std::string("-1\n");
 }
 
-void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
+std::string TrainManager::printTrain(const TrainManager::train_t &t, int date) {
     //int date: the distance between query train argument -d and startTime sate
-    defaultOut << t.trainID << " " << t.type << endl;
+    std::string ret;
+    std::string ty = "a";
+    ty[0] = t.type;
+    ret += std::string(t.trainID) + " " + ty + "\n";
     train_time_t temp {};
     for (int i = 0; i < t.stationNum; i++) {
-        defaultOut << t.stations[i] << " ";
-        if (i == 0)defaultOut << "xx-xx xx:xx";
+        ret += std::string(t.stations[i]) + " ";
+        if (i == 0)ret += "xx-xx xx:xx";
         else {
             temp = t.arrivalTimes[i];
             temp.updateDate(date);
-            defaultOut << temp;
+            ret += std::string(temp);
         }
-        defaultOut << " -> ";
-        if (i == t.stationNum - 1)defaultOut << "xx-xx xx:xx";
+        ret += " -> ";
+        if (i == t.stationNum - 1)ret += "xx-xx xx:xx";
         else {
             temp = t.departureTimes[i];
             temp.updateDate(date);
-            defaultOut << temp;
+            ret += std::string(temp);
         }
-        defaultOut << " " << t.prices[i] << " ";
-        if (i == t.stationNum - 1)defaultOut << 'x';
-        else defaultOut << t.remainSeats[date][i];
-        defaultOut << endl;
+        ret += " " + std::to_string(t.prices[i]) + " ";
+        if (i == t.stationNum - 1)ret += "x";
+        else ret += std::to_string(t.remainSeats[date][i]);
+        ret += "\n";
     }
+    return ret;
 }
 
-void TrainManager::addTrain(const Parser &p) {
+std::string TrainManager::addTrain(const Parser &p) {
     if (indexPool.containsKey(hashTrainID(p["-i"])))return outputFailure();
     int travelTimes[100] = {0};
     int stopoverTimes[100] = {0};
@@ -76,39 +80,40 @@ void TrainManager::addTrain(const Parser &p) {
             j = newTrain.seatNum;
     int offset = storagePool.write(newTrain);
     indexPool.insert(hashTrainID(newTrain.trainID), offset);
-    outputSuccess();
+    return outputSuccess();
 }
 
-void TrainManager::releaseTrain(const Parser &p) {
+std::string TrainManager::releaseTrain(const Parser &p) {
     std::pair<int, bool> temp {indexPool.find(hashTrainID(p["-i"]))};
     if (!temp.second)return outputFailure();
     train_t rTrain {storagePool.read(temp.first)};
     if (rTrain.released)return outputFailure();
     rTrain.released = true;
     for (int i = 0; i < rTrain.stationNum; i++)stationPool.insert(hashStation(rTrain.stations[i]), std::pair<long long, int> {hashTrainID(rTrain.trainID), i});
-    storagePool.update(rTrain, temp.first), outputSuccess();
+    storagePool.update(rTrain, temp.first);
+    return outputSuccess();
 }
 
-void TrainManager::queryTrain(const Parser &p) {
+std::string TrainManager::queryTrain(const Parser &p) {
     std::pair<int, bool> temp {indexPool.find(hashTrainID(p["-i"]))};
     if (!temp.second)return outputFailure();
     train_t qTrain {storagePool.read(temp.first)};
     train_time_t ti {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
     if (!(qTrain.startTime.lessOrEqualDate(ti) && ti.lessOrEqualDate(qTrain.endTime)))return outputFailure();
-    printTrain(qTrain, ti.dateDistance(qTrain.startTime));
+    return printTrain(qTrain, ti.dateDistance(qTrain.startTime));
 }
 
-void TrainManager::deleteTrain(const Parser &p) {
+std::string TrainManager::deleteTrain(const Parser &p) {
     std::pair<int, bool> temp {indexPool.find(hashTrainID(p["-i"]))};
     if (!temp.second)return outputFailure();
     train_t dTrain {storagePool.read(temp.first)};
     if (dTrain.released)return outputFailure();
     indexPool.erase(hashTrainID(p["-i"]));
     storagePool.erase(temp.first);
-    outputSuccess();
+    return outputSuccess();
 }
 
-void TrainManager::queryTicket(const Parser &p) {
+std::string TrainManager::queryTicket(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time";
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0'};
     static vector<std::pair<long long, int>> sTrains, eTrains;
@@ -139,11 +144,13 @@ void TrainManager::queryTicket(const Parser &p) {
     }
     if (sortByTime)sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.time != o2.time ? o1.time < o2.time : o1.trainID < o2.trainID; });
     else sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.price != o2.price ? o1.price < o2.price : o1.trainID < o2.trainID; });
-    defaultOut << result.size() << endl;
-    for (const ticket_t &i : result)defaultOut << i << endl;
+    std::string ret;
+    ret += std::to_string(result.size()) + "\n";
+    for (const ticket_t &i : result)ret += std::string(i) + "\n";
+    return ret;
 }
 
-void TrainManager::queryTransfer(const Parser &p) {
+std::string TrainManager::queryTransfer(const Parser &p) {
     bool sortByTime = !p.haveThisArgument("-p") || p["-p"] == "time", hasResult = false;
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     static vector<std::pair<long long, int>> sTrains, eTrains;
@@ -196,8 +203,10 @@ void TrainManager::queryTransfer(const Parser &p) {
             }
         }
     }
-    if (hasResult)defaultOut << st << endl << en << endl;
-    else defaultOut << "0" << endl;
+    std::string ret;
+    if (hasResult)ret += std::string(st) + "\n" + std::string(en) + "\n";
+    else ret += "0\n";
+    return ret;
 }
 
 void TrainManager::clear() {

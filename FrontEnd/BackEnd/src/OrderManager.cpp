@@ -4,23 +4,25 @@
 
 #include "OrderManager.h"
 
-void OrderManager::outputSuccess(long long message) {
-    defaultOut << message << endl;
+std::string OrderManager::outputSuccess(long long message) {
+    return std::to_string(message) + "\n";
 }
 
-void OrderManager::outputFailure() {
-    defaultOut << "-1" << endl;
+std::string OrderManager::outputFailure() {
+    return "-1\n";
 }
 
-void OrderManager::outputQueue() {
-    defaultOut << "queue" << endl;
+std::string OrderManager::outputQueue() {
+    return "queue\n";
 }
 
-void OrderManager::printOrder(const OrderManager::order_t &o) {
-    defaultOut << status[o.status] << " " << o.trainID << " " << o.fromStation << " " << o.departureTime << " -> " << o.toStation << " " << o.arrivalTime << " " << o.price << " " << o.num << endl;
+std::string OrderManager::printOrder(const OrderManager::order_t &o) {
+    std::string ret;
+    ret += status[o.status] + " " + std::string(o.trainID) + " " + std::string(o.fromStation) + " " + std::string(o.departureTime) + " -> " + std::string(o.toStation) + " " + std::string(o.arrivalTime) + " " + std::to_string(o.price) + " " + std::to_string(o.num) + "\n";
+    return ret;
 }
 
-void OrderManager::buyTicket(const Parser &p) {
+std::string OrderManager::buyTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     std::pair<int, bool> temp {trainManager->indexPool.find(trainManager->hashTrainID(p["-i"]))};
     if (!temp.second)return outputFailure();
@@ -54,19 +56,21 @@ void OrderManager::buyTicket(const Parser &p) {
     order_t order {p["-u"], SUCCESS, targetTrain.trainID, targetTrain.stations[from], targetTrain.stations[to],
                    targetTrain.departureTimes[from].updateDate(dist), targetTrain.arrivalTimes[to].updateDate(dist), price, n, from, to, dist};
     indexPool.insert(userManager->hashUsername(p["-u"]), order);
-    outputSuccess((long long) price * (long long) n);
+    return outputSuccess((long long) price * (long long) n);
 }
 
-void OrderManager::queryOrder(const Parser &p) {
+std::string OrderManager::queryOrder(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     static vector<order_t> result;
     result.clear();
     indexPool.find(userManager->hashUsername(p["-u"]), result);
-    defaultOut << result.size() << endl;
-    for (const order_t &i : result)printOrder(i);
+    std::string ret;
+    ret += std::to_string(result.size()) + "\n";
+    for (const order_t &i : result)ret += printOrder(i);
+    return ret;
 }
 
-void OrderManager::refundTicket(const Parser &p) {
+std::string OrderManager::refundTicket(const Parser &p) {
     if (!userManager->isLogin(p["-u"]))return outputFailure();
     int n = p.haveThisArgument("-n") ? p("-n") : 1;
     std::pair<order_t, bool> o = indexPool.findNth(userManager->hashUsername(p["-u"]), n);
@@ -101,7 +105,7 @@ void OrderManager::refundTicket(const Parser &p) {
         pendingPool.erase(trainManager->hashTrainID(k.trainID), k);
     }
     trainManager->storagePool.update(rTrain, temp.first);
-    outputSuccess();
+    return outputSuccess();
 }
 
 void OrderManager::clear() {

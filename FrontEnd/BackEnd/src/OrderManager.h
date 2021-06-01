@@ -87,27 +87,26 @@ private:
     MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> indexPool;
     MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
-    std::ostream &defaultOut;
     
-    inline void outputSuccess(long long message = 0);
+    inline std::string outputSuccess(long long message = 0);
     
-    inline void outputFailure();
+    inline std::string outputFailure();
     
-    inline void outputQueue();
+    inline std::string outputQueue();
     
-    inline void printOrder(const order_t &o);
+    inline std::string printOrder(const order_t &o);
     
     static inline int min(int a, int b) { return a < b ? a : b; }
 
 public:
-    OrderManager(UserManager *um, TrainManager *tm, const string &indexPath, const string &pendingPath, std::ostream &dft) :
-            userManager(um), trainManager(tm), indexPool(indexPath), pendingPool(pendingPath), defaultOut(dft) {}
+    OrderManager(UserManager *um, TrainManager *tm, const string &indexPath, const string &pendingPath) :
+            userManager(um), trainManager(tm), indexPool(indexPath), pendingPool(pendingPath) {}
     
-    void buyTicket(const Parser &p);
+    std::string buyTicket(const Parser &p);
     
-    void queryOrder(const Parser &p);
+    std::string queryOrder(const Parser &p);
     
-    void refundTicket(const Parser &p);
+    std::string refundTicket(const Parser &p);
     
     void clear();
 };

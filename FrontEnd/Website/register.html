@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Register</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+  <!--Main Navigation-->
+  <header>
+    <style>
+      #intro {
+        background-image: url(https://mdbootstrap.com/img/new/fluid/city/008.jpg);
+        height: 100vh;
+      }
+
+      /* Height for devices larger than 576px */
+      @media (min-width: 992px) {
+        #intro {
+          margin-top: -58.59px;
+        }
+      }
+
+      .navbar .nav-link {
+        color: #fff !important;
+      }
+    </style>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark d-none d-lg-block" style="z-index: 2000;">
+      <div class="container-fluid">
+        <!-- Navbar brand -->
+        <a class="navbar-brand nav-link" target="_self" href="index.html"> TicketSystem:Automata </a>
+        <div class="collapse navbar-collapse" id="navbarExample01">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0"> </ul>
+
+          <ul class="navbar-nav d-flex flex-row">
+            <li class="nav-item me-3 me-lg-0">
+              <a class="nav-link" href="https://github.com/Rainy-Memory/TicketSystem-Automata" rel="nofollow"
+                target="_blank">
+                <i class="fab fa-github fa-1x"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Navbar -->
+
+    <!-- Background image -->
+    <div id="intro" class="bg-image shadow-2-strong">
+      <div class="mask d-flex align-items-center h-100" style="background-color: rgba(0, 0, 0, 0.8);">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-xl-5 col-md-8">
+              <div class="text-white">
+                <h1 class="display-1 mb-5 text-center">Register</h1>
+              </div>
+              <form class="bg-white rounded shadow-5-strong p-5">
+                <!-- Username input -->
+                <div class="form-outline mb-4">
+                  <input type="text" id="username" class="form-control" data-mdb-showcounter="true" maxlength="20" />
+                  <label class="form-label" for="username">Username</label>
+                  <div class="form-helper"></div>
+                </div>
+
+                <!-- Real Name input -->
+                <div class="form-outline mb-4">
+                  <input type="text" id="realName" class="form-control" data-mdb-showcounter="true" maxlength="5" />
+                  <label class="form-label" for="realName">Real Name</label>
+                  <div class="form-helper"></div>
+                </div>
+
+                <!-- E-mail input -->
+                <div class="form-outline mb-4">
+                  <input type="email" id="email" class="form-control" data-mdb-showcounter="true" maxlength="30" />
+                  <label class="form-label" for="email">Email</label>
+                  <div class="form-helper"></div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-5">
+                  <!-- Password input -->
+                  <div class="col form-outline">
+                    <input type="password" id="password" class="form-control" data-mdb-showcounter="true"
+                      maxlength="30" />
+                    <label class="form-label" for="password">Password</label>
+                    <div class="form-helper"></div>
+                  </div>
+                  <div class="col-1"></div>
+                  <div class="col form-outline">
+                    <input type="password" id="confirmPassword" class="form-control" data-mdb-showcounter="true"
+                      maxlength="30" />
+                    <label class="form-label" for="confirmPassword">Confirm</label>
+                    <div class="form-helper"></div>
+                  </div>
+                </div>
+
+                <!-- Submit button -->
+                <button type="button" id="registerBtn" class="btn btn-primary btn-block"
+                  onclick="register()">register</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Background image -->
+  </header>
+  <!--Main Navigation-->
+
+  <!--Footer-->
+  <footer class="bg-light text-lg-start">
+    <hr class="m-0" />
+    <!-- Copyright -->
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+      © 2021 No Copyright
+      <a class="text-dark" href="https://acm.sjtu.edu.cn">SJTU ACM Honors Class</a>
+    </div>
+    <!-- Copyright -->
+  </footer>
+  <!--Footer-->
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript" src="js/script.js"></script>
+
+  <script>
+    function register() {
+      var xmlhttp = new XMLHttpRequest();
+      var username = document.getElementById("username").value;
+      var realName = document.getElementById("realName").value;
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      var confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password != confirmPassword) {
+        document.getElementById("registerBtn").className = "btn btn-warning btn-block";
+        document.getElementById("registerBtn").innerHTML = "please confirm password again";
+        setTimeout(function () {
+          document.getElementById("registerBtn").className = "btn btn-primary btn-block";
+          document.getElementById("registerBtn").innerHTML = "register";
+        }, 3000);
+      }
+      else if (username == "" || realName == "" || email == "" || password == "") {
+        document.getElementById("registerBtn").className = "btn btn-warning btn-block";
+        document.getElementById("registerBtn").innerHTML = "please fill out all information";
+        setTimeout(function () {
+          document.getElementById("registerBtn").className = "btn btn-primary btn-block";
+          document.getElementById("registerBtn").innerHTML = "register";
+        }, 3000);
+      }
+      else {
+        document.getElementById("registerBtn").innerHTML = "loading...";
+        xmlhttp.open("POST", "php/register.php", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.onreadystatechange = function () {
+          if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+              var returnMsg = xmlhttp.responseText;
+              // alert(returnMsg);
+              if (returnMsg != "0") {
+                document.getElementById("registerBtn").className = "btn btn-danger btn-block";
+                document.getElementById("registerBtn").innerHTML = "fail";
+                setTimeout(function () {
+                  document.getElementById("registerBtn").className = "btn btn-primary btn-block";
+                  document.getElementById("registerBtn").innerHTML = "register";
+                }, 3000);
+              }
+              else {
+                document.getElementById("registerBtn").className = "btn btn-success btn-block";
+                document.getElementById("registerBtn").innerHTML = "Success";
+                setTimeout(function () { window.location.href = "login.html"; }, 1000);
+              }
+            } else {
+              alert("Unexpected Failure :(");
+            }
+          }
+        }
+        xmlhttp.send("username=" + username
+          + " & realName=" + realName
+          + " & email=" + email
+          + " & password=" + password
+        );
+      }
+    }
+  </script>
+
+</body>
+
+</html>
