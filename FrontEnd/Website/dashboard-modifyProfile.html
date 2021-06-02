@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Dashboard</title>
+  <link rel="icon" href="img/gear.ico" />
+  <link rel="shortcut icon" href="img/gear.ico" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+    integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
+    crossorigin="anonymous"></script>
+</head>
+
+<body style="background:#EFEBE9;">
+  <!--Main Navigation-->
+  <header>
+    <!-- Navbar -->
+    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+      <!-- Container wrapper -->
+      <div class="container-fluid">
+        <!-- Toggle button -->
+        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu"
+          aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Brand -->
+        <a class="navbar-brand" href="dashboard.html">
+          <div>TicketSystem:Automata</div>
+        </a>
+
+        <!-- Right links -->
+        <ul class="navbar-nav ms-auto d-flex flex-row">
+
+          <!-- Avatar -->
+          <li class="nav-item">
+            <div class="nav-link d-flex">
+              <div>Welcome,&nbsp</div>
+              <!-- https://www.cnblogs.com/carekee/articles/1678041.html -->
+              <div id="usernameLabel"></div>
+              <div>&nbsp&nbsp</div>
+            </div>
+          </li>
+          <!-- Icon dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link me-3 me-lg-0 dropdown-toggle" id="navbarDropdownMenuLink" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item" href="index.html">Homepage</a></li>
+              <li><a class="dropdown-item" href="dashboard-modifyProfile.html">Modify Profile</a></li>
+              <li>
+                <div class="dropdown-item" role="button" onclick="logout()">Logout</div>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+      <!-- Container wrapper -->
+    </nav>
+    <!-- Navbar -->
+  </header>
+  <!--Main Navigation-->
+
+  <!--Main layout-->
+  <div>
+    <div class="mb-13"></div>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-9 col-sm-11">
+          <div class="text">
+            <h1 class="display-5 mb-5 text-center">Modify Profile</h1>
+          </div>
+          <form class="bg-white rounded shadow-5-strong p-5 mb-10">
+
+            <!-- Real Name input -->
+            <div class="form-outline mb-4">
+              <input type="text" id="realName" class="form-control" data-mdb-showcounter="true" maxlength="5"
+                onkeydown="keyEnter()" />
+              <label class="form-label" for="realName">New real name</label>
+              <div class="form-helper"></div>
+            </div>
+
+            <!-- E-mail input -->
+            <div class="form-outline mb-4">
+              <input type="email" id="email" class="form-control" data-mdb-showcounter="true" maxlength="30"
+                onkeydown="keyEnter()" />
+              <label class="form-label" for="email">New email</label>
+              <div class="form-helper"></div>
+            </div>
+
+            <div class="d-flex justify-content-between mb-5">
+              <!-- Password input -->
+              <div class="col form-outline">
+                <input type="password" id="password" class="form-control" data-mdb-showcounter="true" maxlength="30"
+                  onkeydown="keyEnter()" />
+                <label class="form-label" for="password">New password</label>
+                <div class="form-helper"></div>
+              </div>
+              <div class="col-1"></div>
+              <div class="col form-outline">
+                <input type="password" id="confirmPassword" class="form-control" data-mdb-showcounter="true"
+                  maxlength="30" onkeydown="keyEnter()" />
+                <label class="form-label" for="confirmPassword"> Confirm</label>
+                <div class="form-helper"></div>
+              </div>
+            </div>
+
+            <!-- Submit button -->
+            <button type="button" id="modifyBtn" class="btn btn-primary btn-block" onclick="modify()">modify
+              profile</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--Main layout-->
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript" src="js/admin.js"></script>
+  <script type="text/javascript" src="js/script.js"></script>
+
+  <script>
+
+    window.onload = function () { setUserRealName(document.getElementById("usernameLabel")); }
+
+    function keyEnter() { if (event.keyCode == 13) document.getElementById("modifyBtn").click(); }
+
+    function modify() {
+      var xmlhttp = new XMLHttpRequest();
+      var curUsername = safeGetUsername();
+      var realName = document.getElementById("realName").value;
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      var confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password != confirmPassword) {
+        document.getElementById("modifyBtn").className = "btn btn-warning btn-block";
+        document.getElementById("modifyBtn").innerHTML = "please confirm password again";
+        setTimeout(function () {
+          document.getElementById("modifyBtn").className = "btn btn-primary btn-block";
+          document.getElementById("modifyBtn").innerHTML = "modify profile";
+        }, 3000);
+      }
+      else {
+        document.getElementById("modifyBtn").innerHTML = "loading...";
+        xmlhttp.open("POST", "php/modify.php", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.onreadystatechange = function () {
+          if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+              var returnMsg = xmlhttp.responseText;
+              if (returnMsg == "-1") {
+                document.getElementById("modifyBtn").className = "btn btn-danger btn-block";
+                document.getElementById("modifyBtn").innerHTML = "fail";
+                setTimeout(function () {
+                  document.getElementById("modifyBtn").className = "btn btn-primary btn-block";
+                  document.getElementById("modifyBtn").innerHTML = "modify profile";
+                }, 3000);
+              }
+              else {
+                document.getElementById("modifyBtn").className = "btn btn-success btn-block";
+                document.getElementById("modifyBtn").innerHTML = "success";
+                if (password != "") setTimeout(function () { logout(); }, 1000);
+                else setTimeout(function () { window.location.href = "dashboard.html"; }, 1000);
+              }
+            } else {
+              alert("Unexpected Failure :(");
+            }
+          }
+        }
+        xmlhttp.send("curUsername=" + curUsername
+          + "&realName=" + realName
+          + "&email=" + email
+          + "&password=" + password
+        );
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>

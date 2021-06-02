@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <title>Login</title>
+  <link rel="icon" href="img/gear.ico" />
+  <link rel="shortcut icon" href="img/gear.ico" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
   <!-- Google Fonts Roboto -->
@@ -22,7 +24,8 @@
   <header>
     <style>
       #intro {
-        background-image: url(https://mdbootstrap.com/img/new/fluid/city/008.jpg);
+        /* background-image: url(https://mdbootstrap.com/img/new/fluid/city/008.jpg); */
+        background-image: url("https://z3.ax1x.com/2021/06/02/2lEUnH.png");
         height: 100vh;
       }
 
@@ -64,22 +67,22 @@
       <div class="mask d-flex align-items-center h-100" style="background-color: rgba(0, 0, 0, 0.8);">
         <div class="container">
           <div class="row justify-content-center">
-            <div class="col-xl-5 col-md-8">
+            <div class="col-xxl-4 col-xl-5 col-lg-6 col-md-7 col-sm-9">
               <div class="text-white">
                 <h1 class="display-1 mb-5 text-center">Login</h1>
               </div>
-              <form class="bg-white rounded shadow-5-strong p-5">
+              <form class="bg-white rounded shadow-5-strong p-5 mb-12">
                 <!-- style="background-color: rgba(255, 255, 255, 0.9)" -->
 
                 <!-- Text input -->
                 <div class="form-outline mb-4">
-                  <input type="text" id="username" class="form-control" />
+                  <input type="text" id="username" class="form-control" onkeydown="keyEnter()" />
                   <label class="form-label" for="username">Username</label>
                 </div>
 
                 <!-- Password input -->
                 <div class="form-outline mb-4">
-                  <input type="password" id="password" class="form-control" />
+                  <input type="password" id="password" class="form-control" onkeydown="keyEnter()" />
                   <label class="form-label" for="password">Password</label>
                 </div>
 
@@ -88,10 +91,8 @@
                   <div class="col d-flex justify-content-between">
                     <!-- Checkbox -->
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="" id="form1Example3" checked />
-                      <label class="form-check-label" for="form1Example3">
-                        Remember me
-                      </label>
+                      <input class="form-check-input" type="checkbox" value="" id="checkBox" checked />
+                      <label class="form-check-label" for="checkBox"> Remember me </label>
                     </div>
                   </div>
 
@@ -104,6 +105,7 @@
                 <!-- Submit button -->
                 <button type="button" id="loginBtn" class="btn btn-primary btn-block" onclick="login()">login</button>
               </form>
+
             </div>
           </div>
         </div>
@@ -130,9 +132,24 @@
   <script type="text/javascript" src="js/script.js"></script>
 
   <script>
+
+    // $(document).keydown(function (event) {
+    //   if (event.keyCode == 13) {
+    //     document.getElementById("loginBtn").click();
+    //   }
+    // });
+
+    function keyEnter() {
+      if (event.keyCode == 13)  //回车键的键值为13 
+        document.getElementById("loginBtn").click(); //调用登录按钮的登录事件 
+    }
+
     function login() {
+      if (getCookie("username") != "") {
+        alert("You have logged in! Please logout first and then login another account.");
+        window.location.href = "dashboard.html";
+      }
       var xmlhttp = new XMLHttpRequest();
-      //alert("1");
       var username = document.getElementById("username").value;
       var password = document.getElementById("password").value;
       if (username != "" && password != "") {
@@ -154,6 +171,9 @@
               else {
                 document.getElementById("loginBtn").className = "btn btn-success btn-block";
                 document.getElementById("loginBtn").innerHTML = "success";
+                var checkFlag = document.getElementById('checkBox').checked;
+                if (checkFlag) setCookie("username", username, 7);
+                else setCookie("username", username);
                 setTimeout(function () { window.location.href = "dashboard.html"; }, 1000);
               }
             } else {
@@ -162,7 +182,7 @@
           }
         }
         document.getElementById("loginBtn").innerHTML = "loading...";
-        xmlhttp.send("username=" + username + " & password=" + password);
+        xmlhttp.send("username=" + username + "&password=" + password);
       } else {
         document.getElementById("loginBtn").className = "btn btn-warning btn-block";
         document.getElementById("loginBtn").innerHTML = "please input username and password";

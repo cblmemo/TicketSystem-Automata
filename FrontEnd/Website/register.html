@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <title>Register</title>
+  <link rel="icon" href="img/gear.ico" />
+  <link rel="shortcut icon" href="img/gear.ico" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
   <!-- Google Fonts Roboto -->
@@ -22,7 +24,7 @@
   <header>
     <style>
       #intro {
-        background-image: url(https://mdbootstrap.com/img/new/fluid/city/008.jpg);
+        background-image: url("https://z3.ax1x.com/2021/06/02/2l82WQ.jpg");
         height: 100vh;
       }
 
@@ -61,47 +63,50 @@
 
     <!-- Background image -->
     <div id="intro" class="bg-image shadow-2-strong">
-      <div class="mask d-flex align-items-center h-100" style="background-color: rgba(0, 0, 0, 0.8);">
+      <div class="mask d-flex align-items-center h-100" style="background-color: rgba(0, 0, 0, 0.7);">
         <div class="container">
           <div class="row justify-content-center">
-            <div class="col-xl-5 col-md-8">
+            <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-9 col-sm-11">
               <div class="text-white">
                 <h1 class="display-1 mb-5 text-center">Register</h1>
               </div>
-              <form class="bg-white rounded shadow-5-strong p-5">
+              <form class="bg-white rounded shadow-5-strong p-5 mb-10">
                 <!-- Username input -->
                 <div class="form-outline mb-4">
-                  <input type="text" id="username" class="form-control" data-mdb-showcounter="true" maxlength="20" />
+                  <input type="text" id="username" class="form-control" data-mdb-showcounter="true" maxlength="20"
+                    onkeydown="keyEnter()" />
                   <label class="form-label" for="username">Username</label>
                   <div class="form-helper"></div>
                 </div>
 
                 <!-- Real Name input -->
                 <div class="form-outline mb-4">
-                  <input type="text" id="realName" class="form-control" data-mdb-showcounter="true" maxlength="5" />
-                  <label class="form-label" for="realName">Real Name</label>
+                  <input type="text" id="realName" class="form-control" data-mdb-showcounter="true" maxlength="5"
+                    onkeydown="keyEnter()" />
+                  <label class="form-label" for="realName">Real name</label>
                   <div class="form-helper"></div>
                 </div>
 
                 <!-- E-mail input -->
                 <div class="form-outline mb-4">
-                  <input type="email" id="email" class="form-control" data-mdb-showcounter="true" maxlength="30" />
-                  <label class="form-label" for="email">Email</label>
+                  <input type="email" id="email" class="form-control" data-mdb-showcounter="true" maxlength="30"
+                    onkeydown="keyEnter()" />
+                  <label class="form-label" for="email">E-mail</label>
                   <div class="form-helper"></div>
                 </div>
 
                 <div class="d-flex justify-content-between mb-5">
                   <!-- Password input -->
                   <div class="col form-outline">
-                    <input type="password" id="password" class="form-control" data-mdb-showcounter="true"
-                      maxlength="30" />
+                    <input type="password" id="password" class="form-control" data-mdb-showcounter="true" maxlength="30"
+                      onkeydown="keyEnter()" />
                     <label class="form-label" for="password">Password</label>
                     <div class="form-helper"></div>
                   </div>
                   <div class="col-1"></div>
                   <div class="col form-outline">
                     <input type="password" id="confirmPassword" class="form-control" data-mdb-showcounter="true"
-                      maxlength="30" />
+                      maxlength="30" onkeydown="keyEnter()" />
                     <label class="form-label" for="confirmPassword">Confirm</label>
                     <div class="form-helper"></div>
                   </div>
@@ -111,6 +116,7 @@
                 <button type="button" id="registerBtn" class="btn btn-primary btn-block"
                   onclick="register()">register</button>
               </form>
+
             </div>
           </div>
         </div>
@@ -137,8 +143,16 @@
   <script type="text/javascript" src="js/script.js"></script>
 
   <script>
+
+    function keyEnter() {
+      if (event.keyCode == 13)  //回车键的键值为13 
+        document.getElementById("registerBtn").click(); //调用登录按钮的登录事件 
+    }
+
     function register() {
       var xmlhttp = new XMLHttpRequest();
+      var curUsername = getCookie("username");
+      if (curUsername == "") curUsername = "visitor";
       var username = document.getElementById("username").value;
       var realName = document.getElementById("realName").value;
       var email = document.getElementById("email").value;
@@ -180,7 +194,7 @@
               }
               else {
                 document.getElementById("registerBtn").className = "btn btn-success btn-block";
-                document.getElementById("registerBtn").innerHTML = "Success";
+                document.getElementById("registerBtn").innerHTML = "success";
                 setTimeout(function () { window.location.href = "login.html"; }, 1000);
               }
             } else {
@@ -188,13 +202,15 @@
             }
           }
         }
-        xmlhttp.send("username=" + username
-          + " & realName=" + realName
-          + " & email=" + email
-          + " & password=" + password
+        xmlhttp.send("curUsername=" + curUsername
+          + "&username=" + username
+          + "&realName=" + realName
+          + "&email=" + email
+          + "&password=" + password
         );
       }
     }
+  
   </script>
 
 </body>

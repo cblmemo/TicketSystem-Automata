@@ -1,11 +1,12 @@
 <?php
 $curUsername = $_POST['curUsername'];
-$username = $_POST['username'];
-$realName = $_POST['realName'];
-$email = $_POST['email'];
-$password = $_POST['password'];
-
-$command = "add_user -c $curUsername -u $username -p $password -n $realName -m $email -g 0";
+$trainId = $_POST['trainId'];
+$date = $_POST['date'];
+$departure = $_POST['departure'];
+$arrival = $_POST['arrival'];
+$buyQuantity = $_POST['buyQuantity'];
+$queue = $_POST['queue'];
+$command = "buy_ticket -u $curUsername -i $trainId -d $date -f $departure -t $arrival -n $buyQuantity -q $queue";
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 socket_connect($socket, '127.0.0.1', 10240);

@@ -1,11 +1,7 @@
 <?php
-$curUsername = $_POST['curUsername'];
-$username = $_POST['username'];
-$realName = $_POST['realName'];
-$email = $_POST['email'];
-$password = $_POST['password'];
-
-$command = "add_user -c $curUsername -u $username -p $password -n $realName -m $email -g 0";
+$date = substr($_POST['date'], 5, 5);
+$trainID = $_POST['trainID'];
+$command = "query_train -d $date -i $trainID";
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 socket_connect($socket, '127.0.0.1', 10240);

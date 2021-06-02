@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Automata:CONSOLE</title>
+    <link rel="icon" href="img/gear.ico" />
+    <link rel="shortcut icon" href="img/gear.ico" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <!-- MDB -->
+    <link rel="stylesheet" href="css/mdb.dark.min.css" />
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <!--Main Navigation-->
+    <header>
+        <style>
+            .body {
+                background-color: black;
+            }
+        </style>
+
+        <!--Main layout-->
+        <main class="mt-5">
+            <div class="col">
+                <div class="container col-xxl-6 col-lg-7 col-md-8">
+                    <!--Section: Content-->
+                    <section class="p-5 justify-content-center mb-5">
+                        <div class="card mb-3 border border-light">
+                            <div class="card-body p-5">
+                                <div class="mb-5"> </div>
+                                <div class="mb-5">
+                                    <h1 class="display-6 text-center">Administrator Console</h1>
+                                </div>
+                                <div class="form-outline mb-3">
+                                    <textarea class="form-control" id="commandInput" rows="4" onkeypress="keyEnter()"
+                                        onkeyup="clearCommandInput()"
+                                        placeholder=" Frontend Command:&#10; &#34;GC&#34; for getting cookie&#10; &#34;EC&#34; for erasing cookie &#10; &#34;SC [string]&#34; for setting cookie"></textarea>
+                                    <label class="form-label" for="commandInput"> Command </label>
+                                </div>
+                                <button type="button" id="runBtn" class="btn btn-dark btn-block"
+                                    onclick="runCommand()">Run</button>
+                            </div>
+                        </div>
+                        <div class="card border border-light">
+                            <div class="card-body p-5" id="resultCard">
+                                <div class="input-group mb-3">
+                                    <input class="form-control" value="Command" />
+                                    <input class="form-control" value="Result" />
+                                </div>
+                                <div class="input-group mb-3" id="firstInputGrp" style="display: none;">
+                                    <input class="form-control border-dark" value="Command" />
+                                    <input class="form-control border-dark" value="Result" />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+        <!--Main layout-->
+
+        <!--Footer-->
+        <footer class="bg-light text-lg-start">
+            <hr class="m-0" />
+            <!-- Copyright -->
+            <div class="text-muted text-center p-3" style="background-color: rgba(0, 0, 0, 0.6);">
+                © 2021 No Copyright
+                <a class="text-muted" target="_blank" href="https://acm.sjtu.edu.cn">SJTU ACM Honors Class</a>
+            </div>
+            <!-- Copyright -->
+        </footer>
+        <!--Footer-->
+        <!-- MDB -->
+        <script type="text/javascript" src="js/mdb.min.js"></script>
+        <!-- Custom scripts -->
+        <script type="text/javascript" src="js/script.js"></script>
+
+        <script>
+
+            window.onload = function () {
+
+            }
+
+            function keyEnter() { if (event.keyCode == 13) document.getElementById("runBtn").click(); }
+
+            function clearCommandInput() { if (event.keyCode == 13) document.getElementById("commandInput").value = null; }
+
+            function runCommand(specifiedCommand = false, commandContent = "") {
+                var command = "";
+
+                if (specifiedCommand) command = commandContent;
+                else {
+                    command = document.getElementById("commandInput").value;
+                    document.getElementById("commandInput").value = null;
+
+                    var commandList = command.split('\n');
+                    if (commandList.length > 1) {
+                        document.getElementById("commandInput").value = null;
+                        for (var i = 0; i < commandList.length; i++) {
+                            runCommand(true, commandList[i]);
+                            sleep(200);
+                        }
+                        return;
+                    }
+                }
+
+
+
+                if (command == "GC") alert(document.cookie);
+                else if (command == "EC") delCookie("username");
+                else if (command.slice(0, 2) == "SC") setCookie("username", command.slice(3));
+                else {
+                    var xmlhttp = new XMLHttpRequest();
+                    if (command != "") {
+                        xmlhttp.open("POST", "php/console.php", true);
+                        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4) {
+                                if (xmlhttp.status == 200) {
+                                    var returnMsg = xmlhttp.responseText;
+                                    var fa = document.getElementById("resultCard");
+
+                                    var newInputGrp = document.createElement("div");
+                                    newInputGrp.className = "input-group mb-2";
+                                    newInputGrp.id = "nowInsertInputGrp";
+
+                                    var newInput1 = document.createElement("input");
+                                    newInput1.className = "form-control border-dark";
+                                    newInput1.value = command;
+                                    var newInput2 = document.createElement("input");
+                                    newInput2.className = "form-control border-dark";
+                                    newInput2.value = returnMsg;
+
+                                    newInputGrp.appendChild(newInput1);
+                                    newInputGrp.appendChild(newInput2);
+
+                                    fa.insertBefore(newInputGrp, document.getElementById("firstInputGrp"));
+                                    document.getElementById("firstInputGrp").id = "notFirstInputGrp";
+                                    document.getElementById("nowInsertInputGrp").id = "firstInputGrp";
+                                    // fa.appendChild(newInputGrp);
+                                } else alert("\"xmlhttp.status\" is not 200.");
+                            }
+                        }
+                        xmlhttp.send("command=" + command);
+                    } else alert("Command is blank.");
+                }
+            }
+
+        </script>
+</body>
+
+</html>

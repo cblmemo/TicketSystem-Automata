@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Dashboard</title>
+  <link rel="icon" href="img/gear.ico" />
+  <link rel="shortcut icon" href="img/gear.ico" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+    integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
+    crossorigin="anonymous"></script>
+
+  <style>
+    greenName {
+      color: #2A6130;
+    }
+  </style>
+</head>
+
+<body style="background:#E8F5E9;">
+  <!--Main Navigation-->
+  <header>
+    <!-- Navbar -->
+    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+      <!-- Container wrapper -->
+      <div class="container-fluid">
+        <!-- Toggle button -->
+        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu"
+          aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Brand -->
+        <a class="navbar-brand" href="dashboard.html">
+          <div>TicketSystem:Automata</div>
+        </a>
+
+        <!-- Right links -->
+        <ul class="navbar-nav ms-auto d-flex flex-row">
+
+          <!-- Avatar -->
+          <li class="nav-item">
+            <div class="nav-link d-flex">
+              <div>Welcome,&nbsp</div>
+              <div id="usernameLabel"></div>
+              <div>&nbsp&nbsp</div>
+            </div>
+          </li>
+          <!-- Icon dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link me-3 me-lg-0 dropdown-toggle" id="navbarDropdownMenuLink" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item" href="index.html">Homepage</a></li>
+              <li><a class="dropdown-item" href="dashboard-modifyProfile.html">Modify Profile</a></li>
+              <li>
+                <div class="dropdown-item" role="button" onclick="logout()">Logout</div>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+      <!-- Container wrapper -->
+    </nav>
+    <!-- Navbar -->
+
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+      <div class="position-sticky">
+        <div class="list-group list-group-flush mx-3 mt-4">
+          <a href="dashboard.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-home fa-fw me-3"></i><span>Main</span> </a>
+          <a href="dashboard-ticket.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-ticket-alt fa-fw me-3"></i><span>Ticket</span> </a>
+          <a href="dashboard-order.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-clipboard fa-fw me-3"></i><span></span>Ticket Order</a>
+          <a href="dashboard-train.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-train fa-fw me-3"></i><span>Train Information</span></a>
+          <a href="dashboard-user.html" class="list-group-item list-group-item-action py-2 ripple active">
+            <i class="fas fa-user fa-fw me-3"></i><span>User</span> </a>
+        </div>
+      </div>
+    </nav>
+    <!-- Sidebar -->
+
+  </header>
+  <!--Main Navigation-->
+
+  <!--Main layout-->
+  <main style="margin-top: 58px;">
+    <div class="container pt-4">
+      <section>
+        <div class="row justify-content-center">
+          <section class="col-10">
+            <div class="mb-7"> </div>
+            <div class="mb-7">
+              <h1 class="display-5 text-center">Query User Profile</h1>
+            </div>
+            <div class="card mb-3 border border-light">
+              <div class="card-body p-5">
+                <div class="mb-3"> </div>
+                <div class="row justify-content-center mb-5">
+                  <div class="col-6">
+                    <div class="form-outline btn-block">
+                      <input type="text" id="username" class="form-control" maxlength="20" onkeydown="keyEnter()" />
+                      <label class="form-label" for="username">Username</label>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <button type="button" id="searchBtn" class="btn btn-outline-primary btn-block"
+                      onclick="search()">search</button>
+                  </div>
+                </div>
+                <table class="table table-striped table-hover border-top">
+                  <thead>
+                    <tr>
+                      <th scope="col" style="text-align:center;width:30%;">Username</th>
+                      <th scope="col" style="text-align:center;width:30%;">Real Name</th>
+                      <th scope="col" style="text-align:center;width:40%;">E-mail</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="col" id="tableUsername" style="text-align:center"> </th>
+                      <td id="tableRealName" style="text-align:center"></td>
+                      <td id="tableEmail" style="text-align:center"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </main>
+  <!--Main layout-->
+
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript" src="js/admin.js"></script>
+  <script type="text/javascript" src="js/script.js"></script>
+
+  <script>
+    window.onload = function () { setUserRealName(document.getElementById("usernameLabel")); }
+
+    function keyEnter() { if (event.keyCode == 13) document.getElementById("searchBtn").click(); }
+
+    function search() {
+      var xmlhttp = new XMLHttpRequest();
+      var curUsername = safeGetUsername();
+      var username = document.getElementById("username").value;
+      if (username == "") {
+        document.getElementById("searchBtn").className = "btn btn-outline-warning btn-block";
+        document.getElementById("searchBtn").innerHTML = "please input username";
+        setTimeout(function () {
+          document.getElementById("searchBtn").className = "btn btn-outline-primary btn-block";
+          document.getElementById("searchBtn").innerHTML = "search";
+        }, 2000);
+      } else {
+        document.getElementById("searchBtn").innerHTML = "loading...";
+        xmlhttp.open("POST", "php/search.php", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.onreadystatechange = function () {
+          if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+              var returnMsg = xmlhttp.responseText;
+              if (returnMsg == "-1") {
+                document.getElementById("searchBtn").className = "btn btn-outline-danger btn-block";
+                document.getElementById("searchBtn").innerHTML = "not found";
+                setTimeout(function () {
+                  document.getElementById("searchBtn").className = "btn btn-outline-primary btn-block";
+                  document.getElementById("searchBtn").innerHTML = "search";
+                }, 2000);
+              }
+              else {
+                document.getElementById("searchBtn").className = "btn btn-outline-success btn-block";
+                document.getElementById("searchBtn").innerHTML = "found";
+
+                document.getElementById("tableUsername").innerHTML = "<greenName>" + returnMsg.split(' ')[0] + "</greenName>";
+                document.getElementById("tableRealName").innerHTML = "<greenName>" + returnMsg.split(' ')[1] + "</greenName>";
+                document.getElementById("tableEmail").innerHTML = "<greenName>" + returnMsg.split(' ')[2] + "</greenName>";
+
+                setTimeout(function () {
+                  document.getElementById("searchBtn").className = "btn btn-outline-primary btn-block";
+                  document.getElementById("searchBtn").innerHTML = "search";
+                }, 2000);
+              }
+            } else {
+              alert("Unexpected Failure :(");
+            }
+          }
+        }
+        xmlhttp.send("curUsername=" + curUsername + "&username=" + username);
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>

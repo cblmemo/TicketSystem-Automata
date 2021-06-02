@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Dashboard</title>
+  <link rel="icon" href="img/gear.ico" />
+  <link rel="shortcut icon" href="img/gear.ico" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+    integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
+    crossorigin="anonymous"></script>
+</head>
+
+<body style="background-color: #E0F7FA;">
+  <!-- style="background-color: rgb(255,255,255,0.8);" -->
+  <!--Main Navigation-->
+  <header>
+    <!-- Navbar -->
+    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+      <!-- Container wrapper -->
+      <div class="container-fluid">
+        <!-- Toggle button -->
+        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu"
+          aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Brand -->
+        <a class="navbar-brand" href="dashboard.html">
+          <div>TicketSystem:Automata</div>
+        </a>
+
+        <!-- Right links -->
+        <ul class="navbar-nav ms-auto d-flex flex-row">
+
+          <!-- Avatar -->
+          <li class="nav-item">
+            <div class="nav-link d-flex">
+              <div>Welcome,&nbsp</div>
+              <!-- https://www.cnblogs.com/carekee/articles/1678041.html -->
+              <div id="usernameLabel"></div>
+              <div>&nbsp&nbsp</div>
+            </div>
+          </li>
+          <!-- Icon dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link me-3 me-lg-0 dropdown-toggle" id="navbarDropdownMenuLink" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item" href="index.html">Homepage</a></li>
+              <li><a class="dropdown-item" href="dashboard-modifyProfile.html">Modify Profile</a></li>
+              <li>
+                <div class="dropdown-item" role="button" onclick="logout()">Logout</div>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+      <!-- Container wrapper -->
+    </nav>
+    <!-- Navbar -->
+
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+      <div class="position-sticky">
+        <div class="list-group list-group-flush mx-3 mt-4">
+          <a href="dashboard.html" class="list-group-item list-group-item-action py-2 ripple active">
+            <i class="fas fa-home fa-fw me-3"></i><span>Main</span> </a>
+          <a href="dashboard-ticket.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-ticket-alt fa-fw me-3"></i><span>Ticket</span> </a>
+          <a href="dashboard-order.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-clipboard fa-fw me-3"></i><span></span>Ticket Order</a>
+          <a href="dashboard-train.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-train fa-fw me-3"></i><span>Train Information</span></a>
+          <a href="dashboard-user.html" class="list-group-item list-group-item-action py-2 ripple">
+            <i class="fas fa-user fa-fw me-3"></i><span>User</span> </a>
+        </div>
+      </div>
+    </nav>
+    <!-- Sidebar -->
+
+  </header>
+  <!--Main Navigation-->
+
+  <!--Main layout-->
+  <main style="margin-top: 58px">
+    <div class="container pt-4">
+
+      <!--Section: Minimal statistics cards-->
+      <section>
+        <div class="row">
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div class="align-self-center">
+                    <i class="fas fa-pencil-alt text-info fa-3x"></i>
+                  </div>
+                  <div class="text-end">
+                    <h3>278</h3>
+                    <p class="mb-0">Oh God</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div class="align-self-center">
+                    <i class="far fa-comment-alt text-warning fa-3x"></i>
+                  </div>
+                  <div class="text-end">
+                    <h3>156</h3>
+                    <p class="mb-0">I have</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div class="align-self-center">
+                    <i class="fas fa-chart-line text-success fa-3x"></i>
+                  </div>
+                  <div class="text-end">
+                    <h3>64.89 %</h3>
+                    <p class="mb-0">No idea</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div class="align-self-center">
+                    <i class="fas fa-map-marker-alt text-danger fa-3x"></i>
+                  </div>
+                  <div class="text-end">
+                    <h3>423</h3>
+                    <p class="mb-0">About the</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-danger">278</h3>
+                    <p class="mb-0">Damn Main Page</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-rocket text-danger fa-3x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-success">156</h3>
+                    <p class="mb-0">So</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="far fa-user text-success fa-3x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-warning">64.89 %</h3>
+                    <p class="mb-0">I try to</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-chart-pie text-warning fa-3x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-info">423</h3>
+                    <p class="mb-0">Stuff sth</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="far fa-life-ring text-info fa-3x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-info">278</h3>
+                    <p class="mb-0">Here</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-book-open text-info fa-3x"></i>
+                  </div>
+                </div>
+                <div class="px-md-1">
+                  <div class="progress mt-3 mb-1 rounded" style="height: 7px">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 80%" aria-valuenow="80"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-warning">156</h3>
+                    <p class="mb-0">So that</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="far fa-comments text-warning fa-3x"></i>
+                  </div>
+                </div>
+                <div class="px-md-1">
+                  <div class="progress mt-3 mb-1 rounded" style="height: 7px">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 35%" aria-valuenow="35"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-success">64.89 %</h3>
+                    <p class="mb-0">It seems</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-mug-hot text-success fa-3x"></i>
+                  </div>
+                </div>
+                <div class="px-md-1">
+                  <div class="progress mt-3 mb-1 rounded" style="height: 7px">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 60%" aria-valuenow="60"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 col-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between px-md-1">
+                  <div>
+                    <h3 class="text-danger">423</h3>
+                    <p class="mb-0">Suuuuuper Cool</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-map-signs text-danger fa-3x"></i>
+                  </div>
+                </div>
+                <div class="px-md-1">
+                  <div class="progress mt-3 mb-1 rounded" style="height: 7px">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 40%" aria-valuenow="40"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!--Section: Minimal statistics cards-->
+
+      <!--Section: Statistics with subtitles-->
+      <section>
+        <div class="row">
+          <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between p-md-1">
+                  <div class="d-flex flex-row">
+                    <div class="align-self-center">
+                      <i class="fas fa-pencil-alt text-info fa-3x me-4"></i>
+                    </div>
+                    <div>
+                      <h4>Total Character</h4>
+                      <p class="mb-0">Libro</p>
+                    </div>
+                  </div>
+                  <div class="align-self-center">
+                    <h2 class="h1 mb-0">1,800</h2>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between p-md-1">
+                  <div class="d-flex flex-row">
+                    <div class="align-self-center">
+                      <i class="far fa-comment-alt text-warning fa-3x me-4"></i>
+                    </div>
+                    <div>
+                      <h4>Total Bug</h4>
+                      <p class="mb-0">Like cat</p>
+                    </div>
+                  </div>
+                  <div class="align-self-center">
+                    <h2 class="h1 mb-0">84,695</h2>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between p-md-1">
+                  <div class="d-flex flex-row">
+                    <div class="align-self-center">
+                      <h2 class="h1 mb-0 me-4">$76,456.00</h2>
+                    </div>
+                    <div>
+                      <h4>Shopping Cart</h4>
+                      <p class="mb-0">Cong</p>
+                    </div>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="far fa-heart text-danger fa-3x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between p-md-1">
+                  <div class="d-flex flex-row">
+                    <div class="align-self-center">
+                      <h2 class="h1 mb-0 me-4">$3.600,000</h2>
+                    </div>
+                    <div>
+                      <h4>Total Deposite</h4>
+                      <p class="mb-0">Is a good guy</p>
+                    </div>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-wallet text-success fa-3x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!--Section: Statistics with subtitles-->
+    </div>
+  </main>
+  <!--Main layout-->
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript" src="js/admin.js"></script>
+  <script type="text/javascript" src="js/script.js"></script>
+
+  <script>
+    window.onload = function () { setUserRealName(document.getElementById("usernameLabel")); }
+  </script>
+
+</body>
+
+</html>

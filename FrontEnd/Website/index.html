@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <title>TicketSystem:Automata</title>
+  <link rel="icon" href="img/gear.ico" />
+  <link rel="shortcut icon" href="img/gear.ico" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
   <!-- Google Fonts Roboto -->
@@ -21,7 +23,8 @@
   <header>
     <style>
       #intro {
-        background-image: url("https://z3.ax1x.com/2021/05/30/2Ze678.jpg");
+        /* background-image: url("https://z3.ax1x.com/2021/05/30/2Ze678.jpg"); */
+        background-image: url("https://z3.ax1x.com/2021/06/02/2lEjER.png");
         height: 100vh;
       }
 
@@ -65,9 +68,17 @@
           <div class="text-white">
             <h1 class="display-1 mb-3">Welcome to TicketSystem:Automata</h1>
             <p class="lead mb-5">Everying that lives is designed to end.</p>
-            <a class="btn btn-outline-light btn-lg m-2" href="login.html" role="button" rel="nofollow"
-              target="_self">Login</a>
-            <a class="btn btn-outline-light btn-lg m-2" href="register.html" target="_self" role="button">Register</a>
+            <div id="userBtn" style="display: none;">
+              <a class="btn btn-outline-light btn-lg m-2" href="dashboard.html" role="button" rel="nofollow"
+                target="_self">Dashboard</a>
+              <div class="btn btn-outline-light btn-lg m-2" role="button" onclick="logout()">Logout</div>
+            </div>
+            <div id="visitorBtn" style="display: none;">
+              <a class="btn btn-outline-light btn-lg m-2" href="login.html" role="button" rel="nofollow"
+                target="_self">Login</a>
+              <a class="btn btn-outline-light btn-lg m-2" href="register.html" target="_self" role="button">
+                Register</a>
+            </div>
           </div>
         </div>
       </div>
@@ -84,7 +95,9 @@
         <div class="row">
           <div class="col-md-6 gx-5 mb-4">
             <div class="bg-image hover-overlay ripple shadow-2-strong" data-mdb-ripple-color="light">
-              <img src="https://mdbootstrap.com/img/new/slides/031.jpg" class="img-fluid" />
+              <!-- <img src="https://mdbootstrap.com/img/new/slides/031.jpg" class="img-fluid" /> -->
+              <!-- <img src="https://z3.ax1x.com/2021/06/02/2lVlrQ.jpg" class="img-fluid" /> -->
+              <img src="https://z3.ax1x.com/2021/06/02/2lVodA.jpg" class="img-fluid" />
               <a href="index.html">
                 <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
               </a>
@@ -130,10 +143,8 @@
       <div class="btn-group btn-group-lg" role="group">
         <a type="button" class="btn btn-primary fab fa-github active"
           href="https://github.com/Rainy-Memory/TicketSystem-Automata" target="_blank"></a>
-        <a type="button" class="btn btn-primary" href="https://github.com/Rainy-Memory/TicketSystem-Automata"
-          target="_blank">RainyMemory</a>
-        <a type="button" class="btn btn-primary" href="https://github.com/Rainy-Memory/TicketSystem-Automata"
-          target="_blank">PaperL</a>
+        <a type="button" class="btn btn-primary" href="https://github.com/Rainy-Memory" target="_blank">RainyMemory</a>
+        <a type="button" class="btn btn-primary" href="https://github.com/PaperL" target="_blank">PaperL</a>
       </div>
       <!-- <a href="https://github.com/Rainy-Memory/TicketSystem-Automata" class="btn btn-primary m-1" role="button"
         rel="nofollow" target="_blank">
@@ -161,6 +172,17 @@
   <script type="text/javascript" src="js/mdb.min.js"></script>
   <!-- Custom scripts -->
   <script type="text/javascript" src="js/script.js"></script>
+
+  <script>
+
+    window.onload = function () {
+      var username = getCookie("username");
+      if (username != "")
+        document.getElementById("userBtn").style.display = "inline";
+      else document.getElementById("visitorBtn").style.display = "inline";
+    }
+
+  </script>
 </body>
 
 </html>
