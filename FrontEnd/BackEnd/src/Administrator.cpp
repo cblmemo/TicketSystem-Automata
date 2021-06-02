@@ -129,6 +129,6 @@ void Administrator::runBackEnd() {
         getline(std::cin, cmd);
         result = process(cmd);
         std::cout << result;
-        if (result == "bye\n")break;
+        if (result == "bye\n")exit(0);
     }
 }
