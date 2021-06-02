@@ -65,7 +65,7 @@ std::string Administrator::process(const std::string &cmd) {
     }
 }
 
-void Administrator::runProgramme() {
+void Administrator::runFrontEnd() {
     int sListen = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in sin;
     sin.sin_family = AF_INET;
@@ -109,9 +109,9 @@ void Administrator::runProgramme() {
         cmd = std::string(command);
         std::cout << "BackEnd: \033[;36m<< Handling Operation: \033[35m\"" << cmd << "\"\033[0m" << std::endl;
         std::string resultStr = process(cmd);
-        while (resultStr[resultStr.length() - 1] == '\n'
-               || resultStr[resultStr.length() - 1] == '\r'
-               || resultStr[resultStr.length() - 1] == ' ')
+        while (resultStr[resultStr.length() - 1] == ' '
+               || resultStr[resultStr.length() - 1] == '\n'
+               || resultStr[resultStr.length() - 1] == '\r')
             resultStr.pop_back();
         std::cout << "Socket:  \033[;36m>> Operation Result: \033[35m\"" << resultStr << "\"\033[0m" << std::endl;
         std::stringstream resultSS("");
@@ -120,5 +120,15 @@ void Administrator::runProgramme() {
         strcpy(sendResult, resultSS.str().c_str());
         send(sClient, sendResult, strlen(sendResult), 0);
         if (resultStr == "bye")flag = false;
+    }
+}
+
+void Administrator::runBackEnd() {
+    string cmd, result;
+    while (true) {
+        getline(std::cin, cmd);
+        result = process(cmd);
+        std::cout << result;
+        if (result == "bye\n")break;
     }
 }

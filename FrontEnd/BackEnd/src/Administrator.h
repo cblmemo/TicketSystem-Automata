@@ -58,7 +58,9 @@ public:
     
     ~Administrator();
     
-    void runProgramme();
+    void runFrontEnd();
+    
+    void runBackEnd();
 };
 
 #endif //TICKETSYSTEM_AUTOMATA_ADMINISTRATOR_H

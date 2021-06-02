@@ -52,7 +52,7 @@ private:
      */
     HashMap<username_t, std::pair<int, int>, hash_username_t> loginPool;
     BPlusTree<long long, int, BPLUSTREE_L, BPLUSTREE_M> indexPool;
-    LRUCacheMemoryPool<user_t, bool> storagePool;
+    MemoryPool<user_t, bool> storagePool;
     hash_username_t hashUsername;
     
     inline std::string outputSuccess();
@@ -65,7 +65,7 @@ private:
 
 public:
     UserManager(const string &indexPath, const string &storagePath) :
-            loginPool(), indexPool(indexPath), storagePool(storagePath, true, USER_MANAGER_MEMORYPOOL_CAPACITY) {}
+            loginPool(), indexPool(indexPath), storagePool(storagePath, true) {}
     
     std::string addUser(const Parser &p);
     
