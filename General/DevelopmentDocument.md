@@ -330,7 +330,7 @@ void initialize();//初始化
 
 void clean();//清空所有信息
 
-void runProgramme();//处理指令，分解成子任务交给成员变量/自身去做
+void runFrontEnd();//处理指令，分解成子任务交给成员变量/自身去做
 ```
 
 
