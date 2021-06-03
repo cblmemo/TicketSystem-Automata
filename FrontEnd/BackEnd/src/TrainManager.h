@@ -252,11 +252,11 @@ private:
     hash_station_t hashStation;
     TokenScanner splitTool;
     
-    inline std::string outputSuccess();
+    static inline std::string outputSuccess();
     
-    inline std::string outputFailure();
+    static inline std::string outputFailure();
     
-    inline std::string printTrain(const train_t &t, int date);
+    static inline std::string printTrain(const train_t &t, int date);
     
     static inline int min(int a, int b) { return a < b ? a : b; }
 

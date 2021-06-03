@@ -66,8 +66,11 @@ std::string Administrator::process(const std::string &cmd) {
 }
 
 void Administrator::runFrontEnd() {
+    const int BUFFER_SIZE = 102400;
+    
+    std::cout << "Socket:  \033[;32mStart initializing Socket Server...\033[0m" << std::endl;
     int sListen = socket(AF_INET, SOCK_STREAM, 0);
-    sockaddr_in sin;
+    sockaddr_in sin {};
     sin.sin_family = AF_INET;
     sin.sin_port = htons(10240);
     sin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -79,16 +82,37 @@ void Administrator::runFrontEnd() {
         printf("Socket:  \033[;31mListen Error!\033[0m");
         return;
     }
+    int sClient;    // 创建客户端socket
+    sockaddr_in clientAdd {};  // 客户端的地址信息
+    socklen_t clientAddLen = sizeof(clientAdd);
+    char receiveDat[BUFFER_SIZE]; // 接收数据缓冲区
+    char command[BUFFER_SIZE], sendResult[BUFFER_SIZE];
     std::cout << "Socket:  \033[;32mSocket Server Initialization Finished.\033[0m" << std::endl;
     
-    int sClient;    // 创建客户端socket
-    sockaddr_in clientAdd;  // 客户端的地址信息
-    socklen_t clientAddLen = sizeof(clientAdd);
-    char receiveDat[10240]; // 接收数据缓冲区
-    char command[10240], sendResult[10240];
-    
+    std::cout << "BackEnd:  \033[;32mStart initializing BackEnd...\033[0m" << std::endl;
     string cmd;
-    std::cout << "BackEnd: \033[32mBackEnd Initialization Finished.\033[0m" << std::endl;
+    std::fstream fs;
+    fs.open("initialize.txt", std::ios::in | std::ios::out);
+    if (fs.fail()) {
+        printf("BackEnd:  \033[;31mNo Initialize Command Found!\033[0m");
+    }
+    else {
+        while (getline(fs, cmd)) {
+            while (cmd[cmd.length() - 1] == ' '
+                   || cmd[cmd.length() - 1] == '\n'
+                   || cmd[cmd.length() - 1] == '\r')
+                cmd.pop_back();
+            std::cout << "BackEnd:  \033[;33m>> Initializing Command: \033[35m\"" << cmd << "\"\033[0m" << std::endl;
+            string resultStr = process(cmd);
+            while (resultStr[resultStr.length() - 1] == ' '
+                   || resultStr[resultStr.length() - 1] == '\n'
+                   || resultStr[resultStr.length() - 1] == '\r')
+                resultStr.pop_back();
+            std::cout << "BackEnd:  \033[;36m>> Operation Result: \033[35m\"" << resultStr << "\"\033[0m" << std::endl;
+        }
+        std::cout << "BackEnd: \033[32mBackEnd Initialization Finished.\033[0m" << std::endl;
+    }
+    
     bool flag = true;
     while (flag) {
         memset(command, 0, sizeof(command));
@@ -98,7 +122,7 @@ void Administrator::runFrontEnd() {
             printf("Socket:  \033[;31mAccept Error!\033[0m");
             continue;
         }
-        recv(sClient, receiveDat, 10240, 0);
+        recv(sClient, receiveDat, BUFFER_SIZE, 0);
         std::cout << "Socket:  \033[;33m>> Receive Data: \033[35m\"" << receiveDat << "\"\033[0m" << std::endl;
         std::stringstream receiveDatSS(receiveDat);
         int commandLen = 0, tmp, digitLen;

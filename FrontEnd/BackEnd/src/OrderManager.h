@@ -88,11 +88,11 @@ private:
     MultiBPlusTree<long long, order_t, MULTI_BPLUSTREE_L, MULTI_BPLUSTREE_M> pendingPool;
     const string status[3] = {"[success]", "[pending]", "[refunded]"};
     
-    inline std::string outputSuccess(long long message = 0);
+    static inline std::string outputSuccess(long long message = 0);
     
-    inline std::string outputFailure();
+    static inline std::string outputFailure();
     
-    inline std::string outputQueue();
+    static inline std::string outputQueue();
     
     inline std::string printOrder(const order_t &o);
     

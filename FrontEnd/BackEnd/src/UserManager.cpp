@@ -24,7 +24,7 @@ bool UserManager::isLogin(const UserManager::username_t &u) {
 std::string UserManager::addUser(const Parser &p) {
     if (storagePool.readExtraMessage()) {
         storagePool.updateExtraMessage(false);
-        user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], 10};
+        user_t newUser {p["-u"], p["-p"], p["-n"], p["-m"], p("-g")};
         int offset = storagePool.write(newUser);
         indexPool.insert(hashUsername(newUser.username), offset);
         return outputSuccess();

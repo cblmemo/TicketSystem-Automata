@@ -2,5 +2,5 @@
 
 int main() {
     Administrator RhineLab;
-    RhineLab.runBackEnd();
+    RhineLab.runFrontEnd();
 }

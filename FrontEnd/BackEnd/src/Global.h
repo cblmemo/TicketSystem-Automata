@@ -12,6 +12,7 @@
 #include "../include/MemoryPool.h"
 #include "../include/HashMap.h"
 #include <chrono>
+#include <fstream>
 
 using RainyMemory::string_t;
 using RainyMemory::MemoryPool;

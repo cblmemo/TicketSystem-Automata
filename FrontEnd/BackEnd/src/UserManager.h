@@ -55,11 +55,11 @@ private:
     MemoryPool<user_t, bool> storagePool;
     hash_username_t hashUsername;
     
-    inline std::string outputSuccess();
+    static inline std::string outputSuccess();
     
-    inline std::string outputFailure();
+    static inline std::string outputFailure();
     
-    inline std::string printUser(const user_t &u);
+    static inline std::string printUser(const user_t &u);
     
     bool isLogin(const username_t &u);
 
