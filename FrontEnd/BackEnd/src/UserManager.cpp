@@ -62,11 +62,11 @@ std::string UserManager::logout(const Parser &p) {
 std::string UserManager::queryProfile(const Parser &p) {
     if (isLogin(p["-c"])) {
         if (p["-c"] == p["-u"])return printUser(storagePool.read(loginPool[p["-u"]].second));
-        if (isLogin(p["-u"]) && loginPool[p["-c"]].first > loginPool[p["-u"]].first)return printUser(storagePool.read(loginPool[p["-u"]].second));
+        if (isLogin(p["-u"]))return printUser(storagePool.read(loginPool[p["-u"]].second));
         std::pair<int, bool> temp {indexPool.find(hashUsername(p["-u"]))};
         if (!temp.second)return outputFailure();
         user_t qUser {storagePool.read(temp.first)};
-        if (loginPool[p["-c"]].first > qUser.privilege)return printUser(qUser);
+        return printUser(qUser);
     }
     return outputFailure();
 }
