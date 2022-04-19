@@ -128,10 +128,10 @@ namespace RainyMemory {
         }
         
         void resize() {
-            ull n = nextPrime(capacity);
+            ull n = nextPrime(capacity), oldCapacity = capacity;
             if (n <= capacity)return;
-            LinkedList *temp = new LinkedList[n];
-            for (ull i = 0; i < capacity; i++) {
+            LinkedList *temp = new LinkedList[capacity = n];
+            for (ull i = 0; i < oldCapacity; i++) {
                 node_t *p = buckets[i].head;
                 while (p != nullptr) {
                     ull index = hash(*p->key) % n;
@@ -140,7 +140,6 @@ namespace RainyMemory {
                     p = buckets[i].head;
                 }
             }
-            capacity = n;
             delete[] buckets;
             buckets = temp;
         }
