@@ -36,7 +36,7 @@ namespace RainyMemory {
         inline ull nextPrime(ull n) {
             const ull *first = PrimeList;
             const ull *last = PrimeList + PrimeNum;
-            const ull *pos = RainyMemory::lower_bound(first, last, n);
+            const ull *pos = RainyMemory::upper_bound(first, last, n);
             return pos == last ? *(last - 1) : *pos;
         }
         
