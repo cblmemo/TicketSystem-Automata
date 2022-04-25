@@ -57,7 +57,6 @@ namespace RainyMemory {
             };
             
             Node *head = nullptr;
-            ull listSize = 0;
             
             LinkedList() = default;
             
@@ -81,7 +80,6 @@ namespace RainyMemory {
             
             void insert(const Key &k, const Value &v) {
                 head = new Node(k, v, head);
-                listSize++;
             }
             
             void erase(const Key &k) {
@@ -102,11 +100,10 @@ namespace RainyMemory {
                         now = now->next;
                     }
                 }
-                listSize--;
             }
             
             bool empty() const {
-                return listSize == 0;
+                return head == nullptr;
             }
             
             void addNode(Node *n) {
@@ -130,11 +127,11 @@ namespace RainyMemory {
         void resize() {
             ull n = nextPrime(capacity), oldCapacity = capacity;
             if (n <= capacity)return;
-            LinkedList *temp = new LinkedList[capacity = n];
+            auto *temp = new LinkedList[capacity = n];
             for (ull i = 0; i < oldCapacity; i++) {
                 node_t *p = buckets[i].head;
                 while (p != nullptr) {
-                    ull index = hash(*p->key) % n;
+                    ull index = calculateIndex(*p->key);
                     buckets[i].head = p->next;
                     temp[index].addNode(p);
                     p = buckets[i].head;
@@ -168,7 +165,7 @@ namespace RainyMemory {
             ull index = calculateIndex(k);
             if (containsKey(k))return *buckets[index].find(k)->value;
             else {
-                if (number + 1 > capacity)resize();
+                if (number + 1 > capacity)resize(), index = calculateIndex(k);
                 buckets[index].insert(k, Value());
                 number++;
                 return *buckets[index].head->value;
