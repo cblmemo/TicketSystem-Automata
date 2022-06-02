@@ -43,8 +43,7 @@ void TrainManager::printTrain(const TrainManager::train_t &t, int date) {
             else defaultOut << seats[i];
             defaultOut << endl;
         }
-    }
-    else {
+    } else {
         for (int i = 0; i < t.stationNum; i++) {
             defaultOut << t.stations[i] << " ";
             if (i == 0)defaultOut << "xx-xx xx:xx";
@@ -154,8 +153,8 @@ void TrainManager::queryTicket(const Parser &p) {
     if (sTrains.empty() || eTrains.empty())return outputSuccess();
     static HashMap<hash_t, int> hashmap;
     hashmap.clear();
-    for (const std::pair<hash_t, int> &i : sTrains)hashmap[i.first] = i.second;
-    for (const std::pair<hash_t, int> &j : eTrains) {
+    for (const std::pair<hash_t, int> &i: sTrains)hashmap[i.first] = i.second;
+    for (const std::pair<hash_t, int> &j: eTrains) {
         int i;
         if (hashmap.containsKey(j.first) && (i = hashmap[j.first]) < j.second) {
             std::pair<int, bool> temp {indexPool.find(j.first)};
@@ -179,7 +178,7 @@ void TrainManager::queryTicket(const Parser &p) {
     if (sortByTime)sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.time != o2.time ? o1.time < o2.time : o1.trainID < o2.trainID; });
     else sortVector<ticket_t>(result, [](const ticket_t &o1, const ticket_t &o2) -> bool { return o1.price != o2.price ? o1.price < o2.price : o1.trainID < o2.trainID; });
     defaultOut << result.size() << endl;
-    for (const ticket_t &i : result)defaultOut << i << endl;
+    for (const ticket_t &i: result)defaultOut << i << endl;
 }
 
 void TrainManager::queryTransfer(const Parser &p) {
@@ -187,13 +186,16 @@ void TrainManager::queryTransfer(const Parser &p) {
     train_time_t departureDate {(p["-d"][0] - '0') * 10 + p["-d"][1] - '0', (p["-d"][3] - '0') * 10 + p["-d"][4] - '0', 0, 0};
     static vector<std::pair<hash_t, int>> sTrains, eTrains;
     sTrains.clear(), eTrains.clear();
-    ticket_t st {}, en {};
-    int nowTime, nowPrice;
+    
+//    ticket_t st {}, en {};
+//    int nowTime, nowPrice;
+    transfer_t now;
+    
     stationPool.find(hashStation(p["-s"]), sTrains);
     stationPool.find(hashStation(p["-t"]), eTrains);
     if (sTrains.empty() || eTrains.empty())return outputSuccess();
-    for (const std::pair<hash_t, int> &i : sTrains) {
-        for (const std::pair<hash_t, int> &j : eTrains) {
+    for (const std::pair<hash_t, int> &i: sTrains) {
+        for (const std::pair<hash_t, int> &j: eTrains) {
             if (i.first != j.first) {
                 std::pair<int, bool> temp1 {indexPool.find(i.first)}, temp2 {indexPool.find(j.first)};
                 train_t sTrain {storagePool.read(temp1.first)}, eTrain {storagePool.read(temp2.first)};
@@ -227,11 +229,28 @@ void TrainManager::queryTransfer(const Parser &p) {
                             ticket_t tempEn {eTrain.trainID, eTrain.stations[l], eTrain.stations[j.second], tempTime3.updateDate(eDist),
                                              tempTime4.updateDate(eDist), eTrain.prices[j.second] - eTrain.prices[l], seatsEn.ticketNum(l, j.second)};
                             int tempPrice = tempSt.price + tempEn.price, tempTime = tempTime4 - tempTime1;
+                            
+//                            if (hasResult) {
+//                                if (sortByTime && (tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time))nowTime = tempTime, st = tempSt, en = tempEn;
+//                                if (!sortByTime && (tempPrice < nowPrice || tempPrice == nowPrice && tempSt.time < st.time))nowPrice = tempPrice, st = tempSt, en = tempEn;
+//                            } else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
+                            transfer_t temp(tempSt, tempEn, tempPrice, tempTime);
                             if (hasResult) {
-                                if (sortByTime && (tempTime < nowTime || tempTime == nowTime && tempSt.time < st.time))nowTime = tempTime, st = tempSt, en = tempEn;
-                                if (!sortByTime && (tempPrice < nowPrice || tempPrice == nowPrice && tempSt.time < st.time))nowPrice = tempPrice, st = tempSt, en = tempEn;
-                            }
-                            else hasResult = true, nowTime = tempTime, nowPrice = tempPrice, st = tempSt, en = tempEn;
+                                bool (* transferCmp)(const transfer_t &t1, const transfer_t &t2) =
+                                sortByTime ? [](const transfer_t &t1, const transfer_t &t2) -> bool {
+                                    if (t1.time != t2.time) return t1.time < t2.time;
+                                    if (t1.price != t2.price) return t1.price < t2.price;
+                                    if (t1.st.trainID != t2.st.trainID) return t1.st.trainID < t2.st.trainID;
+                                    return t1.en.trainID < t2.en.trainID;
+                                } : [](const transfer_t &t1, const transfer_t &t2) -> bool {
+                                    if (t1.price != t2.price) return t1.price < t2.price;
+                                    if (t1.time != t2.time) return t1.time < t2.time;
+                                    if (t1.st.trainID != t2.st.trainID) return t1.st.trainID < t2.st.trainID;
+                                    return t1.en.trainID < t2.en.trainID;
+                                };
+                                if (transferCmp(temp, now)) now = temp;
+                            } else hasResult = true, now = temp;
+                            
                         }
                     }
                 }
@@ -239,7 +258,7 @@ void TrainManager::queryTransfer(const Parser &p) {
         }
     }
     if (!hasResult)return outputSuccess();
-    defaultOut << st << endl << en << endl;
+    defaultOut << now.st << endl << now.en << endl;
 }
 
 void TrainManager::clear() {

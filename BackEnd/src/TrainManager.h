@@ -43,10 +43,10 @@ private:
          *      Support date of full year
          */
 #ifndef _GLIBCXX_IOSTREAM
-#error "<iostream> is not included. Overloading operator<< is inavailable."
+//#error "<iostream> is not included. Overloading operator<< is inavailable."
 #endif
 #ifndef _GLIBCXX_CSTDINT
-#error "<cstdint> is not included. uint_fast32_t is inavailable."
+//#error "<cstdint> is not included. uint_fast32_t is inavailable."
 #endif
     private:
         typedef uint_fast32_t value_type;
@@ -179,6 +179,15 @@ private:
         }
     };
     
+    struct transfer_t {
+        ticket_t st {}, en {};
+        int price = -1, time = -1;
+        
+        transfer_t() = default;
+        
+        transfer_t(const ticket_t &s, const ticket_t &e, int p, int t) : st(s), en(e), price(p), time(t) {}
+    };
+    
     struct date_ticket_t {
         /*
          * date_ticket_t
@@ -281,8 +290,9 @@ public:
     TrainManager(const string &indexPath, const string &storagePath, const string &ticketPath, const string &ticketStoragePath, const string &stationPath, rmstream &dft) :
 #ifndef storageTicketData
             indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), ticketStoragePool(ticketStoragePath, 0, TICKET_CACHE_SIZE), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+
 #else
-            indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
+    indexPool(indexPath), storagePool(storagePath, 0, TRAIN_CACHE_SIZE), ticketPool(ticketPath), stationPool(stationPath), defaultOut(dft) { splitTool.resetDelim('|'); }
 
 #endif
     
