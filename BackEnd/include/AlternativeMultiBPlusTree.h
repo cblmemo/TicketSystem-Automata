@@ -14,7 +14,7 @@
 
 namespace RainyMemory {
 #ifdef usingPageSize
-    template<class mainKey, class data, int MM = 50, int LL = 50, int CACHE_SIZE = 300, class firstMember_t = char>
+    template<class mainKey, class data, int MM = 50, int LL = 50, int CACHE_SIZE = 1000, class firstMember_t = char>
 #else
     template<class mainKey, class data, int M = 50, int L = 50, int CACHE_SIZE = 300, class firstMember_t = char>
 #endif

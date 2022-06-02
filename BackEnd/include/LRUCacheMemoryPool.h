@@ -111,16 +111,6 @@ namespace RainyMemory {
         };
         
         using node_t = typename DoublyLinkedList::Node;
-        
-        struct hash_int_t {
-            using ull = unsigned long long;
-            
-            ull operator()(int o) const {
-                ull ret = (ull(o) << 32) | ull(o);
-                ret ^= (ret >> 40) ^ (ret >> 24);
-                return ret ^ (ret >> 14) ^ (ret >> 8);
-            }
-        };
     
     private:
         int writePoint;
