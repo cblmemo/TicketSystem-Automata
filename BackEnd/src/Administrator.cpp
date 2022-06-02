@@ -38,6 +38,7 @@ void Administrator::runProgramme() {
         memset(cmd, 0, sizeof(cmd));
         fgets(cmd, CMD_SIZE, stdin);
         Ptilopsis -> resetBuffer(cmd);
+        defaultOut << "[" << Ptilopsis -> getTimeStamp() << "] ";
         switch (Ptilopsis -> getType()) {
             case Parser::ADDUSER:
                 Saria   -> addUser(*Ptilopsis);

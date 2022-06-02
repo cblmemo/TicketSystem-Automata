@@ -35,6 +35,7 @@ namespace RainyMemory {
     private:
         TokenScanner ts;
         commandType type = NONE;
+        int timeStamp;
         string argument[26];
         bool exist[26];
         
@@ -56,6 +57,8 @@ namespace RainyMemory {
         void reset() {
             for (int i = 0; i < 26; i++)exist[i] = false;
             string ty = ts.nextToken();
+            timeStamp = to_int(ty.substr(1, ty.size() - 2));
+            ty = ts.nextToken();
             type = getTypeFromString(ty);
             while (!ts.empty()) {
                 ty = ts.nextToken();
@@ -77,7 +80,7 @@ namespace RainyMemory {
             reset();
         }
         
-        void resetBuffer(const char *buffer) {
+        void resetBuffer(const char * buffer) {
             ts.resetBuffer(buffer);
             reset();
         }
@@ -86,16 +89,20 @@ namespace RainyMemory {
             return type;
         }
         
-        bool haveThisArgument(const char *arg) const {
+        int getTimeStamp() const {
+            return timeStamp;
+        }
+        
+        bool haveThisArgument(const char * arg) const {
             return exist[arg[1] - 'a'];
         }
         
-        const string &operator[](const char *arg) const {
+        const string &operator[](const char * arg) const {
             if (!exist[arg[1] - 'a'])return argument[25];
             return argument[arg[1] - 'a'];
         }
         
-        int operator()(const char *arg) const {
+        int operator()(const char * arg) const {
             if (!exist[arg[1] - 'a'])return -1;
             return to_int(argument[arg[1] - 'a']);
         }
